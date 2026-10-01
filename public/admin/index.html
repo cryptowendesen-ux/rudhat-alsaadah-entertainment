@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RUDHAT ADMIN LOGIN</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e3a8a);
+  padding:20px;
+}
+.login-box{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:24px;
+  padding:36px;
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
+}
+.logo{
+  text-align:center;
+  font-size:42px;
+  margin-bottom:10px;
+}
+h1{
+  text-align:center;
+  margin:0 0 8px;
+  color:#0f172a;
+}
+.subtitle{
+  text-align:center;
+  color:#64748b;
+  margin:0 0 28px;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#334155;
+  margin:16px 0 7px;
+}
+input{
+  width:100%;
+  padding:14px 15px;
+  border:1px solid #cbd5e1;
+  border-radius:12px;
+  font-size:16px;
+  outline:none;
+}
+input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12);
+}
+button{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:15px;
+  margin-top:22px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+}
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+#error{
+  display:none;
+  margin-top:15px;
+  padding:12px;
+  border-radius:10px;
+  background:#fee2e2;
+  color:#991b1b;
+  font-size:14px;
+}
+.footer{
+  text-align:center;
+  color:#94a3b8;
+  font-size:12px;
+  margin-top:22px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <div class="logo">🎈</div>
+  <h1>RUDHAT ADMIN</h1>
+  <p class="subtitle">Sign in to manage your website</p>
+
+  <form id="loginForm">
+
+    <label for="email">ADMIN EMAIL</label>
+    <input
+      id="email"
+      type="email"
+      placeholder="Enter admin email"
+      required
+      autocomplete="username"
+    >
+
+    <label for="password">PASSWORD</label>
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter password"
+      required
+      autocomplete="current-password"
+    >
+
+    <button id="loginBtn" type="submit">
+      Sign In
+    </button>
+
+    <div id="error"></div>
+  </form>
+
+  <div class="footer">
+    RUDHAT ALSAADAH ENTERTAINMENT
+  </div>
+</div>
+
+<script>
+const form=document.getElementById('loginForm');
+const btn=document.getElementById('loginBtn');
+const error=document.getElementById('error');
+
+form.addEventListener('submit',async function(e){
+  e.preventDefault();
+
+  error.style.display='none';
+  btn.disabled=true;
+  btn.textContent='Signing in...';
+
+  try{
+    const response=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        email:document.getElementById('email').value.trim(),
+        password:document.getElementById('password').value
+      })
+    });
+
+    const data=await response.json();
+
+    if(!response.ok){
+      throw new Error(data.error||'Login failed');
+    }
+
+    sessionStorage.setItem('adminToken',data.token);
+
+    window.location.href='/admin/dashboard.html';
+
+  }catch(err){
+    error.textContent=err.message||'Unable to sign in';
+    error.style.display='block';
+    btn.disabled=false;
+    btn.textContent='Sign In';
+  }
+});
+</script>
+
+</body>
+</html>
