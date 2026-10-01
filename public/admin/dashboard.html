@@ -76,3 +76,344 @@ textarea{min-height:90px;resize:vertical}
       <strong id="serviceCount">0</strong>
     </div>
     <div class="
+card">
+      <span>PRICE PLANS</span>
+      <strong id="priceCount">0</strong>
+    </div>
+
+    <div class="card">
+      <span>GALLERY</span>
+      <strong id="galleryCount">0</strong>
+    </div>
+
+    <div class="card">
+      <span>BIRTHDAY</span>
+      <strong id="birthdayCount">0</strong>
+    </div>
+  </section>
+
+  <div id="content"></div>
+
+</main>
+
+<div class="modal" id="modal">
+  <div class="box">
+
+    <h2 id="modalTitle">Add Item</h2>
+
+    <label>TYPE</label>
+    <select id="type">
+      <option value="services">Service</option>
+      <option value="prices">Price</option>
+      <option value="gallery">Gallery</option>
+      <option value="birthday">Birthday</option>
+    </select>
+
+    <label>TITLE</label>
+    <input id="title" placeholder="Title">
+
+    <label>DESCRIPTION</label>
+    <textarea id="description" placeholder="Description"></textarea>
+
+    <label>PRICE</label>
+    <input id="price" placeholder="e.g. AED 50">
+
+    <div id="error"></div>
+
+    <div class="actions">
+      <button class="cancel" id="cancel">Cancel</button>
+      <button class="save" id="save">Save</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+const token=sessionStorage.getItem('adminToken');
+
+if(!token){
+  window.location.href='/admin/';
+}
+
+let data={
+  services:[],
+  prices:[],
+  gallery:[],
+  birthday:[]
+};
+
+let editing=null;
+
+const content=document.getElementById('content');
+const modal=document.getElementById('modal');
+
+async function api(url,options={}){
+
+  options.headers={
+    ...(options.headers||{}),
+    Authorization:'Bearer '+token,
+    'Content-Type':'application/json'
+  };
+
+  const res=await fetch(url,options);
+
+  if(res.status===401){
+    sessionStorage.removeItem('adminToken');
+    window.location.href='/admin/';
+    return;
+  }
+
+  const result=await res.json();
+
+  if(!res.ok){
+    throw new Error(result.error||'Request failed');
+  }
+
+  return result;
+}
+
+function escapeHtml(value){
+
+  return String(value??'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+
+}
+
+function render(){
+
+  document.getElementById('serviceCount').textContent=data.services.length;
+  document.getElementById('priceCount').textContent=data.prices.length;
+  document.getElementById('galleryCount').textContent=data.gallery.length;
+  document.getElementById('birthdayCount').textContent=data.birthday.length;
+
+  const sections=[
+    ['services','🎨 Services'],
+    ['prices','💰 Prices'],
+    ['gallery','🖼️ Gallery'],
+    ['birthday','🎂 Birthday']
+  ];
+
+  content.innerHTML=sections.map(([type,name])=>`
+
+    <section class="panel">
+
+      <div class="panelhead">
+        <h2>${name}</h2>
+
+        <button
+          class="add"
+          onclick="openAdd('${type}')">
+          ＋ Add
+        </button>
+      </div>
+
+      ${
+        data[type].length
+        ?
+        data[type].map(item=>`
+
+          <div class="row">
+
+            <div class="info">
+
+              <div class="title">
+                ${escapeHtml(item.title)}
+              </div>
+
+              <div class="desc">
+                ${escapeHtml(item.description||'')}
+              </div>
+
+            </div>
+
+            <div class="price">
+              ${escapeHtml(item.price||'')}
+            </div>
+
+            <button
+              class="edit"
+              onclick="openEdit('${type}','${item.id}')">
+              Edit
+            </button>
+
+            <button
+              class="delete"
+              onclick="removeItem('${type}','${item.id}')">
+              Delete
+            </button>
+
+          </div>
+
+        `).join('')
+        :
+        '<div class="empty">No items yet.</div>'
+      }
+
+    </section>
+
+  `).join('');
+}
+
+async function load(){
+
+  try{
+
+    data=await api('/api/admin/content');
+    render();
+
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
+}
+
+function openAdd(type){
+
+  editing=null;
+
+  document.getElementById('modalTitle').textContent='Add Item';
+
+  document.getElementById('type').value=type;
+  document.getElementById('type').disabled=false;
+
+  document.getElementById('title').value='';
+  document.getElementById('description').value='';
+  document.getElementById('price').value='';
+  document.getElementById('error').textContent='';
+
+  modal.classList.add('open');
+
+}
+
+function openEdit(type,id){
+
+  const item=data[type].find(x=>x.id===id);
+
+  if(!item)return;
+
+  editing={type,id};
+
+  document.getElementById('modalTitle').textContent='Edit Item';
+
+  document.getElementById('type').value=type;
+  document.getElementById('type').disabled=true;
+
+  document.getElementById('title').value=item.title||'';
+  document.getElementById('description').value=item.description||'';
+  document.getElementById('price').value=item.price||'';
+  document.getElementById('error').textContent='';
+
+  modal.classList.add('open');
+
+}
+
+document.getElementById('cancel').onclick=()=>{
+
+  modal.classList.remove('open');
+
+};
+
+document.getElementById('save').onclick=async()=>{
+
+  const type=document.getElementById('type').value;
+
+  const body={
+
+    title:document.getElementById('title').value.trim(),
+    description:document.getElementById('description').value,
+    price:document.getElementById('price').value,
+    published:true
+
+  };
+
+  if(!body.title){
+
+    document.getElementById('error').textContent=
+      'Title is required.';
+
+    return;
+
+  }
+
+  try{
+
+    if(editing){
+
+      await api(
+        `/api/admin/items/${editing.type}/${editing.id}`,
+        {
+          method:'PUT',
+          body:JSON.stringify(body)
+        }
+      );
+
+    }else{
+
+      await api(
+        '/api/admin/items',
+        {
+          method:'POST',
+          body:JSON.stringify({
+            ...body,
+            type
+          })
+        }
+      );
+
+    }
+
+    modal.classList.remove('open');
+
+    await load();
+
+  }catch(e){
+
+    document.getElementById('error').textContent=e.message;
+
+  }
+
+};
+
+async function removeItem(type,id){
+
+  if(!confirm('Delete this item?'))return;
+
+  try{
+
+    await api(
+      `/api/admin/items/${type}/${id}`,
+      {
+        method:'DELETE'
+      }
+    );
+
+    await load();
+
+  }catch(e){
+
+    alert(e.message);
+
+  }
+
+}
+
+document.getElementById('logout').onclick=()=>{
+
+  sessionStorage.removeItem('adminToken');
+  window.location.href='/admin/';
+
+};
+
+load();
+
+</script>
+
+</body>
+</html>
