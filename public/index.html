@@ -142,15 +142,52 @@ loadServices();
 <div><div class="price">AED 300</div><a class="btn primary" href="https://wa.me/971585187788?text=Hello%2C%20I%20want%20to%20ask%20about%20the%20AED%20300%20birthday%20package." target="_blank">Ask About Birthday</a></div>
 </div></div></section>
 
-<section id="prices"><div class="container">
-<div class="sectionhead"><div><div class="kicker">Simple pricing</div><h2>Play your way.</h2></div><p>Choose the option that works best for your little ones.</p></div>
-<div class="prices">
-<div class="pricecard"><span>Per Hour</span><strong>AED 20</strong><span>1 hour of play</span></div>
-<div class="pricecard hot"><span>30 Hours</span><strong>AED 520</strong><span>Great value</span></div>
-<div class="pricecard"><span>42 Hours</span><strong>AED 620</strong><span>More playtime</span></div>
-<div class="pricecard"><span>64 Hours</span><strong>AED 800</strong><span>Best for regular visits</span></div>
-<div class="pricecard unlimited"><span>UNLIMITED HOURS</span><strong>AED 1,400</strong><span>For maximum flexibility</span></div>
-</div></div></section>
+<section id="prices">
+  <div class="container">
+
+    <div class="sectionhead">
+      <div>
+        <div class="kicker">Simple pricing</div>
+        <h2>Play your way.</h2>
+      </div>
+      <p>Choose the option that works best for your little ones.</p>
+    </div>
+
+    <div class="prices" id="pricesList"></div>
+
+  </div>
+</section>
+
+<script>
+async function loadPrices() {
+  const list = document.getElementById('pricesList');
+
+  if (!list) return;
+
+  try {
+    const response = await fetch('/api/content');
+
+    if (!response.ok) {
+      throw new Error('Failed to load prices');
+    }
+
+    const data = await response.json();
+
+    list.innerHTML = (data.prices || []).map((item, index) => `
+      <div class="pricecard ${index === 1 ? 'hot' : ''} ${item.title.toLowerCase().includes('unlimited') ? 'unlimited' : ''}">
+        <span>${item.title}</span>
+        <strong>${item.price}</strong>
+        <span>${item.description || ''}</span>
+      </div>
+    `).join('');
+
+  } catch (error) {
+    console.error('Prices loading error:', error);
+  }
+}
+
+loadPrices();
+</script>
 
 
 <section id="package"><div class="container package">
