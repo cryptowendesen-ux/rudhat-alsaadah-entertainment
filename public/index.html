@@ -127,15 +127,65 @@ loadServices();
 
 
 
-<section id="gallery"><div class="container">
-<div class="sectionhead"><div><div class="kicker">Gallery</div><h2>A peek into the fun.</h2></div><p>Replace these visual placeholders with the venue's real photos when they are available.</p></div>
-<div class="gallery">
-<div class="gallery-card"><div class="gallery-emoji">🛝</div><div class="gallery-label">Play • Explore • Smile</div></div>
-<div class="gallery-card"><div class="gallery-emoji">🎨</div><div class="gallery-label">Creative Time</div></div>
-<div class="gallery-card"><div class="gallery-emoji">🎈</div><div class="gallery-label">Happy Moments</div></div>
-<div class="gallery-card"><div class="gallery-emoji">🧸</div><div class="gallery-label">Little Explorers</div></div>
-<div class="gallery-card"><div class="gallery-emoji">🎉</div><div class="gallery-label">Celebrate Together</div></div>
-</div></div></section>
+<section id="gallery">
+  <div class="container">
+    <div class="sectionhead">
+      <div>
+        <div class="kicker">Gallery</div>
+        <h2>A peek into the fun.</h2>
+      </div>
+      <p>See the fun, creativity and happy moments at Rudhat Alsaadah.</p>
+    </div>
+    <div class="gallery" id="galleryList"></div>
+  </div>
+</section>
+
+<script>
+async function loadGallery() {
+  const list = document.getElementById('galleryList');
+  if (!list) return;
+
+  try {
+    const response = await fetch('/api/content');
+    if (!response.ok) {
+      throw new Error('Failed to load gallery');
+    }
+
+    const data = await response.json();
+    const gallery = data.gallery || [];
+
+    if (!gallery.length) {
+      list.innerHTML = `
+        <div style="grid-column: 1/-1; background: #fff; border: 1px solid #f0e6dd; border-radius: 28px; padding: 40px 20px; text-align: center; color: var(--muted); font-weight: 800;">
+          Gallery photos will appear here soon. 📸
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = gallery.map(item => `
+      <div class="gallery-card" style="position: relative; overflow: hidden; border-radius: 28px; min-height: 220px;">
+        <img src="${item.imageUrl}" alt="${item.title || 'Rudhat Alsaadah Gallery'}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(24,50,74,.72), rgba(24,50,74,0) 60%); pointer-events: none;"></div>
+        <div class="gallery-label" style="position: absolute; bottom: 15px; left: 15px; right: 15px; color: #fff; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); border-radius: 12px; padding: 8px 12px; font-weight: 900; font-size: 14px;">
+          ${item.title || 'Rudhat Alsaadah'}
+        </div>
+      </div>
+    `).join('');
+
+  } catch (error) {
+    console.error('Gallery loading error:', error);
+    list.innerHTML = `
+      <div style="grid-column: 1/-1; background: #fff; border-radius: 28px; padding: 40px 20px; text-align: center; color: var(--muted); font-weight: 800;">
+        Gallery is temporarily unavailable.
+      </div>
+    `;
+  }
+}
+
+loadGallery();
+</script>
+
 
 <section id="birthday"><div class="container"><div class="offer">
 <div><div class="kicker" style="color:var(--yellow)">Birthday celebrations</div><h2>Make their big day unforgettable. 🎂</h2><p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p></div>
