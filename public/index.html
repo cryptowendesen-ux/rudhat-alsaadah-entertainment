@@ -1,6 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <style>
+/* ===== Gallery Lightbox ===== */
+.gallery-card{ cursor:pointer; }
+.lightbox{ position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.92); padding:24px; }
+.lightbox.show{ display:flex; }
+.lightbox-content{ position:relative; width:min(1100px, 94vw); height:min(88vh, 850px); display:flex; align-items:center; justify-content:center; }
+.lightbox-image{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:18px; box-shadow:0 20px 70px rgba(0,0,0,.45); }
+.lightbox-close, .lightbox-prev, .lightbox-next{ position:absolute; border:0; cursor:pointer; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; font-size:28px; display:grid; place-items:center; backdrop-filter:blur(8px); }
+.lightbox-close{ top:-12px; right:-12px; font-size:24px; }
+.lightbox-prev{ left:-65px; top:50%; transform:translateY(-50%); }
+.lightbox-next{ right:-65px; top:50%; transform:translateY(-50%); }
+.lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover{ background:rgba(255,255,255,.25); }
+.lightbox-caption{ position:absolute; left:0; right:0; bottom:-38px; text-align:center; color:#fff; font-weight:800; font-size:15px; }
+@media(max-width:700px){
+  .lightbox{ padding:14px; }
+  .lightbox-content{ width:100%; height:82vh; }
+  .lightbox-prev, .lightbox-next{ width:42px; height:42px; font-size:22px; bottom:-55px; top:auto; transform:none; }
+  .lightbox-prev{ left:calc(50% - 52px); }
+  .lightbox-next{ right:calc(50% - 52px); }
+  .lightbox-close{ top:-55px; right:4px; }
+  .lightbox-caption{ bottom:-30px; font-size:13px; }
+}
+</style>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="RUDHAT ALSAADAH ENTERTAINMENT — a clean, safe and fun children's entertainment center in Al Majaz 3, Sharjah.">
@@ -349,6 +373,110 @@ loadBirthday();
 <a class="wa" href="https://wa.me/971585187788" target="_blank" aria-label="WhatsApp">◉</a>
 
 
+<!-- ===== Gallery Lightbox ===== -->
+<div class="lightbox" id="galleryLightbox" aria-hidden="true">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close" type="button">✕</button>
+    <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous photo" type="button">‹</button>
+    <img class="lightbox-image" id="lightboxImage" src="" alt="">
+    <button class="lightbox-next" id="lightboxNext" aria-label="Next photo" type="button">›</button>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  let galleryItems = [];
+  let currentIndex = 0;
+  const lightbox = document.getElementById('galleryLightbox');
+  const image = document.getElementById('lightboxImage');
+  const caption = document.getElementById('lightboxCaption');
+  const closeBtn = document.getElementById('lightboxClose');
+  const prevBtn = document.getElementById('lightboxPrev');
+  const nextBtn = document.getElementById('lightboxNext');
+
+  function getGalleryCards() {
+    return Array.from(document.querySelectorAll('.gallery-card'));
+  }
+
+  function updateLightbox() {
+    if (!galleryItems.length) return;
+    const item = galleryItems[currentIndex];
+    image.src = item.imageUrl;
+    image.alt = item.title || 'Rudhat Alsaadah Gallery';
+    caption.textContent = item.title || '';
+    prevBtn.style.display = galleryItems.length > 1 ? 'grid' : 'none';
+    nextBtn.style.display = galleryItems.length > 1 ? 'grid' : 'none';
+  }
+
+  function openLightbox(index) {
+    galleryItems = getGalleryCards()
+      .map(card => ({
+        imageUrl: card.querySelector('img')?.src || '',
+        title: card.querySelector('.gallery-label')?.textContent.trim() || ''
+      }))
+      .filter(item => item.imageUrl);
+
+    if (!galleryItems.length) return;
+    currentIndex = Math.max(0, Math.min(index, galleryItems.length - 1));
+    updateLightbox();
+    lightbox.classList.add('show');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('show');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    image.src = '';
+  }
+
+  function showPrevious() {
+    if (!galleryItems.length) return;
+    currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
+    updateLightbox();
+  }
+
+  function showNext() {
+    if (!galleryItems.length) return;
+    currentIndex = (currentIndex + 1) % galleryItems.length;
+    updateLightbox();
+  }
+
+  document.addEventListener('click', function (event) {
+    const card = event.target.closest('.gallery-card');
+    if (card) {
+      const cards = getGalleryCards();
+      const index = cards.indexOf(card);
+      if (index !== -1) {
+        openLightbox(index);
+      }
+      return;
+    }
+    if (event.target === lightbox) {
+      closeLightbox();
+    }
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+  prevBtn.addEventListener('click', showPrevious);
+  nextBtn.addEventListener('click', showNext);
+
+  document.addEventListener('keydown', function (event) {
+    if (!lightbox.classList.contains('show')) return;
+    if (event.key === 'Escape') {
+      closeLightbox();
+    }
+    if (event.key === 'ArrowLeft') {
+      showPrevious();
+    }
+    if (event.key === 'ArrowRight') {
+      showNext();
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
