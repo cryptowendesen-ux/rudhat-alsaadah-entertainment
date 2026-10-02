@@ -35,7 +35,6 @@ const MONGODB_URI = process.env.MONGODB_URI;
 if (!SECRET || SECRET.length < 32) throw new Error('Set JWT_SECRET (32+ chars)');
 if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD');
 if (!MONGODB_URI) throw new Error('Set MONGODB_URI environment variable');
-
 // MongoDB Schema & Model
 const itemSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
@@ -43,6 +42,8 @@ const itemSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: '' },
   price: { type: String, default: '' },
+  imageUrl: { type: String, default: '' },
+  publicId: { type: String, default: '' },
   published: { type: Boolean, default: true }
 }, { timestamps: true });
 
