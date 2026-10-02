@@ -160,18 +160,7 @@ footer{background:#10283b;color:#fff;padding:45px 0 25px}.footergrid{display:fle
 </div></footer>
 <a class="wa" href="https://wa.me/971585187788" target="_blank" aria-label="WhatsApp">◉</a>
 
-<script>
-const addBtn=document.getElementById('addBtn');
-const modal=document.createElement('div');
-modal.className='modal';
-modal.innerHTML=`<div class="modalbox"><h3>Add content</h3><p style="color:#64748b">Demo form — connect this to your backend/database for real saving.</p><div class="field"><label>CONTENT TYPE</label><select><option>Service</option><option>Price</option><option>Gallery</option></select></div><div class="field"><label>TITLE</label><input placeholder="e.g. Kids Creative Workshop"></div><div class="field"><label>PRICE (OPTIONAL)</label><input placeholder="e.g. AED 50"></div><div class="modalactions"><button class="btn light" id="closeModal">Cancel</button><button class="btn primary" id="demoSave">Save Demo</button></div></div>`;
-document.body.appendChild(modal);
-addBtn?.addEventListener('click',()=>modal.classList.add('open'));
-modal.addEventListener('click',e=>{if(e.target===modal||e.target.id==='closeModal')modal.classList.remove('open')});
-modal.querySelector('#demoSave').addEventListener('click',()=>{modal.classList.remove('open');alert('Demo saved visually. A backend is required for permanent saving.')});
-document.querySelectorAll('.deletebtn').forEach(b=>b.addEventListener('click',()=>{if(confirm('Remove this item from the demo list?')) b.closest('.data-row').remove()}));
-document.querySelectorAll('.editbtn').forEach(b=>b.addEventListener('click',()=>alert('Edit form is ready for backend integration.')));
-</script>
+
 
 </body>
 </html>
