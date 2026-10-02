@@ -557,6 +557,36 @@ loadBirthday();
   });
 })();
 </script>
+  <script>
+/* ===== Scroll Reveal Animation ===== */
+(function () {
+  const revealItems = document.querySelectorAll(
+    '.sectionhead, .card, .price-card, .trust-card, .gallery-card, .trust-note'
+  );
+
+  if (!revealItems.length) return;
+
+  revealItems.forEach(item => {
+    item.classList.add('reveal');
+  });
+
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.12
+    }
+  );
+
+  revealItems.forEach(item => observer.observe(item));
+})();
+</script>
 
 </body>
 </html>
