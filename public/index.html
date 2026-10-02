@@ -190,10 +190,81 @@ loadPrices();
 </script>
 
 
-<section id="package"><div class="container package">
-<div class="package-main"><div class="kicker">Birthday package</div><h3>A special day made for them. 🎂</h3><div class="package-price">AED 300</div><p>For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.</p><a class="btn primary" href="https://wa.me/971585187788?text=Hello%2C%20I%20want%20to%20ask%20about%20the%20AED%20300%20birthday%20package." target="_blank">🎂 Ask About Birthday</a></div>
-<div class="box"><div class="kicker">Why visit?</div><h3>Made for fun.</h3><div class="package-list"><div>🎨 Creative activities</div><div>💃 Music & movement</div><div>🧩 Educational games</div><div>🛡️ Clean & safe environment</div></div></div>
-</div></section>
+<section id="package">
+  <div class="container package">
+
+    <div class="package-main">
+      <div class="kicker">Birthday package</div>
+      <h3 id="birthdayTitle">A special day made for them. 🎂</h3>
+
+      <div class="package-price" id="birthdayPrice">AED 300</div>
+
+      <p id="birthdayDescription">
+        For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.
+      </p>
+
+      <a
+        class="btn primary"
+        id="birthdayButton"
+        href="https://wa.me/971585187788"
+        target="_blank"
+      >
+        🎂 Ask About Birthday
+      </a>
+    </div>
+
+    <div class="box">
+      <div class="kicker">Why visit?</div>
+      <h3>Made for fun.</h3>
+
+      <div class="package-list">
+        <div>🎨 Creative activities</div>
+        <div>💃 Music & movement</div>
+        <div>🧩 Educational games</div>
+        <div>🛡️ Clean & safe environment</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+async function loadBirthday() {
+  try {
+    const response = await fetch('/api/content');
+
+    if (!response.ok) {
+      throw new Error('Failed to load birthday package');
+    }
+
+    const data = await response.json();
+    const birthday = (data.birthday || [])[0];
+
+    if (!birthday) return;
+
+    document.getElementById('birthdayTitle').textContent =
+      birthday.title || 'Birthday Package 🎂';
+
+    document.getElementById('birthdayPrice').textContent =
+      birthday.price || 'AED 300';
+
+    document.getElementById('birthdayDescription').textContent =
+      birthday.description || 'For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.';
+
+    const message = encodeURIComponent(
+      `Hello, I want to ask about the ${birthday.price || 'AED 300'} birthday package.`
+    );
+
+    document.getElementById('birthdayButton').href =
+      `https://wa.me/971585187788?text=${message}`;
+
+  } catch (error) {
+    console.error('Birthday loading error:', error);
+  }
+}
+
+loadBirthday();
+</script>
 
 
 
