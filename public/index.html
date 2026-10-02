@@ -2,6 +2,18 @@
 <html lang="en">
 <head>
   <style>
+    /* ===== Trust Section ===== */
+.trust-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:28px; }
+.trust-card{ background:#fff; border:1px solid #f0e6dd; border-radius:24px; padding:26px 22px; box-shadow:var(--shadow); transition:transform .25s ease, box-shadow .25s ease; }
+.trust-card:hover{ transform:translateY(-6px); box-shadow:0 18px 45px rgba(24,50,74,.12); }
+.trust-icon{ width:56px; height:56px; border-radius:18px; display:grid; place-items:center; background:#fff4c9; font-size:27px; margin-bottom:17px; }
+.trust-card h3{ margin:0 0 8px; font-size:20px; }
+.trust-card p{ margin:0; color:var(--muted); line-height:1.65; font-size:14px; }
+.trust-note{ margin-top:25px; padding:20px 24px; border-radius:22px; background:#18324a; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.trust-note p{ margin:4px 0 0; color:#cbd8e2; font-size:14px; }
+@media(max-width:900px){ .trust-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){ .trust-grid{ grid-template-columns:1fr; } .trust-note{ display:block; } .trust-note .btn{ margin-top:15px; } }
+
 /* ===== Gallery Lightbox ===== */
 .gallery-card{ cursor:pointer; }
 .lightbox{ position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.92); padding:24px; }
@@ -209,6 +221,61 @@ async function loadGallery() {
 
 loadGallery();
 </script>
+<!-- ===== Why Choose Us ===== -->
+<section id="why-us">
+  <div class="container">
+    <div class="sectionhead">
+      <div>
+        <div class="kicker">Why choose us</div>
+        <h2>Made for happy little moments.</h2>
+      </div>
+      <p>
+        A welcoming place where children can play, create, learn and enjoy their time in a clean and comfortable environment.
+      </p>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">🛡️</div>
+        <h3>Clean & Safe</h3>
+        <p>
+          A clean and welcoming environment designed with children's comfort and safety in mind.
+        </p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🎨</div>
+        <h3>Creative Play</h3>
+        <p>
+          Drawing, coloring and creative activities that encourage children to explore their imagination.
+        </p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🧩</div>
+        <h3>Learn Through Play</h3>
+        <p>
+          Educational games and skill-building activities that make learning enjoyable.
+        </p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">💃</div>
+        <h3>Fun & Movement</h3>
+        <p>
+          Music, dancing and active play to keep little explorers moving and smiling.
+        </p>
+      </div>
+    </div>
+    <div class="trust-note">
+      <div>
+        <strong>Ready for a fun day? 🌈</strong>
+        <p>
+          Visit us in Al Majaz 3, Sharjah or contact our team directly.
+        </p>
+      </div>
+      <a class="btn primary" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information." target="_blank">
+        💬 WhatsApp Us
+      </a>
+    </div>
+  </div>
+</section>
 
 
 <section id="birthday"><div class="container"><div class="offer">
