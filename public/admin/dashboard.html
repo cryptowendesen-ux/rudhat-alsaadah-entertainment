@@ -7,53 +7,370 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#0f172a}
-.top{background:#0f172a;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:800}
-.logout{border:0;background:#fff;color:#0f172a;border-radius:9px;padding:9px 14px;font-weight:700}
-.wrap{max-width:1200px;margin:auto;padding:25px 18px}
-h1{margin:0 0 6px}
-.sub{color:#64748b;margin-bottom:25px}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:25px}
-.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 4px 15px rgba(15,23,42,.06)}
-.card span{font-size:12px;color:#64748b;font-weight:700}
-.card strong{display:block;font-size:30px;margin-top:8px}
-.panel{background:#fff;border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 15px rgba(15,23,42,.06)}
-.panelhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}
-.panel h2{font-size:19px;margin:0}
-button{cursor:pointer}
-.add{border:0;background:#2563eb;color:white;border-radius:9px;padding:10px 15px;font-weight:700}
-.row{border-top:1px solid #e2e8f0;padding:14px 0;display:flex;align-items:center;gap:12px}
-.row:first-child{border-top:0}
-.info{flex:1}
-.title{font-weight:700}
-.desc{font-size:13px;color:#64748b;margin-top:4px}
-.price{font-weight:700;min-width:100px}
-.edit,.delete{border:0;border-radius:8px;padding:8px 11px;font-weight:700}
-.edit{background:#e0f2fe;color:#075985}
-.delete{background:#fee2e2;color:#991b1b}
-.empty{color:#64748b;padding:12px 0}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;padding:20px}
-.modal.open{display:flex}
-.box{background:white;width:100%;max-width:500px;border-radius:18px;padding:25px}
-.box h2{margin-top:0}
-label{display:block;font-size:12px;font-weight:700;margin:13px 0 6px}
-input,select,textarea{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font:inherit}
-textarea{min-height:90px;resize:vertical}
-.actions{display:flex;gap:10px;margin-top:20px}
-.actions button{flex:1;padding:12px;border:0;border-radius:9px;font-weight:700}
-.cancel{background:#e2e8f0}
-.save{background:#2563eb;color:white}
-#error{color:#b91c1c;margin-top:12px}
-@media(max-width:800px){
-.cards{grid-template-columns:repeat(2,1fr)}
-.row{flex-wrap:wrap}
-.price{min-width:auto}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f1f5f9;
+  color:#0f172a
 }
+
+.top{
+  background:#0f172a;
+  color:#fff;
+  padding:16px 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+
+.logo{
+  font-weight:800
+}
+
+.logout{
+  border:0;
+  background:#fff;
+  color:#0f172a;
+  border-radius:9px;
+  padding:9px 14px;
+  font-weight:700;
+  cursor:pointer
+}
+
+.wrap{
+  max-width:1200px;
+  margin:auto;
+  padding:25px 18px
+}
+
+h1{
+  margin:0 0 6px
+}
+
+.sub{
+  color:#64748b;
+  margin-bottom:25px
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:25px
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 4px 15px rgba(15,23,42,.06)
+}
+
+.card span{
+  font-size:12px;
+  color:#64748b;
+  font-weight:700
+}
+
+.card strong{
+  display:block;
+  font-size:30px;
+  margin-top:8px
+}
+
+.panel{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 4px 15px rgba(15,23,42,.06)
+}
+
+.panelhead{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px
+}
+
+.panel h2{
+  font-size:19px;
+  margin:0
+}
+
+button{
+  cursor:pointer
+}
+
+.add{
+  border:0;
+  background:#2563eb;
+  color:white;
+  border-radius:9px;
+  padding:10px 15px;
+  font-weight:700
+}
+
+.row{
+  border-top:1px solid #e2e8f0;
+  padding:14px 0;
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+
+.row:first-child{
+  border-top:0
+}
+
+.info{
+  flex:1;
+  min-width:0
+}
+
+.title{
+  font-weight:700
+}
+
+.desc{
+  font-size:13px;
+  color:#64748b;
+  margin-top:4px
+}
+
+.price{
+  font-weight:700;
+  min-width:100px
+}
+
+.edit,
+.delete{
+  border:0;
+  border-radius:8px;
+  padding:8px 11px;
+  font-weight:700
+}
+
+.edit{
+  background:#e0f2fe;
+  color:#075985
+}
+
+.delete{
+  background:#fee2e2;
+  color:#991b1b
+}
+
+.empty{
+  color:#64748b;
+  padding:12px 0
+}
+
+/* =========================
+   GALLERY
+========================= */
+
+.gallery-row{
+  align-items:center
+}
+
+.gallery-thumb{
+  width:90px;
+  height:70px;
+  object-fit:cover;
+  border-radius:10px;
+  background:#e2e8f0;
+  flex-shrink:0;
+  border:1px solid #e2e8f0
+}
+
+.gallery-placeholder{
+  width:90px;
+  height:70px;
+  border-radius:10px;
+  background:#e2e8f0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  flex-shrink:0
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:1000
+}
+
+.modal.open{
+  display:flex
+}
+
+.box{
+  background:white;
+  width:100%;
+  max-width:500px;
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:18px;
+  padding:25px
+}
+
+.box h2{
+  margin-top:0
+}
+
+label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  margin:13px 0 6px
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #cbd5e1;
+  border-radius:9px;
+  font:inherit
+}
+
+input[type="file"]{
+  padding:10px;
+  background:#f8fafc
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical
+}
+
+.file-help{
+  font-size:12px;
+  color:#64748b;
+  margin-top:6px
+}
+
+.preview{
+  display:none;
+  margin-top:12px;
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid #e2e8f0
+}
+
+.preview.show{
+  display:block
+}
+
+.current-image{
+  display:none;
+  margin-top:10px;
+  width:100%;
+  max-height:220px;
+  object-fit:cover;
+  border-radius:12px
+}
+
+.current-image.show{
+  display:block
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:20px
+}
+
+.actions button{
+  flex:1;
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  font-weight:700
+}
+
+.cancel{
+  background:#e2e8f0
+}
+
+.save{
+  background:#2563eb;
+  color:white
+}
+
+.save:disabled{
+  opacity:.6;
+  cursor:not-allowed
+}
+
+#error{
+  color:#b91c1c;
+  margin-top:12px;
+  font-size:14px
+}
+
+@media(max-width:800px){
+  .cards{
+    grid-template-columns:repeat(2,1fr)
+  }
+
+  .row{
+    flex-wrap:wrap
+  }
+
+  .price{
+    min-width:auto
+  }
+}
+
+@media(max-width:600px){
+  .gallery-thumb,
+  .gallery-placeholder{
+    width:75px;
+    height:60px
+  }
+
+  .gallery-row .info{
+    min-width:calc(100% - 90px)
+  }
+}
+
 @media(max-width:500px){
-.cards{grid-template-columns:1fr 1fr}
-.top{padding:13px}
-.wrap{padding:18px 12px}
+  .cards{
+    grid-template-columns:1fr 1fr
+  }
+
+  .top{
+    padding:13px
+  }
+
+  .wrap{
+    padding:18px 12px
+  }
+
+  .panel{
+    padding:15px
+  }
+
+  .box{
+    padding:20px
+  }
 }
 </style>
 </head>
@@ -68,15 +385,17 @@ textarea{min-height:90px;resize:vertical}
 <main class="wrap">
 
   <h1>Business Dashboard</h1>
-  <div class="sub">Manage your RUDHAT ALSAADAH website content.</div>
+  <div class="sub">
+    Manage your RUDHAT ALSAADAH website content.
+  </div>
 
   <section class="cards">
     <div class="card">
       <span>SERVICES</span>
       <strong id="serviceCount">0</strong>
     </div>
-    <div class="
-card">
+
+    <div class="card">
       <span>PRICE PLANS</span>
       <strong id="priceCount">0</strong>
     </div>
@@ -96,6 +415,10 @@ card">
 
 </main>
 
+<!-- =========================
+     MODAL
+========================= -->
+
 <div class="modal" id="modal">
   <div class="box">
 
@@ -109,310 +432,474 @@ card">
       <option value="birthday">Birthday</option>
     </select>
 
-    <label>TITLE</label>
-    <input id="title" placeholder="Title">
+    <div id="normalFields">
+      <label>TITLE</label>
+      <input id="title" placeholder="Title">
 
-    <label>DESCRIPTION</label>
-    <textarea id="description" placeholder="Description"></textarea>
+      <label>DESCRIPTION</label>
+      <textarea id="description" placeholder="Description"></textarea>
 
-    <label>PRICE</label>
-    <input id="price" placeholder="e.g. AED 50">
+      <div id="priceGroup">
+        <label>PRICE</label>
+        <input id="price" placeholder="e.g. AED 50">
+      </div>
+    </div>
+
+    <!-- GALLERY ONLY -->
+    <div id="galleryFields" style="display:none">
+      <label>PHOTO</label>
+      <input
+        id="image"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/jpg"
+      >
+
+      <div class="file-help">
+        JPG, JPEG, PNG or WebP — maximum 10MB.
+      </div>
+
+      <img
+        id="imagePreview"
+        class="preview"
+        alt="Selected image preview"
+      >
+
+      <img
+        id="currentImage"
+        class="current-image"
+        alt="Current gallery image"
+      >
+    </div>
 
     <div id="error"></div>
 
     <div class="actions">
-      <button class="cancel" id="cancel">Cancel</button>
-      <button class="save" id="save">Save</button>
+      <button class="cancel" id="cancel">
+        Cancel
+      </button>
+
+      <button class="save" id="save">
+        Save
+      </button>
     </div>
 
   </div>
 </div>
 
 <script>
-
-const token=sessionStorage.getItem('adminToken');
+const token = sessionStorage.getItem('adminToken');
 
 if(!token){
   window.location.href='/admin/';
 }
 
-let data={
+let data = {
   services:[],
   prices:[],
   gallery:[],
   birthday:[]
 };
 
-let editing=null;
+let editing = null;
 
-const content=document.getElementById('content');
-const modal=document.getElementById('modal');
+const content = document.getElementById('content');
+const modal = document.getElementById('modal');
 
-async function api(url,options={}){
+const typeSelect = document.getElementById('type');
+const titleInput = document.getElementById('title');
+const descriptionInput = document.getElementById('description');
+const priceInput = document.getElementById('price');
+const priceGroup = document.getElementById('priceGroup');
+const imageInput = document.getElementById('image');
 
-  options.headers={
-    ...(options.headers||{}),
-    Authorization:'Bearer '+token,
-    'Content-Type':'application/json'
+const normalFields = document.getElementById('normalFields');
+const galleryFields = document.getElementById('galleryFields');
+const imagePreview = document.getElementById('imagePreview');
+const currentImage = document.getElementById('currentImage');
+const errorBox = document.getElementById('error');
+const saveButton = document.getElementById('save');
+
+/* =========================================================
+   API HELPER
+========================================================= */
+async function api(url, options={}){
+  options.headers = {
+    ...(options.headers || {}),
+    Authorization:'Bearer '+token
   };
 
-  const res=await fetch(url,options);
+  if(
+    options.body &&
+    typeof options.body === 'string' &&
+    !options.headers['Content-Type']
+  ){
+    options.headers['Content-Type']='application/json';
+  }
 
-  if(res.status===401){
+  const res = await fetch(url, options);
+
+  if(res.status === 401){
     sessionStorage.removeItem('adminToken');
     window.location.href='/admin/';
     return;
   }
 
-  const result=await res.json();
+  const result = await res.json();
 
   if(!res.ok){
-    throw new Error(result.error||'Request failed');
+    throw new Error(result.error || 'Request failed');
   }
 
   return result;
 }
 
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 function escapeHtml(value){
-
-  return String(value??'')
+  return String(value ?? '')
     .replaceAll('&','&amp;')
     .replaceAll('<','&lt;')
     .replaceAll('>','&gt;')
     .replaceAll('"','&quot;')
     .replaceAll("'","&#039;");
-
 }
 
+/* =========================================================
+   RENDER DASHBOARD
+========================================================= */
 function render(){
+  document.getElementById('serviceCount').textContent = data.services.length;
+  document.getElementById('priceCount').textContent = data.prices.length;
+  document.getElementById('galleryCount').textContent = data.gallery.length;
+  document.getElementById('birthdayCount').textContent = data.birthday.length;
 
-  document.getElementById('serviceCount').textContent=data.services.length;
-  document.getElementById('priceCount').textContent=data.prices.length;
-  document.getElementById('galleryCount').textContent=data.gallery.length;
-  document.getElementById('birthdayCount').textContent=data.birthday.length;
-
-  const sections=[
+  const sections = [
     ['services','🎨 Services'],
     ['prices','💰 Prices'],
     ['gallery','🖼️ Gallery'],
     ['birthday','🎂 Birthday']
   ];
 
-  content.innerHTML=sections.map(([type,name])=>`
-
+  content.innerHTML = sections.map(([type,name]) => `
     <section class="panel">
-
       <div class="panelhead">
         <h2>${name}</h2>
-
         <button
           class="add"
-          onclick="openAdd('${type}')">
-          ＋ Add
+          onclick="openAdd('${type}')"
+        >
+          ＋ ${type === 'gallery' ? 'Add Photo' : 'Add'}
         </button>
       </div>
 
       ${
         data[type].length
-        ?
-        data[type].map(item=>`
-
-          <div class="row">
-
-            <div class="info">
-
-              <div class="title">
-                ${escapeHtml(item.title)}
+        ? data[type].map(item => {
+          if(type === 'gallery'){
+            return `
+              <div class="row gallery-row">
+                ${
+                  item.imageUrl
+                  ? `<img
+                    class="gallery-thumb"
+                    src="${escapeHtml(item.imageUrl)}"
+                    alt="${escapeHtml(item.title)}"
+                    loading="lazy"
+                  >`
+                  : `<div class="gallery-placeholder">🖼️</div>`
+                }
+                <div class="info">
+                  <div class="title">${escapeHtml(item.title)}</div>
+                  <div class="desc">${escapeHtml(item.description || '')}</div>
+                </div>
+                <button class="edit" onclick="openEdit('gallery','${item.id}')">Edit</button>
+                <button class="delete" onclick="removeItem('gallery','${item.id}')">Delete</button>
               </div>
+            `;
+          }
 
-              <div class="desc">
-                ${escapeHtml(item.description||'')}
+          return `
+            <div class="row">
+              <div class="info">
+                <div class="title">${escapeHtml(item.title)}</div>
+                <div class="desc">${escapeHtml(item.description || '')}</div>
               </div>
-
+              <div class="price">${escapeHtml(item.price || '')}</div>
+              <button class="edit" onclick="openEdit('${type}','${item.id}')">Edit</button>
+              <button class="delete" onclick="removeItem('${type}','${item.id}')">Delete</button>
             </div>
-
-            <div class="price">
-              ${escapeHtml(item.price||'')}
-            </div>
-
-            <button
-              class="edit"
-              onclick="openEdit('${type}','${item.id}')">
-              Edit
-            </button>
-
-            <button
-              class="delete"
-              onclick="removeItem('${type}','${item.id}')">
-              Delete
-            </button>
-
-          </div>
-
-        `).join('')
-        :
-        '<div class="empty">No items yet.</div>'
+          `;
+        }).join('')
+        : '<div class="empty">No items yet.</div>'
       }
-
     </section>
-
   `).join('');
 }
 
+/* =========================================================
+   LOAD CONTENT
+========================================================= */
 async function load(){
-
   try{
-
-    data=await api('/api/admin/content');
+    data = await api('/api/admin/content');
     render();
-
   }catch(e){
-
     alert(e.message);
+  }
+}
 
+/* =========================================================
+   SHOW/HIDE MODAL FIELDS
+========================================================= */
+function updateModalFields(){
+  const type = typeSelect.value;
+
+  if(type === 'gallery'){
+    normalFields.style.display='block';
+    priceGroup.style.display='none';
+    galleryFields.style.display='block';
+  }else{
+    normalFields.style.display='block';
+    priceGroup.style.display='block';
+    galleryFields.style.display='none';
+  }
+}
+
+/* =========================================================
+   OPEN ADD
+========================================================= */
+function openAdd(type){
+  editing = null;
+
+  document.getElementById('modalTitle').textContent =
+    type === 'gallery' ? 'Add Gallery Photo' : 'Add Item';
+
+  typeSelect.value = type;
+  typeSelect.disabled = false;
+
+  titleInput.value='';
+  descriptionInput.value='';
+  priceInput.value='';
+  imageInput.value='';
+
+  imagePreview.src='';
+  imagePreview.classList.remove('show');
+
+  currentImage.src='';
+  currentImage.classList.remove('show');
+
+  errorBox.textContent='';
+
+  saveButton.disabled=false;
+  saveButton.textContent='Save';
+
+  updateModalFields();
+  modal.classList.add('open');
+}
+
+/* =========================================================
+   OPEN EDIT
+========================================================= */
+function openEdit(type,id){
+  const item = data[type].find(x => x.id === id);
+  if(!item) return;
+
+  editing = { type, id };
+
+  document.getElementById('modalTitle').textContent =
+    type === 'gallery' ? 'Edit Gallery Photo' : 'Edit Item';
+
+  typeSelect.value = type;
+  typeSelect.disabled = true;
+
+  titleInput.value = item.title || '';
+  descriptionInput.value = item.description || '';
+  priceInput.value = item.price || '';
+
+  imageInput.value='';
+
+  imagePreview.src='';
+  imagePreview.classList.remove('show');
+
+  if(type === 'gallery' && item.imageUrl){
+    currentImage.src = item.imageUrl;
+    currentImage.classList.add('show');
+  }else{
+    currentImage.src='';
+    currentImage.classList.remove('show');
   }
 
-}
+  errorBox.textContent='';
 
-function openAdd(type){
+  saveButton.disabled=false;
+  saveButton.textContent='Save';
 
-  editing=null;
-
-  document.getElementById('modalTitle').textContent='Add Item';
-
-  document.getElementById('type').value=type;
-  document.getElementById('type').disabled=false;
-
-  document.getElementById('title').value='';
-  document.getElementById('description').value='';
-  document.getElementById('price').value='';
-  document.getElementById('error').textContent='';
-
+  updateModalFields();
   modal.classList.add('open');
-
 }
 
-function openEdit(type,id){
+/* =========================================================
+   IMAGE PREVIEW
+========================================================= */
+imageInput.addEventListener('change', () => {
+  const file = imageInput.files[0];
 
-  const item=data[type].find(x=>x.id===id);
+  if(!file){
+    imagePreview.src='';
+    imagePreview.classList.remove('show');
+    return;
+  }
 
-  if(!item)return;
+  const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
-  editing={type,id};
+  if(!allowed.includes(file.type.toLowerCase())){
+    errorBox.textContent = 'Only JPG, JPEG, PNG and WebP images are allowed.';
+    imageInput.value='';
+    imagePreview.src='';
+    imagePreview.classList.remove('show');
+    return;
+  }
 
-  document.getElementById('modalTitle').textContent='Edit Item';
+  if(file.size > 10 * 1024 * 1024){
+    errorBox.textContent = 'Image size must be 10MB or less.';
+    imageInput.value='';
+    imagePreview.src='';
+    imagePreview.classList.remove('show');
+    return;
+  }
 
-  document.getElementById('type').value=type;
-  document.getElementById('type').disabled=true;
+  errorBox.textContent='';
 
-  document.getElementById('title').value=item.title||'';
-  document.getElementById('description').value=item.description||'';
-  document.getElementById('price').value=item.price||'';
-  document.getElementById('error').textContent='';
+  const reader = new FileReader();
+  reader.onload = e => {
+    imagePreview.src = e.target.result;
+    imagePreview.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+});
 
-  modal.classList.add('open');
+typeSelect.addEventListener('change', updateModalFields);
 
-}
-
-document.getElementById('cancel').onclick=()=>{
-
+document.getElementById('cancel').onclick = () => {
   modal.classList.remove('open');
-
 };
 
-document.getElementById('save').onclick=async()=>{
+/* =========================================================
+   SAVE
+========================================================= */
+saveButton.onclick = async () => {
+  const type = typeSelect.value;
+  const title = titleInput.value.trim();
+  const description = descriptionInput.value;
 
-  const type=document.getElementById('type').value;
-
-  const body={
-
-    title:document.getElementById('title').value.trim(),
-    description:document.getElementById('description').value,
-    price:document.getElementById('price').value,
-    published:true
-
-  };
-
-  if(!body.title){
-
-    document.getElementById('error').textContent=
-      'Title is required.';
-
+  if(!title){
+    errorBox.textContent = 'Title is required.';
     return;
-
   }
 
   try{
+    saveButton.disabled=true;
+    saveButton.textContent='Saving...';
+    errorBox.textContent='';
 
-    if(editing){
+    if(type === 'gallery' && !editing){
+      const file = imageInput.files[0];
 
-      await api(
-        `/api/admin/items/${editing.type}/${editing.id}`,
-        {
-          method:'PUT',
-          body:JSON.stringify(body)
-        }
-      );
+      if(!file){
+        errorBox.textContent = 'Please select an image.';
+        saveButton.disabled=false;
+        saveButton.textContent='Save';
+        return;
+      }
 
-    }else{
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('published', 'true');
 
-      await api(
-        '/api/admin/items',
-        {
-          method:'POST',
-          body:JSON.stringify({
-            ...body,
-            type
-          })
-        }
-      );
-
+      await api('/api/admin/gallery/upload', {
+        method:'POST',
+        body:formData
+      });
+    }
+    else if(type === 'gallery' && editing){
+      await api(`/api/admin/items/${editing.type}/${editing.id}`, {
+        method:'PUT',
+        body:JSON.stringify({
+          title,
+          description,
+          published:true
+        })
+      });
+    }
+    else if(editing){
+      await api(`/api/admin/items/${editing.type}/${editing.id}`, {
+        method:'PUT',
+        body:JSON.stringify({
+          title,
+          description,
+          price:priceInput.value,
+          published:true
+        })
+      });
+    }
+    else{
+      await api('/api/admin/items', {
+        method:'POST',
+        body:JSON.stringify({
+          title,
+          description,
+          price:priceInput.value,
+          published:true,
+          type
+        })
+      });
     }
 
     modal.classList.remove('open');
-
     await load();
-
   }catch(e){
-
-    document.getElementById('error').textContent=e.message;
-
+    errorBox.textContent = e.message;
+    saveButton.disabled=false;
+    saveButton.textContent='Save';
   }
-
 };
 
+/* =========================================================
+   DELETE
+========================================================= */
 async function removeItem(type,id){
+  const message = type === 'gallery'
+    ? 'Delete this photo? This will also delete the image from Cloudinary.'
+    : 'Delete this item?';
 
-  if(!confirm('Delete this item?'))return;
+  if(!confirm(message)) return;
 
   try{
-
-    await api(
-      `/api/admin/items/${type}/${id}`,
-      {
-        method:'DELETE'
-      }
-    );
-
+    await api(`/api/admin/items/${type}/${id}`, { method:'DELETE' });
     await load();
-
   }catch(e){
-
     alert(e.message);
-
   }
-
 }
 
-document.getElementById('logout').onclick=()=>{
-
+/* =========================================================
+   LOGOUT
+========================================================= */
+document.getElementById('logout').onclick = () => {
   sessionStorage.removeItem('adminToken');
   window.location.href='/admin/';
-
 };
 
-load();
+modal.addEventListener('click', event => {
+  if(event.target === modal){
+    modal.classList.remove('open');
+  }
+});
 
+load();
 </script>
 
 </body>
