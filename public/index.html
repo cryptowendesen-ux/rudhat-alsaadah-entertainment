@@ -958,5 +958,320 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   }
 })();
 </script>
+  <!-- ============================================================
+  ARABIC / RTL TOGGLE — paste this whole block into index.html
+  right BEFORE the closing </body> tag. Nothing else changes.
+  ============================================================ -->
+<style>
+.lang-btn{border:1px solid var(--line);background:#fff;color:var(--ink);font:900 14px Nunito,Arial,sans-serif;padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s ease}
+.lang-btn:hover{background:#fff4f7}
+.lang-btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+html[dir=rtl] *{font-family:Cairo,Nunito,Arial,sans-serif!important;letter-spacing:0!important}
+html[dir=rtl] .hero h1{line-height:1.2}
+html[dir=rtl] .sectionhead h2,html[dir=rtl] .offer h2{line-height:1.25}
+html[dir=rtl] .wa{right:auto;left:20px}
+[data-tel],[data-bind=displayPhone]{direction:ltr;unicode-bidi:isolate}
+</style>
+<script>
+(function () {
+  'use strict';
+  var AR = {
+    '✨ FUN • LEARN • GROW': '✨ مرح • تعلّم • نمو',
+    'RUDHAT ALSAADAH': 'روضة السعادة', 'ENTERTAINMENT': 'للترفيه',
+    'Home': 'الرئيسية', 'About': 'من نحن', 'Services': 'خدماتنا', 'Gallery': 'المعرض', 'Prices': 'الأسعار',
+    'Birthday': 'أعياد الميلاد', 'Visit Us': 'زورونا', 'FAQ': 'الأسئلة',
+    '💬 WhatsApp Us': '💬 راسلنا على واتساب', '💬 WhatsApp': '💬 واتساب',
+    '🌈 A PLACE TO PLAY & GROW': '🌈 مكان للعب والنمو',
+    'A happy place for': 'مكان سعيد', 'little explorers.': 'للمستكشفين الصغار.',
+    "A clean, safe and exciting children's entertainment center in Al Majaz 3, Sharjah — where play becomes an adventure.": 'مركز ترفيه للأطفال نظيف وآمن وممتع في المجاز 3، الشارقة — حيث يتحول اللعب إلى مغامرة.',
+    '💬 Book on WhatsApp': '💬 احجز عبر واتساب', 'View Prices →': 'الأسعار ←',
+    '📍 Sarab Tower, Al Majaz 3, Sharjah, UAE': '📍 برج سراب، المجاز 3، الشارقة، الإمارات',
+    'PER HOUR': 'للساعة', 'BIRTHDAY': 'عيد ميلاد', 'SAT–THU': 'السبت–الخميس',
+    '🎨 Create': '🎨 ابتكر', '💃 Dance': '💃 ارقص', '🧩 Learn': '🧩 تعلّم',
+    '🛡️ Clean & Safe Environment': '🛡️ بيئة نظيفة وآمنة',
+    'Welcome': 'أهلاً بكم', 'Where every visit becomes a happy memory.': 'حيث تتحول كل زيارة إلى ذكرى سعيدة.',
+    "RUDHAT ALSAADAH ENTERTAINMENT is a children's entertainment center designed around fun, creativity, movement and learning. Our activities give children a welcoming place to explore and enjoy their time.": 'روضة السعادة للترفيه مركز ترفيه للأطفال صُمم حول المرح والإبداع والحركة والتعلّم. تمنح أنشطتنا الأطفال مكاناً مرحّباً للاستكشاف والاستمتاع بوقتهم.',
+    '🎨 Creative play': '🎨 لعب إبداعي', '🧩 Educational fun': '🧩 مرح تعليمي', '💃 Music & movement': '💃 موسيقى وحركة', '🛡️ Clean & safe': '🛡️ نظيف وآمن',
+    'What we offer': 'ما نقدمه', 'More than playtime.': 'أكثر من مجرد لعب.',
+    'Fun-filled activities designed to keep children active, creative, curious and smiling.': 'أنشطة ممتعة تُبقي الأطفال نشيطين ومبدعين وفضوليين ومبتسمين.',
+    'A peek into the fun.': 'لمحة عن المرح.',
+    'See the fun, creativity and happy moments at Rudhat Alsaadah.': 'شاهد المرح والإبداع واللحظات السعيدة في روضة السعادة.',
+    'Why choose us': 'لماذا تختارنا', 'Made for happy little moments.': 'صُمم للحظات الصغار السعيدة.',
+    'A welcoming place where children can play, create, learn and enjoy their time in a clean and comfortable environment.': 'مكان مرحّب يلعب فيه الأطفال ويبتكرون ويتعلمون ويستمتعون بوقتهم في بيئة نظيفة ومريحة.',
+    'Clean & Safe': 'نظيف وآمن',
+    "A clean and welcoming environment designed with children's comfort and safety in mind.": 'بيئة نظيفة ومرحّبة مصممة مع مراعاة راحة الأطفال وسلامتهم.',
+    'Creative Play': 'لعب إبداعي',
+    'Drawing, coloring and creative activities that encourage children to explore their imagination.': 'رسم وتلوين وأنشطة إبداعية تشجع الأطفال على استكشاف خيالهم.',
+    'Learn Through Play': 'تعلّم من خلال اللعب',
+    'Educational games and skill-building activities that make learning enjoyable.': 'ألعاب تعليمية وأنشطة لبناء المهارات تجعل التعلّم ممتعاً.',
+    'Fun & Movement': 'مرح وحركة',
+    'Music, dancing and active play to keep little explorers moving and smiling.': 'موسيقى ورقص ولعب نشيط يُبقي المستكشفين الصغار في حركة وابتسامة.',
+    'Ready for a fun day? 🌈': 'جاهزون ليوم ممتع؟ 🌈', 'Ready for a fun day?': 'جاهزون ليوم ممتع؟',
+    'Visit us in Al Majaz 3, Sharjah or contact our team directly.': 'زورونا في المجاز 3، الشارقة أو تواصلوا مع فريقنا مباشرة.',
+    'Birthday celebrations': 'حفلات أعياد الميلاد', 'Make their big day unforgettable. 🎂': 'اجعلوا يومهم الكبير لا يُنسى. 🎂',
+    'Celebrate with fun, games and happy memories at Rudhat Alsaadah.': 'احتفلوا بالمرح والألعاب والذكريات السعيدة في روضة السعادة.',
+    'Ask About Birthday': 'اسأل عن حفلة الميلاد', '🎂 Ask About Birthday': '🎂 اسأل عن حفلة الميلاد',
+    '🎂 Book Birthday Party': '🎂 احجز حفلة عيد ميلاد',
+    'Simple pricing': 'أسعار بسيطة', 'Play your way.': 'العب بطريقتك.',
+    'Choose the option that works best for your little ones.': 'اختر الخيار الأنسب لأطفالك.',
+    'Birthday package': 'باقة عيد الميلاد', 'A special day made for them. 🎂': 'يوم مميز صُنع لهم. 🎂',
+    'For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.': 'للاستفسار عن حفلات الميلاد، راسلوا الفريق مباشرة عبر واتساب لمناقشة الحفلة.',
+    'Why visit?': 'لماذا الزيارة؟', 'Made for fun.': 'صُنع للمرح.',
+    '🎨 Creative activities': '🎨 أنشطة إبداعية', '🧩 Educational games': '🧩 ألعاب تعليمية', '🛡️ Clean & safe environment': '🛡️ بيئة نظيفة وآمنة',
+    'Reviews': 'آراء', 'What parents say ⭐': 'ماذا يقول الأهالي ⭐',
+    'See why families in Sharjah love visiting Rudhat Alsaadah.': 'اكتشف لماذا تحب العائلات في الشارقة زيارة روضة السعادة.',
+    'Questions': 'أسئلة', 'Good to know.': 'معلومات مفيدة.',
+    'Quick answers based on the information currently provided for the venue.': 'إجابات سريعة بناءً على المعلومات المتوفرة حالياً عن المكان.',
+    'Where are you located?': 'أين موقعكم؟', 'Sarab Tower, Al Majaz 3, Sharjah, UAE.': 'برج سراب، المجاز 3، الشارقة، الإمارات.',
+    'What are the opening hours?': 'ما هي ساعات العمل؟', 'How much is playtime?': 'كم سعر وقت اللعب؟',
+    'Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.': 'سعر الساعة 20 د.إ. تتوفر أيضاً خيارات 30 و42 و64 ساعة وساعات غير محدودة.',
+    'How can I ask about a birthday booking?': 'كيف أستفسر عن حجز حفلة عيد ميلاد؟',
+    'Use the WhatsApp booking buttons on this website or call': 'استخدم أزرار الحجز عبر واتساب في هذا الموقع أو اتصل على',
+    'Plan your visit': 'خطط لزيارتك', 'Come play with us! 🌈': 'تعالَ العب معنا! 🌈',
+    "We're open every day with special Friday hours.": 'نحن مفتوحون كل يوم مع مواعيد خاصة يوم الجمعة.',
+    'Sat–Thu:': 'السبت–الخميس:', 'Friday:': 'الجمعة:', '📍 Open in Google Maps': '📍 افتح في خرائط جوجل',
+    'Ready to book?': 'جاهز للحجز؟', "Let's make today fun.": 'لنجعل اليوم ممتعاً.',
+    'Message our team on WhatsApp for birthday bookings, questions and visit details.': 'راسل فريقنا عبر واتساب لحجز الحفلات والاستفسارات وتفاصيل الزيارة.',
+    'Plan your visit or ask us about a birthday celebration.': 'خطط لزيارتك أو اسألنا عن حفلة عيد ميلاد.',
+    '💬 Start a WhatsApp Chat': '💬 ابدأ محادثة واتساب',
+    '🎈 RUDHAT ALSAADAH': '🎈 روضة السعادة', 'Play • Explore • Celebrate': 'العب • استكشف • احتفل',
+    'Al Majaz 3, Sharjah, UAE': 'المجاز 3، الشارقة، الإمارات',
+    '© 2026 Rudhat Alsaadah Entertainment. All rights reserved.': '© 2026 روضة السعادة للترفيه. جميع الحقوق محفوظة.',
+    'Birthday Booking Request': 'طلب حجز حفلة عيد ميلاد', 'Tell us your preferred date and details.': 'أخبرنا بالموعد المفضل والتفاصيل.',
+    'Your Name': 'الاسم', 'WhatsApp Number': 'رقم واتساب', 'Preferred Date': 'التاريخ المفضل', 'Preferred Time': 'الوقت المفضل',
+    'Number of Children': 'عدد الأطفال', 'Additional Message': 'رسالة إضافية',
+    '🎂 Send Booking Request': '🎂 إرسال طلب الحجز', 'Birthday package:': 'باقة عيد الميلاد:',
+    '✅ Request received!': '✅ تم استلام طلبك!', '⚠️ Not saved online': '⚠️ لم يُحفظ عبر الإنترنت',
+    '💬 Continue on WhatsApp': '💬 المتابعة عبر واتساب', 'Close': 'إغلاق'
+  };
+  var RX = [
+    [/\bAED\b/g, 'د.إ'], [/\bAM\b/g, 'ص'], [/\bPM\b/g, 'م'],
+    [/Saturday–Thursday/g, 'السبت–الخميس'], [/\bFriday\b/g, 'الجمعة'],
+    [/Per hour is/g, 'سعر الساعة'], [/Other options:/g, 'خيارات أخرى:']
+  ];
+  var PH = { bookingName: 'اسمك', bookingChildren: 'مثال: 10', bookingMessage: 'أي شيء آخر تود إخبارنا به؟' };
+  var orig = new WeakMap(), touched = [], phOrig = {}, active = false, pending = false;
+  var titleEn = document.title;
+
+  function tr(node) {
+    var src = orig.has(node) ? orig.get(node) : node.nodeValue;
+    var t = src.trim(), out = AR[t];
+    if (out) { out = src.replace(t, out); }
+    else {
+      out = src;
+      RX.forEach(function (r) { out = out.replace(r[0], r[1]); });
+    }
+    if (out !== node.nodeValue && out !== src) {
+      if (!orig.has(node)) { orig.set(node, src); touched.push(node); }
+      node.nodeValue = out;
+    }
+  }
+  function walk() {
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode && n.parentNode.nodeName;
+        return (p === 'SCRIPT' || p === 'STYLE' || !n.nodeValue.trim()) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n; while ((n = w.nextNode())) tr(n);
+  }
+  function schedule() {
+    if (!active || pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; if (active) walk(); });
+  }
+  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+
+  function setPlaceholders(on) {
+    Object.keys(PH).forEach(function (id) {
+      var el = document.getElementById(id); if (!el) return;
+      if (on) { if (!(id in phOrig)) phOrig[id] = el.placeholder; el.placeholder = PH[id]; }
+      else if (id in phOrig) el.placeholder = phOrig[id];
+    });
+  }
+  function loadFont() {
+    if (document.getElementById('cairoFont')) return;
+    var l = document.createElement('link');
+    l.id = 'cairoFont'; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap';
+    document.head.appendChild(l);
+  }
+
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'lang-btn';
+  var bar = document.querySelector('.navin'), menu = document.getElementById('menuButton');
+  if (bar) bar.insertBefore(btn, menu);
+
+  function setLang(ar) {
+    active = ar;
+    var h = document.documentElement;
+    h.lang = ar ? 'ar' : 'en'; h.dir = ar ? 'rtl' : 'ltr';
+    btn.textContent = ar ? 'English' : 'العربية';
+    btn.setAttribute('aria-label', ar ? 'Switch to English' : 'التبديل إلى العربية');
+    if (ar) {
+      loadFont(); walk(); document.title = 'روضة السعادة | ترفيه الأطفال';
+    } else {
+      touched.forEach(function (n) { if (orig.has(n)) n.nodeValue = orig.get(n); });
+      touched = []; orig = new WeakMap(); document.title = titleEn;
+    }
+    setPlaceholders(ar);
+    try { localStorage.setItem('lang', ar ? 'ar' : 'en'); } catch (e) {}
+  }
+  btn.addEventListener('click', function () { setLang(!active); });
+
+  var saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) {}
+  setLang(saved === 'ar');
+})();
+</script>
+
+<!-- ============================================================
+  UPGRADES (part 2): open-now badge, booking steps, price fallback
+  + auto-retry, extra FAQ, SEO priceRange, accessibility, motion.
+  Gallery and reviews are not touched.
+  ============================================================ -->
+<style>
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.skip{position:absolute;left:-999px;top:8px;z-index:3000;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:900}
+.skip:focus{left:8px}
+.open-badge{display:inline-flex;align-items:center;gap:8px;margin-inline-start:8px;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:900;font-size:13px}
+.open-badge i{width:9px;height:9px;border-radius:50%;background:#20c76a;animation:pulse 2s infinite}
+.open-badge.closed i{background:#e11d48;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(32,199,106,.5)}70%,100%{box-shadow:0 0 0 9px rgba(32,199,106,0)}}
+.b1,.b2,.b3{animation:floaty 5s ease-in-out infinite}
+.b2{animation-delay:-1.6s}.b3{animation-delay:-3.2s}
+@keyframes floaty{50%{transform:translateY(-9px)}}
+.steps-wrap{margin-top:30px}
+.steps-wrap h3{font:800 28px "Baloo 2",Arial,sans-serif;margin:0 0 14px;text-align:center}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;counter-reset:s}
+.step{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px 22px 22px 70px;position:relative;counter-increment:s}
+html[dir=rtl] .step{padding:22px 70px 22px 22px}
+.step:before{content:counter(s);position:absolute;inset-inline-start:20px;top:20px;width:34px;height:34px;border-radius:50%;background:var(--yellow);display:grid;place-items:center;font-weight:900}
+.step b{display:block;margin-bottom:3px}
+.step span{color:var(--muted);font-size:14px}
+.price-note{margin-top:20px;text-align:center;color:var(--muted);font-weight:800;font-size:14px}
+.price-note a{color:var(--pink);text-decoration:underline}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.b1,.b2,.b3,.open-badge i{animation:none!important}}
+</style>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var isAr = function () { return document.documentElement.lang === 'ar'; };
+  var T = function (en, ar) { return isAr() ? ar : en; };
+  var waBase = function () { var a = $('.navcta'); return a ? a.href.split('?')[0] : 'https://wa.me/971585187788'; };
+  var txt = function (sel, d) { var e = $(sel); return e ? e.textContent : d; };
+
+  /* ---- Open-now badge (Asia/Dubai time, hours read from the page) ---- */
+  function toMin(h, m, ap) {
+    h = +h % 12; if (ap === 'PM' || ap === 'م') h += 12; return h * 60 + +m;
+  }
+  function hoursOf(sel, def) {
+    var r = /(\d+):(\d+)\s*(AM|PM|ص|م)/g, t = txt(sel, ''), a = r.exec(t), b = r.exec(t);
+    return a && b ? [toMin(a[1], a[2], a[3]), toMin(b[1], b[2], b[3])] : def;
+  }
+  function fmt(min) {
+    var h = Math.floor(min / 60), m = min % 60, pm = h >= 12, h12 = h % 12 || 12;
+    return h12 + (m ? ':' + String(m).padStart(2, '0') : '') + ' ' + (isAr() ? (pm ? 'م' : 'ص') : (pm ? 'PM' : 'AM'));
+  }
+  function badge() {
+    var host = $('.eyebrow'); if (!host) return;
+    var el = $('.open-badge');
+    if (!el) { el = document.createElement('span'); el.className = 'open-badge'; el.innerHTML = '<i></i><em></em>'; host.insertAdjacentElement('afterend', el); }
+    var o = {}; new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Dubai', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false })
+      .formatToParts(new Date()).forEach(function (p) { o[p.type] = p.value; });
+    var now = (+o.hour % 24) * 60 + +o.minute, fri = o.weekday === 'Fri';
+    var wd = hoursOf('[data-bind=weekdayHours]', [540, 1260]), fr = hoursOf('[data-bind=fridayHours]', [840, 1320]);
+    var h = fri ? fr : wd, open = now >= h[0] && now < h[1], nextOpen;
+    if (!open) nextOpen = now < h[0] ? h[0] : (o.weekday === 'Thu' ? fr[0] : wd[0]);
+    el.classList.toggle('closed', !open);
+    el.lastChild.textContent = open
+      ? T('Open now · until ' + fmt(h[1]), 'مفتوح الآن · حتى ' + fmt(h[1]))
+      : T('Closed now · opens ' + fmt(nextOpen), 'مغلق الآن · يفتح ' + fmt(nextOpen));
+  }
+
+  /* ---- Booking steps, price note, extra FAQ ---- */
+  function steps() {
+    var box = $('.birthday-booking-trigger'); if (!box) return;
+    var s = $('.steps-wrap');
+    if (!s) { s = document.createElement('div'); s.className = 'steps-wrap'; box.insertAdjacentElement('afterend', s); }
+    var d = [
+      [T('Send a request', 'أرسل طلباً'), T('Pick your date and time in the booking form.', 'اختر التاريخ والوقت في نموذج الحجز.')],
+      [T('We confirm on WhatsApp', 'نؤكد عبر واتساب'), T('Our team replies to agree on the details.', 'يردّ فريقنا للاتفاق على التفاصيل.')],
+      [T('Celebrate', 'احتفلوا'), T('Bring the birthday child and friends and enjoy the day.', 'أحضروا صاحب العيد وأصدقاءه واستمتعوا باليوم.')]
+    ];
+    s.innerHTML = '<h3>' + T('How booking works', 'كيف يعمل الحجز') + '</h3><div class="steps">' +
+      d.map(function (x) { return '<div class="step"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>';
+  }
+  function priceNote() {
+    var list = $('#pricesList'); if (!list) return;
+    var n = $('.price-note');
+    if (!n) { n = document.createElement('p'); n.className = 'price-note'; list.insertAdjacentElement('afterend', n); }
+    n.innerHTML = T('Prices are in AED. Ask about package hours and offers on ', 'الأسعار بالدرهم الإماراتي. اسأل عن باقات الساعات والعروض عبر ') +
+      '<a href="' + waBase() + '" target="_blank" rel="noopener">' + T('WhatsApp', 'واتساب') + '</a>';
+  }
+  function faq() {
+    var box = $('.faq'); if (!box) return;
+    box.querySelectorAll('.x-faq').forEach(function (e) { e.remove(); });
+    [
+      [T('Can I send a birthday request online?', 'هل يمكنني إرسال طلب حفلة عبر الإنترنت؟'),
+       T('Yes. Tap “Book Birthday Party”, fill in the form and our team will confirm with you on WhatsApp.', 'نعم. اضغط على «احجز حفلة عيد ميلاد» واملأ النموذج وسيؤكد لك فريقنا عبر واتساب.')],
+      [T('Are you open on Fridays?', 'هل أنتم مفتوحون يوم الجمعة؟'),
+       T('Yes. Friday hours: ', 'نعم. ساعات العمل يوم الجمعة: ') + txt('[data-bind=fridayHours]', '2:00 PM – 10:00 PM') + '.'],
+      [T('How do I find you?', 'كيف أصل إليكم؟'),
+       T('We are in Sarab Tower, Al Majaz 3, Sharjah. Use “Open in Google Maps” in the visit section for directions.', 'نحن في برج سراب، المجاز 3، الشارقة. استخدم «افتح في خرائط جوجل» في قسم الزيارة للاتجاهات.')]
+    ].forEach(function (x) {
+      var d = document.createElement('details'); d.className = 'x-faq';
+      var s = document.createElement('summary'); s.textContent = x[0];
+      var p = document.createElement('p'); p.textContent = x[1];
+      d.appendChild(s); d.appendChild(p); box.appendChild(d);
+    });
+  }
+  function skip() {
+    var a = $('.skip');
+    if (!a) { a = document.createElement('a'); a.className = 'skip'; a.href = '#top'; document.body.insertBefore(a, document.body.firstChild); }
+    a.textContent = T('Skip to content', 'انتقل إلى المحتوى');
+  }
+  function renderAll() { skip(); badge(); steps(); priceNote(); faq(); }
+
+  /* ---- Prices: fallback card + one automatic retry if the server was asleep ---- */
+  function retry() {
+    try { if (sessionStorage.getItem('rt')) return; sessionStorage.setItem('rt', '1'); } catch (e) { return; }
+    var c = new AbortController(), t = setTimeout(function () { c.abort(); }, 25000);
+    fetch('/api/content', { signal: c.signal })
+      .then(function (r) { clearTimeout(t); if (r.ok) location.reload(); })
+      .catch(function () {});
+  }
+  var pl = $('#pricesList');
+  if (pl) new MutationObserver(function () {
+    if (!pl.querySelector('.list-msg') || pl.dataset.fb) return;
+    pl.dataset.fb = '1';
+    pl.innerHTML = '<div class="pricecard hot"><span>' + T('Per hour', 'للساعة') + '</span><strong>' + txt('[data-bind=hourlyPrice]', 'AED 20') +
+      '</strong><span>' + T('Playtime', 'وقت اللعب') + '</span></div>' +
+      '<div class="pricecard unlimited"><span>' + T('30, 42, 64 hours and unlimited', '30 و42 و64 ساعة وغير محدودة') + '</span><strong>' +
+      T('Ask us', 'اسألنا') + '</strong><span>' + T('Message us on WhatsApp for package prices.', 'راسلنا على واتساب لمعرفة أسعار الباقات.') + '</span></div>';
+    priceNote(); retry();
+  }).observe(pl, { childList: true });
+
+  /* ---- SEO: priceRange from the live hourly price ---- */
+  function seo() {
+    try {
+      var n = (txt('[data-bind=hourlyPrice]', '').match(/\d+/) || [])[0];
+      var s = $('script[type="application/ld+json"]'); if (!n || !s) return;
+      var j = JSON.parse(s.textContent); j.priceRange = 'AED ' + n + '+'; s.textContent = JSON.stringify(j);
+    } catch (e) {}
+  }
+
+  renderAll();
+  setInterval(badge, 60000);
+  new MutationObserver(function () { renderAll(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  var ready = new MutationObserver(function () {
+    if (document.documentElement.classList.contains('content-ready')) { ready.disconnect(); renderAll(); seo(); }
+  });
+  ready.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
+
 </body>
 </html>
