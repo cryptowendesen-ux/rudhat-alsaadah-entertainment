@@ -1252,5 +1252,69 @@ loadBirthday();
   });
 })();
 </script>
+  <div class="birthday-modal" id="birthdayModal" aria-hidden="true">
+  <div class="birthday-modal-backdrop" id="birthdayModalBackdrop"></div>
+
+  <div class="birthday-modal-box" role="dialog" aria-modal="true"
+       aria-labelledby="birthdayModalTitle">
+
+    <button type="button" class="birthday-modal-close"
+            id="closeBirthdayModal" aria-label="Close">
+      ×
+    </button>
+
+    <div class="booking-head">
+      <span class="booking-icon">🎂</span>
+      <div>
+        <h3 id="birthdayModalTitle">Birthday Booking Request</h3>
+        <p>Tell us your preferred date and details.</p>
+      </div>
+    </div>
+
+    <form id="birthdayBookingForm" class="birthday-form">
+      <div class="form-grid">
+        <label>
+          Your Name
+          <input type="text" id="bookingName" required placeholder="Your name">
+        </label>
+
+        <label>
+          WhatsApp Number
+          <input type="tel" id="bookingPhone" required placeholder="+971 5X XXX XXXX">
+        </label>
+
+        <label>
+          Preferred Date
+          <input type="date" id="bookingDate" required>
+        </label>
+
+        <label>
+          Preferred Time
+          <input type="time" id="bookingTime" required>
+        </label>
+
+        <label>
+          Number of Children
+          <input type="number" id="bookingChildren" min="1" max="100"
+                 required placeholder="e.g. 10">
+        </label>
+
+        <label class="full-field">
+          Additional Message
+          <textarea id="bookingMessage" rows="3"
+            placeholder="Anything else you'd like us to know?"></textarea>
+        </label>
+      </div>
+
+      <button type="submit" class="booking-submit">
+        💬 Send Booking Request on WhatsApp
+      </button>
+
+      <p class="booking-note">
+        Birthday package: <strong>AED 300</strong>
+      </p>
+    </form>
+  </div>
+</div>
 </body>
 </html>
