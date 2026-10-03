@@ -1216,7 +1216,40 @@ loadBirthday();
   });
 })();
 
-</script>
 
+<script>
+(function () {
+  const form = document.getElementById('birthdayBookingForm');
+  if (!form) return;
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const name = document.getElementById('bookingName').value.trim();
+    const phone = document.getElementById('bookingPhone').value.trim();
+    const date = document.getElementById('bookingDate').value;
+    const time = document.getElementById('bookingTime').value;
+    const children = document.getElementById('bookingChildren').value;
+    const message = document.getElementById('bookingMessage').value.trim();
+
+    const whatsappMessage =
+      `Hello RUDHAT ALSAADAH ENTERTAINMENT,%0A%0A` +
+      `🎂 Birthday Booking Request%0A` +
+      `━━━━━━━━━━━━━━━━%0A` +
+      `👤 Name: ${encodeURIComponent(name)}%0A` +
+      `📱 WhatsApp: ${encodeURIComponent(phone)}%0A` +
+      `📅 Date: ${encodeURIComponent(date)}%0A` +
+      `⏰ Time: ${encodeURIComponent(time)}%0A` +
+      `👧 Children: ${encodeURIComponent(children)}%0A` +
+      `💰 Package: AED 300%0A` +
+      `💬 Message: ${encodeURIComponent(message || 'No additional message')}`;
+
+    const whatsappUrl =
+      `https://wa.me/971585187788?text=${whatsappMessage}`;
+
+    window.open(whatsappUrl, '_blank', 'noopener');
+  });
+})();
+</script>
 </body>
 </html>
