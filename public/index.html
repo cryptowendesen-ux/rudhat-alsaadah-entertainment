@@ -326,7 +326,134 @@ section{ scroll-margin-top:90px; }
     height:40px;
   }
 }
-</style>
+/* Birthday Booking */
+.birthday-booking{
+  margin-top:24px;
+  padding:28px;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(20,40,70,.08);
+  border-radius:24px;
+  box-shadow:0 14px 40px rgba(20,40,70,.10);
+}
+
+.booking-head{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.booking-icon{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  background:var(--yellow);
+  border-radius:16px;
+  font-size:26px;
+  flex:none;
+}
+
+.booking-head h3{
+  margin:0 0 4px;
+  font-size:1.35rem;
+  color:var(--ink);
+}
+
+.booking-head p{
+  margin:0;
+  color:#687386;
+  font-size:.95rem;
+}
+
+.birthday-form .form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.birthday-form label{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  font-weight:700;
+  color:var(--ink);
+  font-size:.92rem;
+}
+
+.birthday-form input,
+.birthday-form textarea{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid #dce2ea;
+  border-radius:12px;
+  padding:12px 14px;
+  font:inherit;
+  color:var(--ink);
+  background:#fff;
+  outline:none;
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+
+.birthday-form input:focus,
+.birthday-form textarea:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(65,140,255,.12);
+}
+
+.birthday-form textarea{
+  resize:vertical;
+  min-height:105px;
+}
+
+.full-field{
+  grid-column:1 / -1;
+}
+
+.booking-submit{
+  width:100%;
+  margin-top:20px;
+  border:0;
+  border-radius:14px;
+  padding:14px 20px;
+  background:#25D366;
+  color:#fff;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+
+.booking-submit:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(37,211,102,.25);
+}
+
+.booking-note{
+  margin:12px 0 0;
+  text-align:center;
+  color:#687386;
+  font-size:.9rem;
+}
+
+@media(max-width:700px){
+  .birthday-booking{
+    padding:20px;
+    border-radius:20px;
+  }
+
+  .birthday-form .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .full-field{
+    grid-column:auto;
+  }
+
+  .booking-head{
+    align-items:flex-start;
+  }
+}</style>
 
 
 
