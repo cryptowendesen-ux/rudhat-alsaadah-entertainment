@@ -88,6 +88,40 @@ section{ scroll-margin-top:90px; }
   html{ scroll-behavior:auto; }
   *, *::before, *::after{ animation:none !important; transition:none !important; }
 }
+/* ===== Mobile Menu Styling ===== */
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--ink);
+  padding: 4px 8px;
+}
+
+@media(max-width:980px) {
+  .menu-btn {
+    display: block;
+  }
+  .links {
+    position: absolute;
+    top: 78px;
+    right: 20px;
+    left: 20px;
+    background: #ffffff;
+    flex-direction: column;
+    padding: 22px;
+    border-radius: 24px;
+    box-shadow: 0 18px 45px rgba(24,50,74,0.18);
+    border: 1px solid var(--line);
+    z-index: 100;
+    text-align: center;
+    gap: 18px;
+  }
+  .links.show {
+    display: flex !important;
+  }
+}
 </style>
 
 
@@ -677,6 +711,18 @@ loadBirthday();
 
   revealItems.forEach(item => observer.observe(item));
 })();
+</script>
+<script>
+  function toggleMenu() {
+    const links = document.querySelector('.links');
+    links.classList.toggle('show');
+  }
+
+  document.querySelectorAll('.links a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelector('.links').classList.remove('show');
+    });
+  });
 </script>
 
 </body>
