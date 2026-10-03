@@ -1,159 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
- /* Birthday Booking Modal */
-.birthday-booking-trigger{
-  margin-top:24px;
-  text-align:center;
-}
-
-.birthday-book-btn{
-  border:0;
-  border-radius:16px;
-  padding:15px 24px;
-  background:var(--yellow);
-  color:var(--ink);
-  font:inherit;
-  font-weight:900;
-  font-size:1rem;
-  cursor:pointer;
-  box-shadow:0 10px 25px rgba(0,0,0,.12);
-  transition:transform .2s ease,box-shadow .2s ease;
-}
-
-.birthday-book-btn:hover{
-  transform:translateY(-2px);
-  box-shadow:0 14px 30px rgba(0,0,0,.16);
-}
-
-.birthday-modal{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  display:none;
-}
-
-.birthday-modal.show{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-}
-
-.birthday-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(10,20,35,.62);
-  backdrop-filter:blur(5px);
-}
-
-.birthday-modal-box{
-  position:relative;
-  z-index:1;
-  width:min(680px,100%);
-  max-height:calc(100vh - 40px);
-  overflow:auto;
-  padding:28px;
-  background:#fff;
-  border-radius:24px;
-  box-shadow:0 25px 80px rgba(0,0,0,.28);
-  animation:birthdayModalIn .22s ease-out;
-}
-
-@keyframes birthdayModalIn{
-  from{
-    opacity:0;
-    transform:translateY(18px) scale(.97);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
-}
-
-.birthday-modal-close{
-  position:absolute;
-  top:14px;
-  right:16px;
-  width:38px;
-  height:38px;
-  border:0;
-  border-radius:50%;
-  background:#f1f3f6;
-  color:var(--ink);
-  font-size:25px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.birthday-modal-close:hover{
-  background:#e5e8ed;
-}
-
-body.modal-open{
-  overflow:hidden;
-}
-
-@media(max-width:700px){
-  .birthday-modal.show{
-    padding:10px;
-    align-items:flex-end;
-  }
-
-  .birthday-modal-box{
-    width:100%;
-    max-height:calc(100vh - 20px);
-    padding:22px 18px;
-    border-radius:22px 22px 14px 14px;
-  }
-
-  .birthday-book-btn{
-    width:100%;
-  }
-
-  .birthday-form .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .full-field{
-    grid-column:auto;
-  }
-} <style>
-    /* ===== Trust Section ===== */
-.trust-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:28px; }
-.trust-card{ background:#fff; border:1px solid #f0e6dd; border-radius:24px; padding:26px 22px; box-shadow:var(--shadow); transition:transform .25s ease, box-shadow .25s ease; }
-.trust-card:hover{ transform:translateY(-6px); box-shadow:0 18px 45px rgba(24,50,74,.12); }
-.trust-icon{ width:56px; height:56px; border-radius:18px; display:grid; place-items:center; background:#fff4c9; font-size:27px; margin-bottom:17px; }
-.trust-card h3{ margin:0 0 8px; font-size:20px; }
-.trust-card p{ margin:0; color:var(--muted); line-height:1.65; font-size:14px; }
-.trust-note{ margin-top:25px; padding:20px 24px; border-radius:22px; background:#18324a; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-.trust-note p{ margin:4px 0 0; color:#cbd8e2; font-size:14px; }
-@media(max-width:900px){ .trust-grid{ grid-template-columns:repeat(2,1fr); } }
-@media(max-width:560px){ .trust-grid{ grid-template-columns:1fr; } .trust-note{ display:block; } .trust-note .btn{ margin-top:15px; } }
-
-/* ===== Gallery Lightbox ===== */
-.gallery-card{ cursor:pointer; }
-.lightbox{ position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.92); padding:24px; }
-.lightbox.show{ display:flex; }
-.lightbox-content{ position:relative; width:min(1100px, 94vw); height:min(88vh, 850px); display:flex; align-items:center; justify-content:center; }
-.lightbox-image{ max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; border-radius:18px; box-shadow:0 20px 70px rgba(0,0,0,.45); }
-.lightbox-close, .lightbox-prev, .lightbox-next{ position:absolute; border:0; cursor:pointer; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; font-size:28px; display:grid; place-items:center; backdrop-filter:blur(8px); }
-.lightbox-close{ top:-12px; right:-12px; font-size:24px; }
-.lightbox-prev{ left:-65px; top:50%; transform:translateY(-50%); }
-.lightbox-next{ right:-65px; top:50%; transform:translateY(-50%); }
-.lightbox-close:hover, .lightbox-prev:hover, .lightbox-next:hover{ background:rgba(255,255,255,.25); }
-.lightbox-caption{ position:absolute; left:0; right:0; bottom:-38px; text-align:center; color:#fff; font-weight:800; font-size:15px; }
-@media(max-width:700px){
-  .lightbox{ padding:14px; }
-  .lightbox-content{ width:100%; height:82vh; }
-  .lightbox-prev, .lightbox-next{ width:42px; height:42px; font-size:22px; bottom:-55px; top:auto; transform:none; }
-  .lightbox-prev{ left:calc(50% - 52px); }
-  .lightbox-next{ right:calc(50% - 52px); }
-  .lightbox-close{ top:-55px; right:4px; }
-  .lightbox-caption{ bottom:-30px; font-size:13px; }
-}
-</style>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="RUDHAT ALSAADAH ENTERTAINMENT — a clean, safe and fun children's entertainment center in Al Majaz 3, Sharjah.">
@@ -162,466 +9,7 @@ body.modal-open{
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#18324a;--muted:#64748b;--bg:#fffaf5;--card:#fff;--pink:#ff5f87;--yellow:#ffd95a;--mint:#61d9c2;--blue:#65a9ff;--line:#f0e6dd;--shadow:0 22px 65px rgba(24,50,74,.12);--radius:30px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,Arial,sans-serif;line-height:1.55}a{text-decoration:none;color:inherit}
-.container{width:min(1160px,92%);margin:auto}
-.topbar{background:var(--ink);color:#fff;font-size:13px}.topin{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:15px}.topin span{opacity:.9}.topin a{font-weight:900}
-nav{position:sticky;top:0;z-index:50;background:rgba(255,250,245,.88);backdrop-filter:blur(18px);border-bottom:1px solid rgba(24,50,74,.07)}
-.navin{height:78px;display:flex;align-items:center;justify-content:space-between;gap:22px}.brand{display:flex;align-items:center;gap:11px;font-weight:900}.logo{width:47px;height:47px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--yellow),var(--pink));font-size:25px;box-shadow:0 9px 25px rgba(255,95,135,.25)}.brand span{font-family:"Baloo 2";font-size:20px;line-height:.92}
-.links{display:flex;gap:24px;font-weight:900;font-size:14px}.links a{transition:.2s}.links a:hover{color:var(--pink)}
-.navcta,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:900 15px Nunito;padding:13px 19px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 11px 26px rgba(24,50,74,.18);transition:.2s}.btn:hover,.navcta:hover{transform:translateY(-2px)}.btn.primary{background:var(--pink)}.btn.light{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
-.hero{padding:76px 0 72px;overflow:hidden;position:relative}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;z-index:-1}.hero:before{width:480px;height:480px;background:#fff0a9;right:-180px;top:-150px}.hero:after{width:360px;height:360px;background:#c9f7ed;left:-170px;bottom:-160px}
-.gridhero{display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:58px}.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:900;font-size:13px;box-shadow:0 8px 24px rgba(24,50,74,.05)}
-.hero h1{font-family:"Baloo 2";font-size:clamp(55px,7vw,88px);line-height:.9;margin:18px 0 20px;letter-spacing:-2.5px}.hero h1 em{font-style:normal;color:var(--pink)}.hero p{font-size:18px;color:var(--muted);max-width:610px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}.location{font-size:13px!important;margin-top:8px}
-.hero-card{min-height:500px;border-radius:45px;background:linear-gradient(145deg,#bdf4e7,#a9d2ff);position:relative;box-shadow:var(--shadow);overflow:hidden;padding:28px;display:flex;align-items:flex-end}.hero-card:before{content:"";position:absolute;width:310px;height:310px;border-radius:50%;background:#fff7c8;right:-65px;top:-85px}.bubble{position:absolute;background:#fff;border-radius:22px;padding:13px 17px;font-weight:900;box-shadow:0 14px 30px rgba(24,50,74,.12);z-index:2}.b1{top:42px;left:28px}.b2{right:28px;top:165px}.b3{left:38px;bottom:135px}.playground{width:100%;height:280px;border-radius:38px 38px 27px 27px;background:linear-gradient(#f7d66b 0 30%,#fff 30%);position:relative;display:flex;align-items:center;justify-content:center;font-size:120px;box-shadow:inset 0 -17px 0 #75d8c0}.hero-badge{position:absolute;right:24px;bottom:25px;background:#fff;padding:12px 15px;border-radius:18px;font-size:12px;font-weight:900;box-shadow:0 12px 28px rgba(24,50,74,.1)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:26px}.stat{background:#fff;border:1px solid var(--line);border-radius:22px;padding:17px 18px}.stat strong{display:block;font:800 28px "Baloo 2"}.stat span{font-size:12px;color:var(--muted);font-weight:800}
-section{padding:82px 0}.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:31px}.kicker{color:var(--pink);font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:12px}.sectionhead h2{font:800 45px/1 "Baloo 2";margin:6px 0 0}.sectionhead p{color:var(--muted);max-width:500px;margin:0}
-.features{display:grid;grid-template-columns:repeat(5,1fr);gap:15px}.feature{background:#fff;padding:24px 18px;border-radius:26px;border:1px solid var(--line);box-shadow:0 8px 28px rgba(24,50,74,.05);transition:.2s}.feature:hover{transform:translateY(-5px);box-shadow:var(--shadow)}.icon{font-size:31px}.feature h3{font-size:16px;margin:11px 0 4px}.feature p{font-size:13px;color:var(--muted);margin:0}
-.about{display:grid;grid-template-columns:.9fr 1.1fr;gap:25px;align-items:stretch}.aboutvisual{min-height:360px;border-radius:36px;background:linear-gradient(145deg,#ffe6ed,#fff0ad);display:grid;place-items:center;font-size:135px;box-shadow:var(--shadow)}.aboutbox{background:#fff;border:1px solid var(--line);border-radius:36px;padding:38px;box-shadow:var(--shadow)}.aboutbox h3{font:800 38px "Baloo 2";margin:7px 0 12px}.aboutbox p{color:var(--muted)}.ticks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.tick{font-weight:900;background:#fffaf5;border-radius:16px;padding:12px}
-.offer{background:var(--ink);color:#fff;border-radius:40px;padding:42px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:center;overflow:hidden;position:relative;box-shadow:var(--shadow)}.offer:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:var(--yellow);opacity:.13;right:-80px;top:-80px}.offer h2{font:800 45px/1 "Baloo 2";margin:6px 0 9px}.offer p{color:#c7d4df;margin:0}.price{font:900 60px/1 "Baloo 2";white-space:nowrap}
-.prices{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.pricecard{background:#fff;border:1px solid var(--line);border-radius:26px;padding:26px;position:relative;transition:.2s}.pricecard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}.pricecard strong{display:block;font:800 39px "Baloo 2";margin:3px 0}.pricecard span{color:var(--muted);font-weight:800}.pricecard.hot{background:#fff4d3;border-color:#f3d87a}.unlimited{grid-column:span 2;background:linear-gradient(135deg,#ffe7ef,#fff)}
-.booking{display:grid;grid-template-columns:1fr 1fr;gap:25px}.box{background:#fff;border-radius:32px;padding:31px;border:1px solid var(--line);box-shadow:var(--shadow)}.box h3{font:800 32px "Baloo 2";margin:0 0 8px}.box p{color:var(--muted)}.info{display:grid;gap:14px;margin-top:22px}.info a{font-weight:900}.mapbtn{margin-top:20px}
-.cta{margin-top:25px;background:linear-gradient(135deg,#ffedf2,#fff5c8);border-radius:34px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:25px}.cta h2{font:800 39px "Baloo 2";margin:0 0 5px}.cta p{margin:0;color:var(--muted)}
-footer{background:#10283b;color:#fff;padding:45px 0 25px}.footergrid{display:flex;justify-content:space-between;gap:25px}.footbrand{font:800 25px "Baloo 2"}.footergrid p{color:#b9c8d4}.footlinks{display:flex;gap:18px;align-items:center;font-weight:800}.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:28px;padding-top:18px;color:#91a5b4;font-size:13px}
-.wa{position:fixed;right:20px;bottom:20px;z-index:60;width:61px;height:61px;border-radius:50%;display:grid;place-items:center;background:#20c76a;color:#fff;font-size:27px;box-shadow:0 14px 35px rgba(32,199,106,.35)}
-@media(max-width:980px){.links{display:none}.gridhero,.about,.booking{grid-template-columns:1fr}.features{grid-template-columns:repeat(2,1fr)}.prices{grid-template-columns:repeat(2,1fr)}.unlimited{grid-column:span 2}.aboutvisual{min-height:300px}}
-@media(max-width:600px){.topin{justify-content:center}.topin span{display:none}.hero{padding-top:50px}.hero h1{font-size:57px}.hero-card{min-height:370px}.features,.prices,.stats{grid-template-columns:1fr}.unlimited{grid-column:span 1}.offer{grid-template-columns:1fr;padding:29px}.price{font-size:49px}.sectionhead{display:block}.sectionhead h2{font-size:37px;margin-bottom:9px}.ticks{grid-template-columns:1fr}.cta{display:block}.cta .btn{margin-top:18px;width:100%}.footergrid{display:block}.footlinks{margin-top:18px;flex-wrap:wrap}.brand span{font-size:17px}}
-
-<style>
-.gallery{display:grid;grid-template-columns:1.35fr .65fr .65fr;grid-template-rows:210px 210px;gap:14px}.gallery-card{border-radius:28px;overflow:hidden;position:relative;display:flex;align-items:flex-end;padding:20px;background:linear-gradient(145deg,#bdf4e7,#a9d2ff);min-height:0}.gallery-card:nth-child(2){background:linear-gradient(145deg,#ffe7ef,#fff0ad)}.gallery-card:nth-child(3){background:linear-gradient(145deg,#dbeaff,#d4f7ee)}.gallery-card:nth-child(4){background:linear-gradient(145deg,#fff0ad,#ffe1ec)}.gallery-card:nth-child(5){background:linear-gradient(145deg,#d9f8ef,#e2dcff)}.gallery-card:first-child{grid-row:span 2}.gallery-emoji{font-size:95px;position:absolute;right:20px;top:24px}.gallery-card:not(:first-child) .gallery-emoji{font-size:62px}.gallery-label{position:relative;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-radius:16px;padding:9px 12px;font-weight:900;font-size:13px}.service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.service-detail{background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:0 8px 28px rgba(24,50,74,.05)}.service-detail .bigicon{width:55px;height:55px;border-radius:18px;display:grid;place-items:center;background:#fff4d3;font-size:29px}.service-detail:nth-child(2) .bigicon{background:#ffe7ef}.service-detail:nth-child(3) .bigicon{background:#dff8f2}.service-detail:nth-child(4) .bigicon{background:#e2ecff}.service-detail:nth-child(5) .bigicon{background:#eee7ff}.service-detail h3{font:800 25px "Baloo 2";margin:15px 0 5px}.service-detail p{color:var(--muted);margin:0}.package{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:stretch}.package-main{background:linear-gradient(145deg,#ffedf2,#fff2bd);border-radius:34px;padding:35px}.package-main h3{font:800 38px "Baloo 2";margin:6px 0}.package-price{font:900 55px "Baloo 2";margin:10px 0}.package-list{display:grid;gap:10px;margin-top:20px}.package-list div{font-weight:900;background:rgba(255,255,255,.72);border-radius:15px;padding:11px 13px}.faq{display:grid;gap:12px}.faq details{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px 20px}.faq summary{cursor:pointer;font-weight:900}.faq p{color:var(--muted);margin:12px 0 0}.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.contact-link{display:flex;align-items:center;gap:13px;background:#fff;border:1px solid var(--line);border-radius:19px;padding:15px;font-weight:900}.contact-link span{font-size:24px}.mini-note{font-size:12px;color:var(--muted);margin-top:10px}
-@media(max-width:800px){.gallery{grid-template-columns:1fr 1fr;grid-template-rows:190px 190px 190px}.gallery-card:first-child{grid-row:span 2}.service-grid,.package,.contact-grid{grid-template-columns:1fr}}
-@media(max-width:560px){.gallery{grid-template-columns:1fr;grid-template-rows:repeat(5,190px)}.gallery-card:first-child{grid-row:span 1}.gallery-emoji{font-size:72px}}
-/* ===== Smooth Scroll & Micro Animations ===== */
-html{ scroll-behavior:smooth; }
-section{ scroll-margin-top:90px; }
-.reveal{ opacity:0; transform:translateY(28px); transition: opacity .7s ease, transform .7s ease; }
-.reveal.visible{ opacity:1; transform:translateY(0); }
-.card, .price-card, .trust-card, .gallery-card{ transition: transform .3s ease, box-shadow .3s ease; }
-.card:hover, .price-card:hover, .trust-card:hover, .gallery-card:hover{ transform:translateY(-5px); }
-.btn{ transition: transform .2s ease, box-shadow .2s ease; }
-.btn:hover{ transform:translateY(-2px); }
-@media(prefers-reduced-motion:reduce){
-  html{ scroll-behavior:auto; }
-  *, *::before, *::after{ animation:none !important; transition:none !important; }
-}
-/* ===== Professional Navigation ===== */
-
-.main-nav{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:rgba(255,250,245,.94);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  border-bottom:1px solid rgba(24,50,74,.08);
-}
-
-.main-nav .navin{
-  min-height:78px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:20px;
-}
-
-.main-nav .brand{
-  flex-shrink:0;
-}
-
-.main-nav .links{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:20px;
-  font-weight:900;
-  font-size:14px;
-}
-
-.main-nav .links a{
-  position:relative;
-  padding:10px 2px;
-  transition:
-    color .2s ease,
-    transform .2s ease;
-}
-
-.main-nav .links a:not(.mobile-whatsapp)::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:3px;
-  height:2px;
-  border-radius:10px;
-  background:var(--pink);
-  transform:scaleX(0);
-  transform-origin:center;
-  transition:transform .2s ease;
-}
-
-.main-nav .links a:hover{
-  color:var(--pink);
-  transform:translateY(-1px);
-}
-
-.main-nav .links a:hover::after{
-  transform:scaleX(1);
-}
-
-.main-nav .navcta{
-  white-space:nowrap;
-}
-
-.mobile-whatsapp{
-  display:none;
-}
-
-.menu-btn{
-  display:none;
-  width:46px;
-  height:46px;
-  border:1px solid var(--line);
-  border-radius:15px;
-  background:#fff;
-  color:var(--ink);
-  font-size:25px;
-  cursor:pointer;
-  place-items:center;
-  box-shadow:0 7px 20px rgba(24,50,74,.08);
-  transition:
-    transform .2s ease,
-    background .2s ease;
-}
-
-.menu-btn:hover{
-  transform:translateY(-2px);
-  background:#fff7fa;
-}
-
-@media(max-width:1100px){
-
-  .main-nav .links{
-    gap:13px;
-    font-size:13px;
-  }
-
-  .main-nav .navcta{
-    padding:11px 15px;
-    font-size:13px;
-  }
-}
-
-@media(max-width:980px){
-
-  .main-nav .navin{
-    min-height:72px;
-  }
-
-  .main-nav .navcta{
-    display:none;
-  }
-
-  .menu-btn{
-    display:grid;
-  }
-
-  .main-nav .links{
-    position:absolute;
-    top:calc(100% + 10px);
-    left:4%;
-    right:4%;
-
-    display:flex;
-    flex-direction:column;
-    align-items:stretch;
-    justify-content:flex-start;
-
-    gap:5px;
-    padding:14px;
-
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:24px;
-
-    box-shadow:0 22px 55px rgba(24,50,74,.18);
-
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(-12px) scale(.98);
-    pointer-events:none;
-
-    transition:
-      opacity .22s ease,
-      transform .22s ease,
-      visibility .22s ease;
-  }
-
-  .main-nav .links.show{
-    opacity:1;
-    visibility:visible;
-    transform:translateY(0) scale(1);
-    pointer-events:auto;
-  }
-
-  .main-nav .links a{
-    width:100%;
-    padding:14px 16px;
-    border-radius:15px;
-    font-size:15px;
-  }
-
-  .main-nav .links a:hover{
-    background:#fff4f7;
-    transform:none;
-  }
-
-  .main-nav .links a::after{
-    display:none !important;
-  }
-
-  .mobile-whatsapp{
-    display:flex !important;
-    align-items:center;
-    justify-content:center;
-    margin-top:7px;
-    background:var(--pink);
-    color:#fff !important;
-    border-radius:999px !important;
-    box-shadow:0 10px 25px rgba(255,95,135,.25);
-  }
-
-  .mobile-whatsapp:hover{
-    background:#ff4b78 !important;
-    color:#fff !important;
-  }
-}
-
-@media(max-width:600px){
-
-  .main-nav .navin{
-    min-height:68px;
-    gap:10px;
-  }
-
-  .main-nav .brand{
-    gap:8px;
-  }
-
-  .main-nav .logo{
-    width:43px;
-    height:43px;
-    border-radius:14px;
-    font-size:22px;
-  }
-
-  .main-nav .brand span{
-    font-size:15px;
-  }
-
-  .menu-btn{
-    width:44px;
-    height:44px;
-    font-size:23px;
-  }
-
-  .main-nav .links{
-    left:3%;
-    right:3%;
-    border-radius:22px;
-  }
-}
-
-@media(max-width:380px){
-
-  .main-nav .brand span{
-    font-size:13px;
-  }
-
-  .main-nav .logo{
-    width:40px;
-    height:40px;
-  }
-}
-/* Birthday Booking */
-.birthday-booking{
-  margin-top:24px;
-  padding:28px;
-  background:rgba(255,255,255,.96);
-  border:1px solid rgba(20,40,70,.08);
-  border-radius:24px;
-  box-shadow:0 14px 40px rgba(20,40,70,.10);
-}
-
-.booking-head{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  margin-bottom:22px;
-}
-
-.booking-icon{
-  width:52px;
-  height:52px;
-  display:grid;
-  place-items:center;
-  background:var(--yellow);
-  border-radius:16px;
-  font-size:26px;
-  flex:none;
-}
-
-.booking-head h3{
-  margin:0 0 4px;
-  font-size:1.35rem;
-  color:var(--ink);
-}
-
-.booking-head p{
-  margin:0;
-  color:#687386;
-  font-size:.95rem;
-}
-
-.birthday-form .form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:16px;
-}
-
-.birthday-form label{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-  font-weight:700;
-  color:var(--ink);
-  font-size:.92rem;
-}
-
-.birthday-form input,
-.birthday-form textarea{
-  width:100%;
-  box-sizing:border-box;
-  border:1px solid #dce2ea;
-  border-radius:12px;
-  padding:12px 14px;
-  font:inherit;
-  color:var(--ink);
-  background:#fff;
-  outline:none;
-  transition:border-color .2s ease,box-shadow .2s ease;
-}
-
-.birthday-form input:focus,
-.birthday-form textarea:focus{
-  border-color:var(--blue);
-  box-shadow:0 0 0 3px rgba(65,140,255,.12);
-}
-
-.birthday-form textarea{
-  resize:vertical;
-  min-height:105px;
-}
-
-.full-field{
-  grid-column:1 / -1;
-}
-
-.booking-submit{
-  width:100%;
-  margin-top:20px;
-  border:0;
-  border-radius:14px;
-  padding:14px 20px;
-  background:#25D366;
-  color:#fff;
-  font:inherit;
-  font-weight:800;
-  cursor:pointer;
-  transition:transform .2s ease,box-shadow .2s ease;
-}
-
-.booking-submit:hover{
-  transform:translateY(-2px);
-  box-shadow:0 10px 24px rgba(37,211,102,.25);
-}
-
-.booking-note{
-  margin:12px 0 0;
-  text-align:center;
-  color:#687386;
-  font-size:.9rem;
-}
-
-@media(max-width:700px){
-  .birthday-booking{
-    padding:20px;
-    border-radius:20px;
-  }
-
-  .birthday-form .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .full-field{
-    grid-column:auto;
-  }
-
-  .booking-head{
-    align-items:flex-start;
-  }
-}</style>
-
-
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://rudhat-alsaadah-entertainment.onrender.com/#business",
-  "name": "RUDHAT ALSAADAH ENTERTAINMENT",
-  "url": "https://rudhat-alsaadah-entertainment.onrender.com/",
-  "image": "https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2",
-  "description": "Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.",
-  "telephone": "+971585187788",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Sarab Tower, Al Majaz 3",
-    "addressLocality": "Sharjah",
-    "addressCountry": "AE"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 25.325012,
-    "longitude": 55.379532
-  },
-  "hasMap": "https://maps.google.com/?q=25.325012,55.379532",
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Saturday",
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday"
-      ],
-      "opens": "09:00",
-      "closes": "21:00"
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": "Friday",
-      "opens": "14:00",
-      "closes": "22:00"
-    }
-  ]
-}
-</script>
-
-  <meta name="google-site-verification" content="JPIU2ga-UCC0LGSQ_4f7ocvuILLYjSrs_MXSP5ZUEHg" />
-<!-- ===== Social Media Preview ===== -->
+<meta name="google-site-verification" content="JPIU2ga-UCC0LGSQ_4f7ocvuILLYjSrs_MXSP5ZUEHg">
 <meta property="og:type" content="website">
 <meta property="og:title" content="RUDHAT ALSAADAH | Kids Entertainment">
 <meta property="og:description" content="A happy place for little explorers in Al Majaz 3, Sharjah, UAE.">
@@ -637,15 +25,302 @@ section{ scroll-margin-top:90px; }
 <meta name="twitter:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎈</text></svg>">
 <link rel="canonical" href="https://rudhat-alsaadah-entertainment.onrender.com/">
-</head>
-  
-<body>
-<div class="topbar"><div class="container topin"><span>✨ FUN • LEARN • GROW</span><a href="tel:+971585187788">📞 +971 58 518 7788</a></div></div>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"geo":{"@type":"GeoCoordinates","latitude":25.325012,"longitude":55.379532},"hasMap":"https://maps.google.com/?q=25.325012,55.379532","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
+</script>
 
-<!-- ===== Professional Navigation ===== -->
+<style>
+:root{--ink:#18324a;--muted:#64748b;--bg:#fffaf5;--pink:#ff5f87;--yellow:#ffd95a;--mint:#61d9c2;--blue:#65a9ff;--line:#f0e6dd;--shadow:0 22px 65px rgba(24,50,74,.12)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,Arial,sans-serif;line-height:1.55}
+body.modal-open{overflow:hidden}
+a{text-decoration:none;color:inherit}
+.container{width:min(1160px,92%);margin:auto}
+section{padding:82px 0;scroll-margin-top:90px}
+
+/* Top bar */
+.topbar{background:var(--ink);color:#fff;font-size:13px}
+.topin{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.topin span{opacity:.9}.topin a{font-weight:900}
+
+/* Buttons */
+.btn,.navcta{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:900 15px Nunito,Arial,sans-serif;padding:13px 19px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 11px 26px rgba(24,50,74,.18);transition:transform .2s ease,box-shadow .2s ease}
+.btn:hover,.navcta:hover{transform:translateY(-2px)}
+.btn.primary{background:var(--pink)}
+.btn.light{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+
+/* Navigation */
+.main-nav{position:sticky;top:0;z-index:1000;background:rgba(255,250,245,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(24,50,74,.08)}
+.navin{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;flex-shrink:0}
+.logo{width:47px;height:47px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--yellow),var(--pink));font-size:25px;box-shadow:0 9px 25px rgba(255,95,135,.25)}
+.brand span{font-family:"Baloo 2",Arial,sans-serif;font-size:20px;line-height:.92}
+.links{display:flex;align-items:center;justify-content:center;gap:20px;font-weight:900;font-size:14px}
+.links a{position:relative;padding:10px 2px;transition:color .2s ease,transform .2s ease}
+.links a:not(.mobile-whatsapp)::after{content:"";position:absolute;left:0;right:0;bottom:3px;height:2px;border-radius:10px;background:var(--pink);transform:scaleX(0);transition:transform .2s ease}
+.links a:hover{color:var(--pink);transform:translateY(-1px)}
+.links a:hover::after{transform:scaleX(1)}
+.navcta{white-space:nowrap}
+.mobile-whatsapp{display:none}
+.menu-btn{display:none;width:46px;height:46px;border:1px solid var(--line);border-radius:15px;background:#fff;color:var(--ink);font-size:25px;cursor:pointer;place-items:center;box-shadow:0 7px 20px rgba(24,50,74,.08)}
+
+/* Hero */
+.hero{padding:76px 0 72px;overflow:hidden;position:relative}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;z-index:-1}
+.hero:before{width:480px;height:480px;background:#fff0a9;right:-180px;top:-150px}
+.hero:after{width:360px;height:360px;background:#c9f7ed;left:-170px;bottom:-160px}
+.gridhero{display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:58px}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:900;font-size:13px;box-shadow:0 8px 24px rgba(24,50,74,.05)}
+.hero h1{font-family:"Baloo 2",Arial,sans-serif;font-size:clamp(55px,7vw,88px);line-height:.9;margin:18px 0 20px;letter-spacing:-2.5px}
+.hero h1 em{font-style:normal;color:var(--pink)}
+.hero p{font-size:18px;color:var(--muted);max-width:610px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}
+.hero .location{font-size:13px;margin-top:8px}
+.hero-card{min-height:500px;border-radius:45px;background:linear-gradient(145deg,#bdf4e7,#a9d2ff);position:relative;box-shadow:var(--shadow);overflow:hidden;padding:28px;display:flex;align-items:flex-end}
+.hero-card:before{content:"";position:absolute;width:310px;height:310px;border-radius:50%;background:#fff7c8;right:-65px;top:-85px}
+.bubble{position:absolute;background:#fff;border-radius:22px;padding:13px 17px;font-weight:900;box-shadow:0 14px 30px rgba(24,50,74,.12);z-index:2}
+.b1{top:42px;left:28px}.b2{right:28px;top:165px}.b3{left:38px;bottom:135px}
+.playground{width:100%;height:280px;border-radius:38px 38px 27px 27px;background:linear-gradient(#f7d66b 0 30%,#fff 30%);position:relative;display:flex;align-items:center;justify-content:center;font-size:120px;box-shadow:inset 0 -17px 0 #75d8c0}
+.hero-badge{position:absolute;right:24px;bottom:25px;background:#fff;padding:12px 15px;border-radius:18px;font-size:12px;font-weight:900;box-shadow:0 12px 28px rgba(24,50,74,.1)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:26px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:22px;padding:17px 18px}
+.stat strong{display:block;font:800 28px "Baloo 2",Arial,sans-serif}
+.stat span{font-size:12px;color:var(--muted);font-weight:800}
+
+/* Section heads */
+.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:31px}
+.kicker{color:var(--pink);font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:12px}
+.sectionhead h2{font:800 45px/1 "Baloo 2",Arial,sans-serif;margin:6px 0 0}
+.sectionhead p{color:var(--muted);max-width:500px;margin:0}
+
+/* Features */
+.features{display:grid;grid-template-columns:repeat(5,1fr);gap:15px}
+.feature{background:#fff;padding:24px 18px;border-radius:26px;border:1px solid var(--line);box-shadow:0 8px 28px rgba(24,50,74,.05);transition:transform .25s ease,box-shadow .25s ease}
+.feature:hover{transform:translateY(-5px);box-shadow:var(--shadow)}
+.icon{font-size:31px}
+.feature h3{font-size:16px;margin:11px 0 4px}
+.feature p{font-size:13px;color:var(--muted);margin:0}
+
+/* About */
+.about{display:grid;grid-template-columns:.9fr 1.1fr;gap:25px;align-items:stretch}
+.aboutvisual{min-height:360px;border-radius:36px;background:linear-gradient(145deg,#ffe6ed,#fff0ad);display:grid;place-items:center;font-size:135px;box-shadow:var(--shadow)}
+.aboutbox{background:#fff;border:1px solid var(--line);border-radius:36px;padding:38px;box-shadow:var(--shadow)}
+.aboutbox h3{font:800 38px "Baloo 2",Arial,sans-serif;margin:7px 0 12px}
+.aboutbox p{color:var(--muted)}
+.ticks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+.tick{font-weight:900;background:#fffaf5;border-radius:16px;padding:12px}
+
+/* Gallery */
+.gallery{display:grid;grid-template-columns:1.35fr .65fr .65fr;grid-template-rows:210px 210px;gap:14px}
+.gallery-card{border-radius:28px;overflow:hidden;position:relative;cursor:pointer;background:linear-gradient(145deg,#bdf4e7,#a9d2ff);min-height:0;transition:transform .3s ease,box-shadow .3s ease}
+.gallery-card:hover{transform:translateY(-5px)}
+.gallery-card:first-child{grid-row:span 2}
+.gallery-card img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-card::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(24,50,74,.72),rgba(24,50,74,0) 60%);pointer-events:none}
+.gallery-label{position:absolute;z-index:1;bottom:15px;left:15px;right:15px;color:#fff;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border-radius:12px;padding:8px 12px;font-weight:900;font-size:14px}
+.gallery-empty{grid-column:1/-1;grid-row:1/-1;background:#fff;border:1px solid var(--line);border-radius:28px;padding:40px 20px;text-align:center;color:var(--muted);font-weight:800}
+
+/* Trust */
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:28px}
+.trust-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:26px 22px;box-shadow:var(--shadow);transition:transform .25s ease,box-shadow .25s ease}
+.trust-card:hover{transform:translateY(-6px);box-shadow:0 18px 45px rgba(24,50,74,.12)}
+.trust-icon{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:#fff4c9;font-size:27px;margin-bottom:17px}
+.trust-card h3{margin:0 0 8px;font-size:20px}
+.trust-card p{margin:0;color:var(--muted);line-height:1.65;font-size:14px}
+.trust-note{margin-top:25px;padding:20px 24px;border-radius:22px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.trust-note p{margin:4px 0 0;color:#cbd8e2;font-size:14px}
+.reviews-grid{grid-template-columns:repeat(3,1fr)}
+.stars{color:#ffb400;font-size:18px;margin-bottom:8px}
+.trust-card h3.reviewer{font-size:15px;margin-top:12px}
+
+/* Birthday offer */
+.offer{background:var(--ink);color:#fff;border-radius:40px;padding:42px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:center;overflow:hidden;position:relative;box-shadow:var(--shadow)}
+.offer:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:var(--yellow);opacity:.13;right:-80px;top:-80px;pointer-events:none}
+.offer h2{font:800 45px/1 "Baloo 2",Arial,sans-serif;margin:6px 0 9px}
+.offer p{color:#c7d4df;margin:0}
+.offer .kicker{color:var(--yellow)}
+.price{font:900 60px/1 "Baloo 2",Arial,sans-serif;white-space:nowrap}
+.offer-btns{display:flex;flex-direction:column;gap:10px;align-items:flex-start;position:relative;z-index:1}
+.birthday-booking-trigger{margin-top:24px;text-align:center}
+.birthday-book-btn{border:0;border-radius:16px;padding:15px 24px;background:var(--yellow);color:var(--ink);font:inherit;font-weight:900;font-size:1rem;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,.12);transition:transform .2s ease,box-shadow .2s ease}
+.birthday-book-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,0,0,.16)}
+
+/* Prices */
+.prices{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.pricecard{background:#fff;border:1px solid var(--line);border-radius:26px;padding:26px;transition:transform .25s ease,box-shadow .25s ease}
+.pricecard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.pricecard strong{display:block;font:800 39px "Baloo 2",Arial,sans-serif;margin:3px 0}
+.pricecard span{color:var(--muted);font-weight:800}
+.pricecard.hot{background:#fff4d3;border-color:#f3d87a}
+.pricecard.unlimited{grid-column:span 2;background:linear-gradient(135deg,#ffe7ef,#fff)}
+
+/* Package */
+.package{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:stretch}
+.package-main{background:linear-gradient(145deg,#ffedf2,#fff2bd);border-radius:34px;padding:35px}
+.package-main h3{font:800 38px "Baloo 2",Arial,sans-serif;margin:6px 0}
+.package-price{font:900 55px "Baloo 2",Arial,sans-serif;margin:10px 0}
+.package-list{display:grid;gap:10px;margin-top:20px}
+.package-list div{font-weight:900;background:rgba(255,255,255,.72);border-radius:15px;padding:11px 13px}
+
+/* Boxes, FAQ, visit */
+.box{background:#fff;border-radius:32px;padding:31px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.box h3{font:800 32px "Baloo 2",Arial,sans-serif;margin:0 0 8px}
+.box p{color:var(--muted)}
+.booking{display:grid;grid-template-columns:1fr 1fr;gap:25px}
+.info{display:grid;gap:14px;margin-top:22px}
+.info a{font-weight:900}
+.mapbtn{margin-top:20px}
+.faq{display:grid;gap:12px}
+.faq details{background:#fff;border:1px solid var(--line);border-radius:20px;padding:17px 20px}
+.faq summary{cursor:pointer;font-weight:900}
+.faq p{color:var(--muted);margin:12px 0 0}
+.cta{margin-top:25px;background:linear-gradient(135deg,#ffedf2,#fff5c8);border-radius:34px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:25px}
+.cta h2{font:800 39px "Baloo 2",Arial,sans-serif;margin:0 0 5px}
+.cta p{margin:0;color:var(--muted)}
+
+/* Footer + floating WhatsApp */
+footer{background:#10283b;color:#fff;padding:45px 0 25px}
+.footergrid{display:flex;justify-content:space-between;gap:25px}
+.footbrand{font:800 25px "Baloo 2",Arial,sans-serif}
+.footergrid p{color:#b9c8d4}
+.footlinks{display:flex;gap:18px;align-items:center;font-weight:800}
+.copy{border-top:1px solid rgba(255,255,255,.12);margin-top:28px;padding-top:18px;color:#91a5b4;font-size:13px}
+.wa{position:fixed;right:20px;bottom:20px;z-index:60;width:61px;height:61px;border-radius:50%;display:grid;place-items:center;background:#20c76a;color:#fff;font-size:27px;box-shadow:0 14px 35px rgba(32,199,106,.35)}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92);padding:24px}
+.lightbox.show{display:flex}
+.lightbox-content{position:relative;width:min(1100px,94vw);height:min(88vh,850px);display:flex;align-items:center;justify-content:center}
+.lightbox-image{max-width:100%;max-height:100%;object-fit:contain;border-radius:18px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.lightbox-close,.lightbox-prev,.lightbox-next{position:absolute;border:0;cursor:pointer;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:28px;display:grid;place-items:center;backdrop-filter:blur(8px)}
+.lightbox-close{top:-12px;right:-12px;font-size:24px}
+.lightbox-prev{left:-65px;top:50%;transform:translateY(-50%)}
+.lightbox-next{right:-65px;top:50%;transform:translateY(-50%)}
+.lightbox-close:hover,.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
+.lightbox-caption{position:absolute;left:0;right:0;bottom:-38px;text-align:center;color:#fff;font-weight:800;font-size:15px}
+
+/* Birthday modal */
+.birthday-modal{position:fixed;inset:0;z-index:9998;display:none}
+.birthday-modal.show{display:flex;align-items:center;justify-content:center;padding:20px}
+.birthday-modal-backdrop{position:absolute;inset:0;background:rgba(10,20,35,.62);backdrop-filter:blur(5px)}
+.birthday-modal-box{position:relative;z-index:1;width:min(680px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:28px;background:#fff;border-radius:24px;box-shadow:0 25px 80px rgba(0,0,0,.28);animation:modalIn .22s ease-out}
+@keyframes modalIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.birthday-modal-close{position:absolute;top:14px;right:16px;width:38px;height:38px;border:0;border-radius:50%;background:#f1f3f6;color:var(--ink);font-size:25px;line-height:1;cursor:pointer}
+.birthday-modal-close:hover{background:#e5e8ed}
+.booking-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;padding-right:40px}
+.booking-icon{width:52px;height:52px;display:grid;place-items:center;background:var(--yellow);border-radius:16px;font-size:26px;flex:none}
+.booking-head h3{margin:0 0 4px;font-size:1.35rem}
+.booking-head p{margin:0;color:#687386;font-size:.95rem}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.birthday-form label{display:flex;flex-direction:column;gap:7px;font-weight:700;font-size:.92rem}
+.birthday-form input,.birthday-form textarea{width:100%;border:1px solid #dce2ea;border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);background:#fff;outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+.birthday-form input:focus,.birthday-form textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(65,140,255,.12)}
+.birthday-form textarea{resize:vertical;min-height:90px}
+.full-field{grid-column:1/-1}
+.booking-submit{width:100%;margin-top:20px;border:0;border-radius:14px;padding:14px 20px;background:#25D366;color:#fff;font:inherit;font-weight:800;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+.booking-submit:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(37,211,102,.25)}
+.booking-note{margin:12px 0 0;text-align:center;color:#687386;font-size:.9rem}
+
+/* Scroll reveal (only hides content when JS is running) */
+.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.visible{opacity:1;transform:none}
+
+/* Skeleton placeholders: reserve the final space so the page does not jump when the API answers */
+.skel{border-radius:26px;background:linear-gradient(90deg,#f3ece4 25%,#fbf7f2 50%,#f3ece4 75%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
+.features .skel{min-height:158px}
+.prices .skel{min-height:134px}
+.prices .skel:last-child{grid-column:span 2}
+.gallery-skel{border-radius:28px;min-height:0}
+.gallery-skel:first-child{grid-row:span 2}
+.list-msg{grid-column:1/-1;background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px 20px;text-align:center;color:var(--muted);font-weight:800}
+@keyframes shimmer{to{background-position:-200% 0}}
+@media(max-width:980px){.prices .skel:last-child{grid-column:span 2}}
+@media(max-width:600px){.prices .skel:last-child{grid-column:span 1}.gallery-skel:first-child{grid-row:span 1}}
+
+/* Values that come from the admin dashboard stay hidden until loaded (no flash of old prices) */
+.js:not(.content-ready) [data-bind]{visibility:hidden}
+.form-error{margin:14px 0 0;padding:11px 14px;border-radius:12px;background:#fee2e2;color:#991b1b;font-size:.92rem;font-weight:700}
+.booking-success{text-align:center;padding:10px 0 4px}
+.booking-success h3{margin:0 0 8px;font-size:1.4rem}
+.booking-success p{color:#687386;margin:0 0 18px}
+.booking-success a.booking-submit{display:block;margin-top:0;text-decoration:none}
+.booking-done{margin-top:12px;border:0;background:none;color:var(--muted);font:inherit;font-weight:800;cursor:pointer;text-decoration:underline}
+.hp-field{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+
+/* Responsive */
+@media(max-width:1100px){.links{gap:13px;font-size:13px}.navcta{padding:11px 15px;font-size:13px}}
+@media(max-width:980px){
+  .gridhero,.about,.booking,.package{grid-template-columns:1fr}
+  .features{grid-template-columns:repeat(2,1fr)}
+  .prices{grid-template-columns:repeat(2,1fr)}
+  .pricecard.unlimited{grid-column:span 2}
+  .aboutvisual{min-height:300px}
+  .trust-grid{grid-template-columns:repeat(2,1fr)}
+  .navin{min-height:72px}
+  .navcta{display:none}
+  .menu-btn{display:grid}
+  .links{position:absolute;top:calc(100% + 10px);left:4%;right:4%;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:5px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:0 22px 55px rgba(24,50,74,.18);opacity:0;visibility:hidden;transform:translateY(-12px) scale(.98);pointer-events:none;transition:opacity .22s ease,transform .22s ease,visibility .22s ease}
+  .links.show{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+  .links a{width:100%;padding:14px 16px;border-radius:15px;font-size:15px}
+  .links a:hover{background:#fff4f7;transform:none}
+  .links a::after{display:none!important}
+  .mobile-whatsapp{display:flex;align-items:center;justify-content:center;margin-top:7px;background:var(--pink);color:#fff!important;border-radius:999px!important;box-shadow:0 10px 25px rgba(255,95,135,.25)}
+}
+@media(max-width:800px){
+  .gallery{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,190px)}
+  .lightbox{padding:14px}
+  .lightbox-content{width:100%;height:82vh}
+  .lightbox-prev,.lightbox-next{width:42px;height:42px;font-size:22px;bottom:-55px;top:auto;transform:none}
+  .lightbox-prev{left:calc(50% - 52px)}
+  .lightbox-next{right:calc(50% - 52px)}
+  .lightbox-close{top:-55px;right:4px}
+  .lightbox-caption{bottom:-30px;font-size:13px}
+}
+@media(max-width:700px){
+  .birthday-modal.show{padding:10px;align-items:flex-end}
+  .birthday-modal-box{max-height:calc(100vh - 20px);padding:22px 18px;border-radius:22px 22px 14px 14px}
+  .birthday-book-btn{width:100%}
+  .form-grid{grid-template-columns:1fr}
+  .full-field{grid-column:auto}
+}
+@media(max-width:600px){
+  .topin{justify-content:center}.topin span{display:none}
+  .navin{min-height:68px;gap:10px}
+  .brand{gap:8px}.logo{width:43px;height:43px;border-radius:14px;font-size:22px}
+  .brand span{font-size:15px}
+  .menu-btn{width:44px;height:44px;font-size:23px}
+  .links{left:3%;right:3%;border-radius:22px}
+  .hero{padding-top:50px}.hero h1{font-size:57px}.hero-card{min-height:370px}
+  .features,.prices,.stats,.trust-grid,.reviews-grid{grid-template-columns:1fr}
+  .pricecard.unlimited{grid-column:span 1}
+  .offer{grid-template-columns:1fr;padding:29px}.price{font-size:49px}
+  .sectionhead{display:block}.sectionhead h2{font-size:37px;margin-bottom:9px}
+  .ticks{grid-template-columns:1fr}
+  .cta{display:block}.cta .btn{margin-top:18px;width:100%}
+  .trust-note{display:block}.trust-note .btn{margin-top:15px}
+  .footergrid{display:block}.footlinks{margin-top:18px;flex-wrap:wrap}
+  .gallery{grid-template-columns:1fr;grid-template-rows:none;grid-auto-rows:190px}
+  .gallery-card:first-child{grid-row:span 1}
+}
+@media(max-width:380px){.brand span{font-size:13px}.logo{width:40px;height:40px}}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+<script>
+document.documentElement.classList.add('js');
+/* Safety net: if the API (or the main script) is slow or broken, show the built-in fallback prices/hours after 3 s */
+setTimeout(function () { document.documentElement.classList.add('content-ready'); }, 3000);
+</script>
+</head>
+
+<body>
+<div class="topbar"><div class="container topin"><span>✨ FUN • LEARN • GROW</span><a href="tel:+971585187788" data-tel>📞 <span data-bind="displayPhone">+971 58 518 7788</span></a></div></div>
+
 <nav class="main-nav">
   <div class="container navin">
-
     <a class="brand" href="#top" aria-label="Rudhat Alsaadah Home">
       <div class="logo">🎈</div>
       <span>RUDHAT ALSAADAH<br>ENTERTAINMENT</span>
@@ -659,727 +334,207 @@ section{ scroll-margin-top:90px; }
       <a href="#prices">Prices</a>
       <a href="#birthday">Birthday</a>
       <a href="#visit">Visit Us</a>
-
-      <a
-        class="mobile-whatsapp"
-        href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information."
-        target="_blank"
-        rel="noopener"
-      >
-        💬 WhatsApp Us
-      </a>
+      <a class="mobile-whatsapp" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 WhatsApp Us</a>
     </div>
 
-    <a
-      class="navcta"
-      href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information."
-      target="_blank"
-      rel="noopener"
-    >
-      💬 WhatsApp
-    </a>
+    <a class="navcta" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 WhatsApp</a>
 
-    <button
-      class="menu-btn"
-      id="menuButton"
-      type="button"
-      aria-label="Open navigation menu"
-      aria-controls="mainMenu"
-      aria-expanded="false"
-    >
-      ☰
-    </button>
-
+    <button class="menu-btn" id="menuButton" type="button" aria-label="Open navigation menu" aria-controls="mainMenu" aria-expanded="false">☰</button>
   </div>
 </nav>
 
 <main id="top">
+
 <section class="hero"><div class="container gridhero">
-<div>
-<div class="eyebrow">🌈 A PLACE TO PLAY & GROW</div>
-<h1>A happy place for <em>little explorers.</em></h1>
-<p>A clean, safe and exciting children's entertainment center in Al Majaz 3, Sharjah — where play becomes an adventure.</p>
-<div class="actions"><a class="btn primary" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%2C%20I%20would%20like%20to%20book." target="_blank">💬 Book on WhatsApp</a><a class="btn light" href="#prices">View Prices →</a></div>
-<p class="location"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></p>
-<div class="stats"><div class="stat"><strong>AED 20</strong><span>PER HOUR</span></div><div class="stat"><strong>AED 300</strong><span>BIRTHDAY</span></div><div class="stat"><strong>9AM–9PM</strong><span>SAT–THU</span></div></div>
-</div>
-<div class="hero-card">
-<div class="bubble b1">🎨 Create</div><div class="bubble b2">💃 Dance</div><div class="bubble b3">🧩 Learn</div>
-<div class="playground">🛝</div><div class="hero-badge">🛡️ Clean & Safe Environment</div>
-</div>
+  <div>
+    <div class="eyebrow">🌈 A PLACE TO PLAY &amp; GROW</div>
+    <h1>A happy place for <em>little explorers.</em></h1>
+    <p>A clean, safe and exciting children's entertainment center in Al Majaz 3, Sharjah — where play becomes an adventure.</p>
+    <div class="actions">
+      <a class="btn primary" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 Book on WhatsApp</a>
+      <a class="btn light" href="#prices">View Prices →</a>
+    </div>
+    <p class="location"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></p>
+    <div class="stats">
+      <div class="stat"><strong data-bind="hourlyPrice">AED 20</strong><span>PER HOUR</span></div>
+      <div class="stat"><strong data-bind="birthdayPrice">AED 300</strong><span>BIRTHDAY</span></div>
+      <div class="stat"><strong data-bind="weekdayShort">9AM–9PM</strong><span>SAT–THU</span></div>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="bubble b1">🎨 Create</div><div class="bubble b2">💃 Dance</div><div class="bubble b3">🧩 Learn</div>
+    <div class="playground">🛝</div>
+    <div class="hero-badge">🛡️ Clean &amp; Safe Environment</div>
+  </div>
 </div></section>
 
 <section id="about"><div class="container about">
-<div class="aboutvisual">🎈🧸</div>
-<div class="aboutbox"><div class="kicker">Welcome</div><h3>Where every visit becomes a happy memory.</h3><p>RUDHAT ALSAADAH ENTERTAINMENT is a children's entertainment center designed around fun, creativity, movement and learning. Our activities give children a welcoming place to explore and enjoy their time.</p>
-<div class="ticks"><div class="tick">🎨 Creative play</div><div class="tick">🧩 Educational fun</div><div class="tick">💃 Music & movement</div><div class="tick">🛡️ Clean & safe</div></div></div>
+  <div class="aboutvisual">🎈🧸</div>
+  <div class="aboutbox">
+    <div class="kicker">Welcome</div>
+    <h3>Where every visit becomes a happy memory.</h3>
+    <p>RUDHAT ALSAADAH ENTERTAINMENT is a children's entertainment center designed around fun, creativity, movement and learning. Our activities give children a welcoming place to explore and enjoy their time.</p>
+    <div class="ticks"><div class="tick">🎨 Creative play</div><div class="tick">🧩 Educational fun</div><div class="tick">💃 Music &amp; movement</div><div class="tick">🛡️ Clean &amp; safe</div></div>
+  </div>
 </div></section>
 
-<section id="activities">
-  <div class="container">
-
-    <div class="sectionhead">
-      <div>
-        <div class="kicker">What we offer</div>
-        <h2>More than playtime.</h2>
-      </div>
-      <p>Fun-filled activities designed to keep children active, creative, curious and smiling.</p>
-    </div>
-
-    <div class="features" id="servicesList"></div>
-
+<section id="activities"><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">What we offer</div><h2>More than playtime.</h2></div>
+    <p>Fun-filled activities designed to keep children active, creative, curious and smiling.</p>
   </div>
-</section>
+  <div class="features" id="servicesList" aria-busy="true"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
+</div></section>
 
-<script>
-async function loadServices() {
-  const list = document.getElementById('servicesList');
-
-  if (!list) return;
-
-  try {
-    const response = await fetch('/api/content');
-
-    if (!response.ok) {
-      throw new Error('Failed to load services');
-    }
-
-    const data = await response.json();
-
-    const icons = ['🎨', '💃', '🧩', '🧠', '🛡️'];
-
-    list.innerHTML = (data.services || []).map((service, index) => `
-      <div class="feature">
-        <div class="icon">${icons[index % icons.length]}</div>
-        <h3>${service.title}</h3>
-        <p>${service.description || ''}</p>
-      </div>
-    `).join('');
-
-  } catch (error) {
-    console.error('Services loading error:', error);
-  }
-}
-
-loadServices();
-</script>
-
-
-
-<section id="gallery">
-  <div class="container">
-    <div class="sectionhead">
-      <div>
-        <div class="kicker">Gallery</div>
-        <h2>A peek into the fun.</h2>
-      </div>
-      <p>See the fun, creativity and happy moments at Rudhat Alsaadah.</p>
-    </div>
-    <div class="gallery" id="galleryList"></div>
+<section id="gallery"><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Gallery</div><h2>A peek into the fun.</h2></div>
+    <p>See the fun, creativity and happy moments at Rudhat Alsaadah.</p>
   </div>
-</section>
+  <div class="gallery" id="galleryList" aria-busy="true"><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div></div>
+</div></section>
 
-<script>
-async function loadGallery() {
-  const list = document.getElementById('galleryList');
-  if (!list) return;
+<section id="why-us"><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Why choose us</div><h2>Made for happy little moments.</h2></div>
+    <p>A welcoming place where children can play, create, learn and enjoy their time in a clean and comfortable environment.</p>
+  </div>
+  <div class="trust-grid">
+    <div class="trust-card"><div class="trust-icon">🛡️</div><h3>Clean &amp; Safe</h3><p>A clean and welcoming environment designed with children's comfort and safety in mind.</p></div>
+    <div class="trust-card"><div class="trust-icon">🎨</div><h3>Creative Play</h3><p>Drawing, coloring and creative activities that encourage children to explore their imagination.</p></div>
+    <div class="trust-card"><div class="trust-icon">🧩</div><h3>Learn Through Play</h3><p>Educational games and skill-building activities that make learning enjoyable.</p></div>
+    <div class="trust-card"><div class="trust-icon">💃</div><h3>Fun &amp; Movement</h3><p>Music, dancing and active play to keep little explorers moving and smiling.</p></div>
+  </div>
+  <div class="trust-note">
+    <div><strong>Ready for a fun day? 🌈</strong><p>Visit us in Al Majaz 3, Sharjah or contact our team directly.</p></div>
+    <a class="btn primary" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 WhatsApp Us</a>
+  </div>
+</div></section>
 
-  try {
-    const response = await fetch('/api/content');
-    if (!response.ok) {
-      throw new Error('Failed to load gallery');
-    }
-
-    const data = await response.json();
-    const gallery = data.gallery || [];
-
-    if (!gallery.length) {
-      list.innerHTML = `
-        <div style="grid-column: 1/-1; background: #fff; border: 1px solid #f0e6dd; border-radius: 28px; padding: 40px 20px; text-align: center; color: var(--muted); font-weight: 800;">
-          Gallery photos will appear here soon. 📸
-        </div>
-      `;
-      return;
-    }
-
-    list.innerHTML = gallery.map(item => `
-      <div class="gallery-card" style="position: relative; overflow: hidden; border-radius: 28px; min-height: 220px;">
-        <img src="${item.imageUrl}" alt="${item.title || 'Rudhat Alsaadah Gallery'}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block;">
-        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(24,50,74,.72), rgba(24,50,74,0) 60%); pointer-events: none;"></div>
-        <div class="gallery-label" style="position: absolute; bottom: 15px; left: 15px; right: 15px; color: #fff; background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); border-radius: 12px; padding: 8px 12px; font-weight: 900; font-size: 14px;">
-          ${item.title || 'Rudhat Alsaadah'}
-        </div>
-      </div>
-    `).join('');
-
-  } catch (error) {
-    console.error('Gallery loading error:', error);
-    list.innerHTML = `
-      <div style="grid-column: 1/-1; background: #fff; border-radius: 28px; padding: 40px 20px; text-align: center; color: var(--muted); font-weight: 800;">
-        Gallery is temporarily unavailable.
-      </div>
-    `;
-  }
-}
-
-loadGallery();
-</script>
-<!-- ===== Why Choose Us ===== -->
-<section id="why-us">
-  <div class="container">
-    <div class="sectionhead">
-      <div>
-        <div class="kicker">Why choose us</div>
-        <h2>Made for happy little moments.</h2>
-      </div>
-      <p>
-        A welcoming place where children can play, create, learn and enjoy their time in a clean and comfortable environment.
-      </p>
+<section id="birthday"><div class="container">
+  <div class="offer">
+    <div>
+      <div class="kicker">Birthday celebrations</div>
+      <h2>Make their big day unforgettable. 🎂</h2>
+      <p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p>
     </div>
-    <div class="trust-grid">
-      <div class="trust-card">
-        <div class="trust-icon">🛡️</div>
-        <h3>Clean & Safe</h3>
-        <p>
-          A clean and welcoming environment designed with children's comfort and safety in mind.
-        </p>
-      </div>
-      <div class="trust-card">
-        <div class="trust-icon">🎨</div>
-        <h3>Creative Play</h3>
-        <p>
-          Drawing, coloring and creative activities that encourage children to explore their imagination.
-        </p>
-      </div>
-      <div class="trust-card">
-        <div class="trust-icon">🧩</div>
-        <h3>Learn Through Play</h3>
-        <p>
-          Educational games and skill-building activities that make learning enjoyable.
-        </p>
-      </div>
-      <div class="trust-card">
-        <div class="trust-icon">💃</div>
-        <h3>Fun & Movement</h3>
-        <p>
-          Music, dancing and active play to keep little explorers moving and smiling.
-        </p>
-      </div>
-    </div>
-    <div class="trust-note">
-      <div>
-        <strong>Ready for a fun day? 🌈</strong>
-        <p>
-          Visit us in Al Majaz 3, Sharjah or contact our team directly.
-        </p>
-      </div>
-      <a class="btn primary" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information." target="_blank">
-        💬 WhatsApp Us
-      </a>
+    <div class="offer-btns">
+      <div class="price" data-bind="birthdayPrice">AED 300</div>
+      <a class="btn primary" data-wa="Hello, I want to ask about the {birthdayPrice} birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener">Ask About Birthday</a>
     </div>
   </div>
-</section>
-
-<section id="birthday">
-  <div class="container">
-    <div class="offer">
-      <div>
-        <div class="kicker" style="color:var(--yellow)">Birthday celebrations</div>
-        <h2>Make their big day unforgettable. 🎂</h2>
-        <p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p>
-      </div>
-
-      <div>
-        <div class="price">AED 300</div>
-        <a class="btn primary"
-           href="https://wa.me/971585187788?text=Hello%2C%20I%20want%20to%20ask%20about%20the%20AED%20300%20birthday%20package."
-           target="_blank"
-           rel="noopener">
-          Ask About Birthday
-        </a>
-      </div>
-    </div>
-
-    <!-- Birthday Booking Form -->
-    <div class="birthday-booking-trigger">
-  <button type="button" class="birthday-book-btn" id="openBirthdayModal">
-    🎂 Book Birthday Party
-  </button>
-</div>
-          <h3>Birthday Booking Request</h3>
-          <p>Send us your preferred date and details on WhatsApp.</p>
-        </div>
-      </div>
-
-      <form id="birthdayBookingForm" class="birthday-form">
-        <div class="form-grid">
-
-          <label>
-            Your Name
-            <input type="text" id="bookingName" required placeholder="Your name">
-          </label>
-
-          <label>
-            WhatsApp Number
-            <input type="tel" id="bookingPhone" required placeholder="+971 5X XXX XXXX">
-          </label>
-
-          <label>
-            Preferred Date
-            <input type="date" id="bookingDate" required>
-          </label>
-
-          <label>
-            Preferred Time
-            <input type="time" id="bookingTime" required>
-          </label>
-
-          <label>
-            Number of Children
-            <input type="number" id="bookingChildren" min="1" max="100" required placeholder="e.g. 10">
-          </label>
-
-          <label class="full-field">
-            Additional Message
-            <textarea id="bookingMessage" rows="4"
-              placeholder="Tell us anything else you would like us to know..."></textarea>
-          </label>
-
-        </div>
-
-        <button type="submit" class="booking-submit">
-          💬 Send Booking Request on WhatsApp
-        </button>
-
-        <p class="booking-note">
-          Birthday package: <strong>AED 300</strong>
-        </p>
-      </form>
-    </div>
-
+  <div class="birthday-booking-trigger">
+    <button type="button" class="birthday-book-btn" id="openBirthdayModal" aria-haspopup="dialog">🎂 Book Birthday Party</button>
   </div>
-</section>
+</div></section>
 
-<section id="prices">
-<section id="prices">
-  <div class="container">
-
-    <div class="sectionhead">
-      <div>
-        <div class="kicker">Simple pricing</div>
-        <h2>Play your way.</h2>
-      </div>
-      <p>Choose the option that works best for your little ones.</p>
-    </div>
-
-    <div class="prices" id="pricesList"></div>
-
+<section id="prices"><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Simple pricing</div><h2>Play your way.</h2></div>
+    <p>Choose the option that works best for your little ones.</p>
   </div>
-</section>
+  <div class="prices" id="pricesList" aria-busy="true"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
+</div></section>
 
-<script>
-async function loadPrices() {
-  const list = document.getElementById('pricesList');
-
-  if (!list) return;
-
-  try {
-    const response = await fetch('/api/content');
-
-    if (!response.ok) {
-      throw new Error('Failed to load prices');
-    }
-
-    const data = await response.json();
-
-    list.innerHTML = (data.prices || []).map((item, index) => `
-      <div class="pricecard ${index === 1 ? 'hot' : ''} ${item.title.toLowerCase().includes('unlimited') ? 'unlimited' : ''}">
-        <span>${item.title}</span>
-        <strong>${item.price}</strong>
-        <span>${item.description || ''}</span>
-      </div>
-    `).join('');
-
-  } catch (error) {
-    console.error('Prices loading error:', error);
-  }
-}
-
-loadPrices();
-</script>
-
-
-<section id="package">
-  <div class="container package">
-
-    <div class="package-main">
-      <div class="kicker">Birthday package</div>
-      <h3 id="birthdayTitle">A special day made for them. 🎂</h3>
-
-      <div class="package-price" id="birthdayPrice">AED 300</div>
-
-      <p id="birthdayDescription">
-        For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.
-      </p>
-
-      <a
-        class="btn primary"
-        id="birthdayButton"
-        href="https://wa.me/971585187788"
-        target="_blank"
-      >
-        🎂 Ask About Birthday
-      </a>
-    </div>
-
-    <div class="box">
-      <div class="kicker">Why visit?</div>
-      <h3>Made for fun.</h3>
-
-      <div class="package-list">
-        <div>🎨 Creative activities</div>
-        <div>💃 Music & movement</div>
-        <div>🧩 Educational games</div>
-        <div>🛡️ Clean & safe environment</div>
-      </div>
-    </div>
-
+<section id="package"><div class="container package">
+  <div class="package-main">
+    <div class="kicker">Birthday package</div>
+    <h3 id="birthdayTitle">A special day made for them. 🎂</h3>
+    <div class="package-price" id="birthdayPrice">AED 300</div>
+    <p id="birthdayDescription">For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.</p>
+    <a class="btn primary" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice} birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener">🎂 Ask About Birthday</a>
   </div>
-</section>
-
-<script>
-async function loadBirthday() {
-  try {
-    const response = await fetch('/api/content');
-
-    if (!response.ok) {
-      throw new Error('Failed to load birthday package');
-    }
-
-    const data = await response.json();
-    const birthday = (data.birthday || [])[0];
-
-    if (!birthday) return;
-
-    document.getElementById('birthdayTitle').textContent =
-      birthday.title || 'Birthday Package 🎂';
-
-    document.getElementById('birthdayPrice').textContent =
-      birthday.price || 'AED 300';
-
-    document.getElementById('birthdayDescription').textContent =
-      birthday.description || 'For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.';
-
-    const message = encodeURIComponent(
-      `Hello, I want to ask about the ${birthday.price || 'AED 300'} birthday package.`
-    );
-
-    document.getElementById('birthdayButton').href =
-      `https://wa.me/971585187788?text=${message}`;
-
-  } catch (error) {
-    console.error('Birthday loading error:', error);
-  }
-}
-
-loadBirthday();
-</script>
-
-
-
-<!-- ===== Testimonials Section ===== -->
-<section id="reviews">
-  <div class="container">
-    <div class="sectionhead">
-      <div>
-        <div class="kicker">Reviews</div>
-        <h2>What parents say ⭐</h2>
-      </div>
-      <p>See why families in Sharjah love visiting Rudhat Alsaadah.</p>
-    </div>
-    <div class="trust-grid">
-      <div class="trust-card">
-        <div style="color:#ffb400;font-size:18px;margin-bottom:8px">⭐⭐⭐⭐⭐</div>
-        <p>"A wonderful and safe place for kids! My children had so much fun."</p>
-        <h3 style="font-size:15px;margin-top:12px;color:var(--ink)">— Sarah A.</h3>
-      </div>
-      <div class="trust-card">
-        <div style="color:#ffb400;font-size:18px;margin-bottom:8px">⭐⭐⭐⭐⭐</div>
-        <p>"Very clean environment and very friendly staff. Highly recommended!"</p>
-        <h3 style="font-size:15px;margin-top:12px;color:var(--ink)">— Mohamed K.</h3>
-      </div>
-      <div class="trust-card">
-        <div style="color:#ffb400;font-size:18px;margin-bottom:8px">⭐⭐⭐⭐⭐</div>
-        <p>"Great place for birthday celebrations and everyday playtime in Al Majaz."</p>
-        <h3 style="font-size:15px;margin-top:12px;color:var(--ink)">— Fatima H.</h3>
-      </div>
+  <div class="box">
+    <div class="kicker">Why visit?</div>
+    <h3>Made for fun.</h3>
+    <div class="package-list">
+      <div>🎨 Creative activities</div><div>💃 Music &amp; movement</div><div>🧩 Educational games</div><div>🛡️ Clean &amp; safe environment</div>
     </div>
   </div>
-</section>
+</div></section>
+
+<!-- TODO: Replace these with REAL customer reviews (with permission). Fake reviews can violate consumer-protection rules. -->
+<section id="reviews"><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Reviews</div><h2>What parents say ⭐</h2></div>
+    <p>See why families in Sharjah love visiting Rudhat Alsaadah.</p>
+  </div>
+  <div class="trust-grid reviews-grid">
+    <div class="trust-card"><div class="stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div><p>"A wonderful and safe place for kids! My children had so much fun."</p><h3 class="reviewer">— Sarah A.</h3></div>
+    <div class="trust-card"><div class="stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div><p>"Very clean environment and very friendly staff. Highly recommended!"</p><h3 class="reviewer">— Mohamed K.</h3></div>
+    <div class="trust-card"><div class="stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div><p>"Great place for birthday celebrations and everyday playtime in Al Majaz."</p><h3 class="reviewer">— Fatima H.</h3></div>
+  </div>
+</div></section>
 
 <section id="faq"><div class="container">
-<div class="sectionhead"><div><div class="kicker">Questions</div><h2>Good to know.</h2></div><p>Quick answers based on the information currently provided for the venue.</p></div>
-<div class="faq">
-<details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE.</p></details>
-<details><summary>What are the opening hours?</summary><p>Saturday–Thursday: 9:00 AM–9:00 PM. Friday: 2:00 PM–10:00 PM.</p></details>
-<details><summary>How much is playtime?</summary><p>Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.</p></details>
-<details><summary>How can I ask about a birthday booking?</summary><p>Use the WhatsApp booking buttons on this website or call +971 58 518 7788.</p></details>
-</div></div></section>
+  <div class="sectionhead">
+    <div><div class="kicker">Questions</div><h2>Good to know.</h2></div>
+    <p>Quick answers based on the information currently provided for the venue.</p>
+  </div>
+  <div class="faq">
+    <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE.</p></details>
+    <details><summary>What are the opening hours?</summary><p data-bind="faqHours">Saturday–Thursday: 9:00 AM–9:00 PM. Friday: 2:00 PM–10:00 PM.</p></details>
+    <details><summary>How much is playtime?</summary><p data-bind="faqPlay">Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.</p></details>
+    <details><summary>How can I ask about a birthday booking?</summary><p>Use the WhatsApp booking buttons on this website or call <span data-bind="displayPhone">+971 58 518 7788</span>.</p></details>
+  </div>
+</div></section>
 
-<section id="visit"><div class="container booking">
-<div class="box"><div class="kicker">Plan your visit</div><h3>Come play with us! 🌈</h3><p>We're open every day with special Friday hours.</p>
-<div class="info"><div>🕘 <b>Sat–Thu:</b> 9:00 AM – 9:00 PM</div><div>🌙 <b>Friday:</b> 2:00 PM – 10:00 PM</div><div>📞 <a href="tel:+971585187788">+971 58 518 7788</a></div><div>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</div></div>
-<a class="btn mapbtn" href="https://maps.google.com/?q=25.325012,55.379532" target="_blank">📍 Open in Google Maps</a>
-</div>
-<div class="box"><div class="kicker">Ready to book?</div><h3>Let's make today fun.</h3><p>Message our team on WhatsApp for birthday bookings, questions and visit details.</p>
-<a class="btn primary" style="width:100%;margin-top:12px" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information." target="_blank">💬 WhatsApp Us</a>
-<a class="btn light" style="width:100%;margin-top:10px" href="tel:+971585187788">📞 +971 58 518 7788</a>
-</div></div>
-
-<div class="container cta"><div><h2>Ready for a fun day?</h2><p>Plan your visit or ask us about a birthday celebration.</p></div><a class="btn primary" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%2C%20I%20would%20like%20to%20book." target="_blank">💬 Start a WhatsApp Chat</a></div>
+<section id="visit">
+  <div class="container booking">
+    <div class="box">
+      <div class="kicker">Plan your visit</div>
+      <h3>Come play with us! 🌈</h3>
+      <p>We're open every day with special Friday hours.</p>
+      <div class="info">
+        <div>🕘 <b>Sat–Thu:</b> <span data-bind="weekdayHours">9:00 AM – 9:00 PM</span></div>
+        <div>🌙 <b>Friday:</b> <span data-bind="fridayHours">2:00 PM – 10:00 PM</span></div>
+        <div>📞 <a href="tel:+971585187788" data-tel data-bind="displayPhone">+971 58 518 7788</a></div>
+        <div>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</div>
+      </div>
+      <a class="btn mapbtn" href="https://maps.google.com/?q=25.325012,55.379532" target="_blank" rel="noopener">📍 Open in Google Maps</a>
+    </div>
+    <div class="box">
+      <div class="kicker">Ready to book?</div>
+      <h3>Let's make today fun.</h3>
+      <p>Message our team on WhatsApp for birthday bookings, questions and visit details.</p>
+      <a class="btn primary" style="width:100%;margin-top:12px" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 WhatsApp Us</a>
+      <a class="btn light" style="width:100%;margin-top:10px" href="tel:+971585187788" data-tel>📞 <span data-bind="displayPhone">+971 58 518 7788</span></a>
+    </div>
+  </div>
+  <div class="container cta">
+    <div><h2>Ready for a fun day?</h2><p>Plan your visit or ask us about a birthday celebration.</p></div>
+    <a class="btn primary" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 Start a WhatsApp Chat</a>
+  </div>
 </section>
+
 </main>
 
 <footer><div class="container">
-<div class="footergrid"><div><div class="footbrand">🎈 RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE</p></div><div class="footlinks"><a href="#about">About</a><a href="#activities">Services</a>
-<a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#faq">FAQ</a></div></div>
-<div class="copy">© 2026 Rudhat Alsaadah Entertainment. All rights reserved.</div>
+  <div class="footergrid">
+    <div><div class="footbrand">🎈 RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE</p></div>
+    <div class="footlinks"><a href="#about">About</a><a href="#activities">Services</a><a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#faq">FAQ</a></div>
+  </div>
+  <div class="copy">© 2026 Rudhat Alsaadah Entertainment. All rights reserved.</div>
 </div></footer>
-<a class="wa" href="https://wa.me/971585187788" target="_blank" aria-label="WhatsApp">◉</a>
 
+<a class="wa" href="https://wa.me/971585187788" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
 
-<!-- ===== Gallery Lightbox ===== -->
-<div class="lightbox" id="galleryLightbox" aria-hidden="true">
+<!-- Gallery lightbox -->
+<div class="lightbox" id="galleryLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photo gallery">
   <div class="lightbox-content">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close" type="button">✕</button>
     <button class="lightbox-prev" id="lightboxPrev" aria-label="Previous photo" type="button">‹</button>
     <img class="lightbox-image" id="lightboxImage" src="" alt="">
     <button class="lightbox-next" id="lightboxNext" aria-label="Next photo" type="button">›</button>
-    <div class="lightbox-caption" id="lightboxCaption"></div>
+    <div class="lightbox-caption" id="lightboxCaption" aria-live="polite"></div>
   </div>
 </div>
 
-<script>
-(function () {
-  let galleryItems = [];
-  let currentIndex = 0;
-  const lightbox = document.getElementById('galleryLightbox');
-  const image = document.getElementById('lightboxImage');
-  const caption = document.getElementById('lightboxCaption');
-  const closeBtn = document.getElementById('lightboxClose');
-  const prevBtn = document.getElementById('lightboxPrev');
-  const nextBtn = document.getElementById('lightboxNext');
-
-  function getGalleryCards() {
-    return Array.from(document.querySelectorAll('.gallery-card'));
-  }
-
-  function updateLightbox() {
-    if (!galleryItems.length) return;
-    const item = galleryItems[currentIndex];
-    image.src = item.imageUrl;
-    image.alt = item.title || 'Rudhat Alsaadah Gallery';
-    caption.textContent = item.title || '';
-    prevBtn.style.display = galleryItems.length > 1 ? 'grid' : 'none';
-    nextBtn.style.display = galleryItems.length > 1 ? 'grid' : 'none';
-  }
-
-  function openLightbox(index) {
-    galleryItems = getGalleryCards()
-      .map(card => ({
-        imageUrl: card.querySelector('img')?.src || '',
-        title: card.querySelector('.gallery-label')?.textContent.trim() || ''
-      }))
-      .filter(item => item.imageUrl);
-
-    if (!galleryItems.length) return;
-    currentIndex = Math.max(0, Math.min(index, galleryItems.length - 1));
-    updateLightbox();
-    lightbox.classList.add('show');
-    lightbox.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    lightbox.classList.remove('show');
-    lightbox.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    image.src = '';
-  }
-
-  function showPrevious() {
-    if (!galleryItems.length) return;
-    currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-    updateLightbox();
-  }
-
-  function showNext() {
-    if (!galleryItems.length) return;
-    currentIndex = (currentIndex + 1) % galleryItems.length;
-    updateLightbox();
-  }
-
-  document.addEventListener('click', function (event) {
-    const card = event.target.closest('.gallery-card');
-    if (card) {
-      const cards = getGalleryCards();
-      const index = cards.indexOf(card);
-      if (index !== -1) {
-        openLightbox(index);
-      }
-      return;
-    }
-    if (event.target === lightbox) {
-      closeLightbox();
-    }
-  });
-
-  closeBtn.addEventListener('click', closeLightbox);
-  prevBtn.addEventListener('click', showPrevious);
-  nextBtn.addEventListener('click', showNext);
-
-  document.addEventListener('keydown', function (event) {
-    if (!lightbox.classList.contains('show')) return;
-    if (event.key === 'Escape') {
-      closeLightbox();
-    }
-    if (event.key === 'ArrowLeft') {
-      showPrevious();
-    }
-    if (event.key === 'ArrowRight') {
-      showNext();
-    }
-  });
-})();
-</script>
-  <script>
-/* ===== Scroll Reveal Animation ===== */
-(function () {
-  const revealItems = document.querySelectorAll(
-    '.sectionhead, .card, .price-card, .trust-card, .gallery-card, .trust-note'
-  );
-
-  if (!revealItems.length) return;
-
-  revealItems.forEach(item => {
-    item.classList.add('reveal');
-  });
-
-  const observer = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.12
-    }
-  );
-
-  revealItems.forEach(item => observer.observe(item));
-})();
-</script>
-
-  <script>
-(function () {
-  const menuButton = document.getElementById('menuButton');
-  const mainMenu = document.getElementById('mainMenu');
-
-  if (!menuButton || !mainMenu) return;
-
-  function closeMenu() {
-    mainMenu.classList.remove('show');
-    menuButton.setAttribute('aria-expanded', 'false');
-    menuButton.setAttribute('aria-label', 'Open navigation menu');
-  }
-
-  function toggleMenu() {
-    const isOpen = mainMenu.classList.toggle('show');
-
-    menuButton.setAttribute(
-      'aria-expanded',
-      String(isOpen)
-    );
-
-    menuButton.setAttribute(
-      'aria-label',
-      isOpen ? 'Close navigation menu' : 'Open navigation menu'
-    );
-  }
-
-  menuButton.addEventListener('click', toggleMenu);
-
-  mainMenu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
-  });
-
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') {
-      closeMenu();
-    }
-  });
-
-  document.addEventListener('click', event => {
-    if (!mainMenu.classList.contains('show')) return;
-
-    if (
-      !mainMenu.contains(event.target) &&
-      !menuButton.contains(event.target)
-    ) {
-      closeMenu();
-    }
-  });
-})();
-
-
-<script>
-(function () {
-  const form = document.getElementById('birthdayBookingForm');
-  if (!form) return;
-
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const name = document.getElementById('bookingName').value.trim();
-    const phone = document.getElementById('bookingPhone').value.trim();
-    const date = document.getElementById('bookingDate').value;
-    const time = document.getElementById('bookingTime').value;
-    const children = document.getElementById('bookingChildren').value;
-    const message = document.getElementById('bookingMessage').value.trim();
-
-    const whatsappMessage =
-      `Hello RUDHAT ALSAADAH ENTERTAINMENT,%0A%0A` +
-      `🎂 Birthday Booking Request%0A` +
-      `━━━━━━━━━━━━━━━━%0A` +
-      `👤 Name: ${encodeURIComponent(name)}%0A` +
-      `📱 WhatsApp: ${encodeURIComponent(phone)}%0A` +
-      `📅 Date: ${encodeURIComponent(date)}%0A` +
-      `⏰ Time: ${encodeURIComponent(time)}%0A` +
-      `👧 Children: ${encodeURIComponent(children)}%0A` +
-      `💰 Package: AED 300%0A` +
-      `💬 Message: ${encodeURIComponent(message || 'No additional message')}`;
-
-    const whatsappUrl =
-      `https://wa.me/971585187788?text=${whatsappMessage}`;
-
-    window.open(whatsappUrl, '_blank', 'noopener');
-  });
-})();
-</script>
-  <div class="birthday-modal" id="birthdayModal" aria-hidden="true">
+<!-- Birthday booking modal (single form, unique IDs) -->
+<div class="birthday-modal" id="birthdayModal" aria-hidden="true">
   <div class="birthday-modal-backdrop" id="birthdayModalBackdrop"></div>
-
-  <div class="birthday-modal-box" role="dialog" aria-modal="true"
-       aria-labelledby="birthdayModalTitle">
-
-    <button type="button" class="birthday-modal-close"
-            id="closeBirthdayModal" aria-label="Close">
-      ×
-    </button>
-
+  <div class="birthday-modal-box" role="dialog" aria-modal="true" aria-labelledby="birthdayModalTitle">
+    <button type="button" class="birthday-modal-close" id="closeBirthdayModal" aria-label="Close">×</button>
     <div class="booking-head">
       <span class="booking-icon">🎂</span>
       <div>
@@ -1387,51 +542,421 @@ loadBirthday();
         <p>Tell us your preferred date and details.</p>
       </div>
     </div>
-
     <form id="birthdayBookingForm" class="birthday-form">
       <div class="form-grid">
-        <label>
-          Your Name
-          <input type="text" id="bookingName" required placeholder="Your name">
-        </label>
-
-        <label>
-          WhatsApp Number
-          <input type="tel" id="bookingPhone" required placeholder="+971 5X XXX XXXX">
-        </label>
-
-        <label>
-          Preferred Date
-          <input type="date" id="bookingDate" required>
-        </label>
-
-        <label>
-          Preferred Time
-          <input type="time" id="bookingTime" required>
-        </label>
-
-        <label>
-          Number of Children
-          <input type="number" id="bookingChildren" min="1" max="100"
-                 required placeholder="e.g. 10">
-        </label>
-
-        <label class="full-field">
-          Additional Message
-          <textarea id="bookingMessage" rows="3"
-            placeholder="Anything else you'd like us to know?"></textarea>
-        </label>
+        <label>Your Name<input type="text" id="bookingName" required placeholder="Your name" autocomplete="name"></label>
+        <label>WhatsApp Number<input type="tel" id="bookingPhone" required inputmode="tel" maxlength="25" pattern="^\+?[0-9\s\-\(\)]{9,25}$" title="Enter 9–15 digits, e.g. +971 50 123 4567 or 050 123 4567" placeholder="+971 5X XXX XXXX" autocomplete="tel"></label>
+        <label>Preferred Date<input type="date" id="bookingDate" required></label>
+        <label>Preferred Time<input type="time" id="bookingTime" required></label>
+        <label>Number of Children<input type="number" id="bookingChildren" min="1" max="100" required placeholder="e.g. 10"></label>
+        <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="bookingWebsite" tabindex="-1" autocomplete="off"></label></div>
+        <label class="full-field">Additional Message<textarea id="bookingMessage" rows="3" placeholder="Anything else you'd like us to know?"></textarea></label>
       </div>
-
-      <button type="submit" class="booking-submit">
-        💬 Send Booking Request on WhatsApp
-      </button>
-
-      <p class="booking-note">
-        Birthday package: <strong>AED 300</strong>
-      </p>
+      <p class="form-error" id="bookingError" role="alert" hidden></p>
+      <button type="submit" class="booking-submit">🎂 Send Booking Request</button>
+      <p class="booking-note">Birthday package: <strong data-bind="birthdayPrice">AED 300</strong></p>
     </form>
+    <div class="booking-success" id="bookingSuccess" hidden>
+      <h3 id="bookingSuccessTitle">✅ Request received!</h3>
+      <p id="bookingSuccessText"></p>
+      <a class="booking-submit" id="bookingWaLink" href="https://wa.me/971585187788" target="_blank" rel="noopener">💬 Continue on WhatsApp</a>
+      <button type="button" class="booking-done" id="bookingDoneBtn">Close</button>
+    </div>
   </div>
 </div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ===== Settings (overwritten by /api/content; these are only fallbacks) ===== */
+  var PHONE = '971585187788';
+  var BIRTHDAY_PRICE = 'AED 300';
+
+  var esc = function (v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var safeUrl = function (u) {
+    u = String(u || '');
+    return /^(https?:\/\/|\/|data:image\/)/i.test(u) ? u : '';
+  };
+  var waLink = function (text) {
+    return 'https://wa.me/' + PHONE + (text ? '?text=' + encodeURIComponent(text) : '');
+  };
+
+  /* data-wa="text with {birthdayPrice}" -> real wa.me link */
+  function buildWaLinks() {
+    document.querySelectorAll('[data-wa]').forEach(function (a) {
+      a.href = waLink(a.getAttribute('data-wa').replace('{birthdayPrice}', BIRTHDAY_PRICE));
+    });
+  }
+  buildWaLinks();
+
+  var fmt12 = function (t) {
+    var m = /^(\d\d):(\d\d)$/.exec(t || '');
+    if (!m) return '';
+    var h = +m[1];
+    var ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + m[2] + ' ' + ap;
+  };
+  var fmtShort = function (t) {
+    var m = /^(\d\d):(\d\d)$/.exec(t || '');
+    if (!m) return '';
+    var h = +m[1];
+    var ap = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + (m[2] === '00' ? '' : ':' + m[2]) + ap;
+  };
+
+  /* ===== Mobile menu ===== */
+  var menuButton = document.getElementById('menuButton');
+  var mainMenu = document.getElementById('mainMenu');
+  function closeMenu() {
+    mainMenu.classList.remove('show');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.setAttribute('aria-label', 'Open navigation menu');
+  }
+  menuButton.addEventListener('click', function () {
+    var open = mainMenu.classList.toggle('show');
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+  });
+  mainMenu.querySelectorAll('a').forEach(function (l) { l.addEventListener('click', closeMenu); });
+  document.addEventListener('click', function (e) {
+    if (mainMenu.classList.contains('show') && !mainMenu.contains(e.target) && !menuButton.contains(e.target)) closeMenu();
+  });
+
+  /* ===== Content (ONE fetch drives prices, hours, phone, FAQ, everything) ===== */
+  var galleryData = [];
+
+  function renderServices(data) {
+    var icons = ['🎨', '💃', '🧩', '🧠', '🛡️'];
+    document.getElementById('servicesList').innerHTML = (data.services || []).map(function (s, i) {
+      return '<div class="feature"><div class="icon">' + icons[i % icons.length] + '</div><h3>' +
+        esc(s.title) + '</h3><p>' + esc(s.description) + '</p></div>';
+    }).join('');
+  }
+
+  function renderGallery(data) {
+    var list = document.getElementById('galleryList');
+    galleryData = (data.gallery || []).filter(function (g) { return safeUrl(g.imageUrl); });
+    if (!galleryData.length) {
+      list.innerHTML = '<div class="gallery-empty">Gallery photos will appear here soon. 📸</div>';
+      return;
+    }
+    list.innerHTML = galleryData.map(function (g, i) {
+      var title = g.title || 'Rudhat Alsaadah';
+      return '<div class="gallery-card" data-index="' + i + '" tabindex="0" role="button" aria-label="Open photo: ' + esc(title) + '">' +
+        '<img src="' + esc(safeUrl(g.imageUrl)) + '" alt="' + esc(title) + '" loading="lazy">' +
+        '<div class="gallery-label">' + esc(title) + '</div></div>';
+    }).join('');
+  }
+
+  function renderPrices(data) {
+    document.getElementById('pricesList').innerHTML = (data.prices || []).map(function (p, i) {
+      var title = String(p.title || '');
+      var cls = 'pricecard' + (i === 1 ? ' hot' : '') + (title.toLowerCase().indexOf('unlimited') !== -1 ? ' unlimited' : '');
+      return '<div class="' + cls + '"><span>' + esc(title) + '</span><strong>' + esc(p.price) +
+        '</strong><span>' + esc(p.description) + '</span></div>';
+    }).join('');
+  }
+
+  function renderBirthday(data) {
+    var b = (data.birthday || [])[0];
+    if (!b) return;
+    if (b.price) BIRTHDAY_PRICE = b.price;
+    document.getElementById('birthdayTitle').textContent = b.title || 'Birthday Package 🎂';
+    document.getElementById('birthdayPrice').textContent = BIRTHDAY_PRICE;
+    if (b.description) document.getElementById('birthdayDescription').textContent = b.description;
+  }
+
+  /* Every price / hour / phone on the page comes from these few values */
+  function applyBindings(data) {
+    var s = data.settings || {};
+    var prices = data.prices || [];
+    var hourly = prices.filter(function (p) { return /per\s*hour|1\s*hour/i.test(p.title || ''); })[0];
+    var map = {};
+
+    if (hourly && hourly.price) map.hourlyPrice = hourly.price;
+    map.birthdayPrice = BIRTHDAY_PRICE;
+
+    if (s.weekdayOpen && s.weekdayClose && s.fridayOpen && s.fridayClose) {
+      var wd = fmt12(s.weekdayOpen) + ' – ' + fmt12(s.weekdayClose);
+      var fr = fmt12(s.fridayOpen) + ' – ' + fmt12(s.fridayClose);
+      map.weekdayHours = wd;
+      map.fridayHours = fr;
+      map.weekdayShort = fmtShort(s.weekdayOpen) + '–' + fmtShort(s.weekdayClose);
+      map.faqHours = 'Saturday–Thursday: ' + wd.replace(' – ', '–') + '. Friday: ' + fr.replace(' – ', '–') + '.';
+    }
+
+    if (s.displayPhone) {
+      map.displayPhone = s.displayPhone;
+      var tel = 'tel:' + s.displayPhone.replace(/[^\d+]/g, '');
+      document.querySelectorAll('[data-tel]').forEach(function (a) { a.href = tel; });
+    }
+
+    if (hourly && hourly.price) {
+      var others = prices.filter(function (p) { return p !== hourly; })
+        .map(function (p) { return p.title + ' (' + p.price + ')'; });
+      map.faqPlay = 'Per hour is ' + hourly.price + '.' +
+        (others.length ? ' Other options: ' + others.join(', ') + '.' : '');
+    }
+
+    document.querySelectorAll('[data-bind]').forEach(function (el) {
+      var k = el.getAttribute('data-bind');
+      if (map[k]) el.textContent = map[k];
+    });
+  }
+
+  function failList(id, text) {
+    var el = document.getElementById(id);
+    if (el && el.querySelector('.skel, .gallery-skel')) {
+      el.innerHTML = '<div class="list-msg">' + text + '</div>';
+    }
+  }
+
+  /* Give up after 8 s so skeletons / hidden values never stay forever on a slow network */
+  var ctrl = ('AbortController' in window) ? new AbortController() : null;
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 8000);
+
+  fetch('/api/content', ctrl ? { signal: ctrl.signal } : undefined)
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (data) {
+      if (data.settings && data.settings.whatsapp) PHONE = String(data.settings.whatsapp);
+      renderServices(data);
+      renderGallery(data);
+      renderPrices(data);
+      renderBirthday(data);
+      applyBindings(data);
+      buildWaLinks();
+    })
+    .catch(function (err) {
+      console.error('Content loading error:', err);
+      failList('servicesList', 'Services are temporarily unavailable. Please message us on WhatsApp.');
+      failList('pricesList', 'Prices are temporarily unavailable. Please message us on WhatsApp.');
+      failList('galleryList', 'Gallery is temporarily unavailable.');
+    })
+    .then(function () {
+      clearTimeout(timer);
+      ['servicesList', 'galleryList', 'pricesList'].forEach(function (id) {
+        document.getElementById(id).setAttribute('aria-busy', 'false');
+      });
+      document.documentElement.classList.add('content-ready');
+    });
+
+  /* ===== Gallery lightbox ===== */
+  var lb = document.getElementById('galleryLightbox');
+  var lbImg = document.getElementById('lightboxImage');
+  var lbCap = document.getElementById('lightboxCaption');
+  var lbPrev = document.getElementById('lightboxPrev');
+  var lbNext = document.getElementById('lightboxNext');
+  var lbIndex = 0, lbOpener = null;
+
+  function lbUpdate() {
+    var item = galleryData[lbIndex];
+    lbImg.src = safeUrl(item.imageUrl);
+    lbImg.alt = item.title || 'Rudhat Alsaadah Gallery';
+    lbCap.textContent = item.title || '';
+    var multi = galleryData.length > 1;
+    lbPrev.style.display = multi ? 'grid' : 'none';
+    lbNext.style.display = multi ? 'grid' : 'none';
+  }
+  function lbOpen(i, opener) {
+    if (!galleryData.length) return;
+    lbOpener = opener || null;
+    lbIndex = Math.max(0, Math.min(i, galleryData.length - 1));
+    lbUpdate();
+    lb.classList.add('show');
+    lb.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    document.getElementById('lightboxClose').focus();
+  }
+  function lbClose() {
+    lb.classList.remove('show');
+    lb.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    lbImg.src = '';
+    if (lbOpener) lbOpener.focus();
+  }
+  function lbStep(d) {
+    if (!galleryData.length) return;
+    lbIndex = (lbIndex + d + galleryData.length) % galleryData.length;
+    lbUpdate();
+  }
+  document.getElementById('galleryList').addEventListener('click', function (e) {
+    var card = e.target.closest('.gallery-card');
+    if (card) lbOpen(Number(card.dataset.index), card);
+  });
+  document.getElementById('galleryList').addEventListener('keydown', function (e) {
+    var card = e.target.closest('.gallery-card');
+    if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); lbOpen(Number(card.dataset.index), card); }
+  });
+  lb.addEventListener('click', function (e) { if (e.target === lb) lbClose(); });
+  document.getElementById('lightboxClose').addEventListener('click', lbClose);
+  lbPrev.addEventListener('click', function () { lbStep(-1); });
+  lbNext.addEventListener('click', function () { lbStep(1); });
+
+  /* ===== Birthday modal ===== */
+  var modal = document.getElementById('birthdayModal');
+  var openBtn = document.getElementById('openBirthdayModal');
+  var modalBox = modal.querySelector('.birthday-modal-box');
+  var form = document.getElementById('birthdayBookingForm');
+  var dateInput = document.getElementById('bookingDate');
+  var errBox = document.getElementById('bookingError');
+  var successBox = document.getElementById('bookingSuccess');
+  var submitBtn = form.querySelector('.booking-submit');
+  var submitLabel = submitBtn.textContent;
+
+  var phoneInput = document.getElementById('bookingPhone');
+  function phoneDigits(v) { return String(v || '').replace(/\D/g, ''); }
+  function checkPhone() {
+    var n = phoneDigits(phoneInput.value).length;
+    phoneInput.setCustomValidity(n >= 9 && n <= 15 ? '' : 'Please enter a valid phone number (9–15 digits).');
+  }
+  phoneInput.addEventListener('input', checkPhone);
+
+  function openModal() {
+    var d = new Date();
+    dateInput.min = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    form.hidden = false;
+    successBox.hidden = true;
+    errBox.hidden = true;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    document.getElementById('bookingName').focus();
+  }
+  function closeModal() {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    openBtn.focus();
+  }
+  openBtn.addEventListener('click', openModal);
+  document.getElementById('closeBirthdayModal').addEventListener('click', closeModal);
+  document.getElementById('birthdayModalBackdrop').addEventListener('click', closeModal);
+  document.getElementById('bookingDoneBtn').addEventListener('click', closeModal);
+
+  /* Keeps Tab / Shift+Tab inside an open dialog (also pulls focus back in if it ever escaped) */
+  function trapTab(e, box) {
+    var f = Array.prototype.filter.call(
+      box.querySelectorAll('button, input, textarea, a[href]'),
+      function (el) { return el.offsetParent !== null && el.tabIndex !== -1 && !el.disabled; }
+    );
+    if (!f.length) { e.preventDefault(); return; }
+    var first = f[0], last = f[f.length - 1], active = document.activeElement;
+    if (!box.contains(active)) { e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && active === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (modal.classList.contains('show')) closeModal();
+      if (lb.classList.contains('show')) lbClose();
+      closeMenu();
+    }
+    if (lb.classList.contains('show')) {
+      if (e.key === 'ArrowLeft') lbStep(-1);
+      if (e.key === 'ArrowRight') lbStep(1);
+    }
+    if (e.key === 'Tab') {
+      if (modal.classList.contains('show')) trapTab(e, modalBox);
+      else if (lb.classList.contains('show')) trapTab(e, lb);
+    }
+  });
+
+  function bookingText(p, ref) {
+    return [
+      'Hello RUDHAT ALSAADAH ENTERTAINMENT,',
+      '',
+      '🎂 Birthday Booking Request' + (ref ? ' (Ref: ' + ref + ')' : ''),
+      '━━━━━━━━━━━━━━━━',
+      '👤 Name: ' + p.name,
+      '📱 WhatsApp: ' + p.phone,
+      '📅 Date: ' + p.date,
+      '⏰ Time: ' + p.time,
+      '👧 Children: ' + p.children,
+      '💰 Package: ' + BIRTHDAY_PRICE,
+      '💬 Message: ' + (p.message || 'No additional message')
+    ].join('\n');
+  }
+
+  function showSuccess(p, ref, saved) {
+    document.getElementById('bookingSuccessTitle').textContent =
+      saved ? '✅ Request received!' : '⚠️ Not saved online';
+    document.getElementById('bookingSuccessText').textContent = saved
+      ? 'Your reference is ' + ref + '. Tap the button below to confirm the details with our team on WhatsApp.'
+      : "We couldn't save your request online. Please send it on WhatsApp so our team receives it.";
+    document.getElementById('bookingWaLink').href = waLink(bookingText(p, saved ? ref : ''));
+    form.hidden = true;
+    successBox.hidden = false;
+    if (saved) form.reset();
+    document.getElementById('bookingWaLink').focus();
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    checkPhone();
+    if (!form.reportValidity()) return;
+    var v = function (id) { return document.getElementById(id).value.trim(); };
+    var payload = {
+      name: v('bookingName'),
+      phone: v('bookingPhone'),
+      date: v('bookingDate'),
+      time: v('bookingTime'),
+      children: Number(v('bookingChildren')),
+      message: v('bookingMessage'),
+      website: v('bookingWebsite') /* honeypot: must stay empty */
+    };
+
+    errBox.hidden = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (d) {
+          return { ok: r.ok, status: r.status, data: d };
+        });
+      })
+      .then(function (res) {
+        if (res.status >= 400 && res.status < 500 && res.status !== 404 && res.status !== 405) {
+          /* Validation / rate-limit problem: stay on the form and explain */
+          errBox.textContent = res.data.error || 'Please check your details and try again.';
+          errBox.hidden = false;
+          return;
+        }
+        showSuccess(payload, res.ok ? res.data.reference : '', res.ok);
+      })
+      .catch(function () {
+        /* Network/server down: never lose the customer — fall back to WhatsApp */
+        showSuccess(payload, '', false);
+      })
+      .then(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = submitLabel;
+      });
+  });
+
+  /* ===== Scroll reveal (static elements only) ===== */
+  var items = document.querySelectorAll('.sectionhead, .trust-card, .trust-note, .package-main, .box');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    items.forEach(function (el) { el.classList.add('reveal'); io.observe(el); });
+  }
+})();
+</script>
 </body>
 </html>
