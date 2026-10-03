@@ -194,13 +194,56 @@ section{ scroll-margin-top:90px; }
 <body>
 <div class="topbar"><div class="container topin"><span>✨ FUN • LEARN • GROW</span><a href="tel:+971585187788">📞 +971 58 518 7788</a></div></div>
 
-<nav><div class="container navin">
-<a class="brand" href="#top"><div class="logo">🎈</div><span>RUDHAT ALSAADAH<br>ENTERTAINMENT</span></a>
-<div class="links"><a href="#about">About</a><a href="#activities">Services</a>
-<a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#visit">Visit Us</a></div>
-<a class="navcta" href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information." target="_blank">WhatsApp Us</a>
-<button class="menu-btn" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
-</div></nav>
+<!-- ===== Professional Navigation ===== -->
+<nav class="main-nav">
+  <div class="container navin">
+
+    <a class="brand" href="#top" aria-label="Rudhat Alsaadah Home">
+      <div class="logo">🎈</div>
+      <span>RUDHAT ALSAADAH<br>ENTERTAINMENT</span>
+    </a>
+
+    <div class="links" id="mainMenu">
+      <a href="#top">Home</a>
+      <a href="#about">About</a>
+      <a href="#activities">Services</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#prices">Prices</a>
+      <a href="#birthday">Birthday</a>
+      <a href="#visit">Visit Us</a>
+
+      <a
+        class="mobile-whatsapp"
+        href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information."
+        target="_blank"
+        rel="noopener"
+      >
+        💬 WhatsApp Us
+      </a>
+    </div>
+
+    <a
+      class="navcta"
+      href="https://wa.me/971585187788?text=Hello%20Rudhat%20Alsaadah%20Entertainment%2C%20I%20would%20like%20more%20information."
+      target="_blank"
+      rel="noopener"
+    >
+      💬 WhatsApp
+    </a>
+
+    <button
+      class="menu-btn"
+      id="menuButton"
+      type="button"
+      aria-label="Open navigation menu"
+      aria-controls="mainMenu"
+      aria-expanded="false"
+    >
+      ☰
+    </button>
+
+  </div>
+</nav>
 
 <main id="top">
 <section class="hero"><div class="container gridhero">
