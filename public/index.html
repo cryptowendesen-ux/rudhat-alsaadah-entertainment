@@ -636,12 +636,86 @@ loadGallery();
   </div>
 </section>
 
+<section id="birthday">
+  <div class="container">
+    <div class="offer">
+      <div>
+        <div class="kicker" style="color:var(--yellow)">Birthday celebrations</div>
+        <h2>Make their big day unforgettable. 🎂</h2>
+        <p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p>
+      </div>
 
-<section id="birthday"><div class="container"><div class="offer">
-<div><div class="kicker" style="color:var(--yellow)">Birthday celebrations</div><h2>Make their big day unforgettable. 🎂</h2><p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p></div>
-<div><div class="price">AED 300</div><a class="btn primary" href="https://wa.me/971585187788?text=Hello%2C%20I%20want%20to%20ask%20about%20the%20AED%20300%20birthday%20package." target="_blank">Ask About Birthday</a></div>
-</div></div></section>
+      <div>
+        <div class="price">AED 300</div>
+        <a class="btn primary"
+           href="https://wa.me/971585187788?text=Hello%2C%20I%20want%20to%20ask%20about%20the%20AED%20300%20birthday%20package."
+           target="_blank"
+           rel="noopener">
+          Ask About Birthday
+        </a>
+      </div>
+    </div>
 
+    <!-- Birthday Booking Form -->
+    <div class="birthday-booking">
+      <div class="booking-head">
+        <span class="booking-icon">🎂</span>
+        <div>
+          <h3>Birthday Booking Request</h3>
+          <p>Send us your preferred date and details on WhatsApp.</p>
+        </div>
+      </div>
+
+      <form id="birthdayBookingForm" class="birthday-form">
+        <div class="form-grid">
+
+          <label>
+            Your Name
+            <input type="text" id="bookingName" required placeholder="Your name">
+          </label>
+
+          <label>
+            WhatsApp Number
+            <input type="tel" id="bookingPhone" required placeholder="+971 5X XXX XXXX">
+          </label>
+
+          <label>
+            Preferred Date
+            <input type="date" id="bookingDate" required>
+          </label>
+
+          <label>
+            Preferred Time
+            <input type="time" id="bookingTime" required>
+          </label>
+
+          <label>
+            Number of Children
+            <input type="number" id="bookingChildren" min="1" max="100" required placeholder="e.g. 10">
+          </label>
+
+          <label class="full-field">
+            Additional Message
+            <textarea id="bookingMessage" rows="4"
+              placeholder="Tell us anything else you would like us to know..."></textarea>
+          </label>
+
+        </div>
+
+        <button type="submit" class="booking-submit">
+          💬 Send Booking Request on WhatsApp
+        </button>
+
+        <p class="booking-note">
+          Birthday package: <strong>AED 300</strong>
+        </p>
+      </form>
+    </div>
+
+  </div>
+</section>
+
+<section id="prices">
 <section id="prices">
   <div class="container">
 
