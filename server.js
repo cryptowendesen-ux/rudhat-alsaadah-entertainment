@@ -86,7 +86,7 @@ const itemSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['services', 'prices', 'gallery', 'birthday']
+      enum: ['services', 'prices', 'gallery', 'birthday', 'hero', 'about']
     },
     title: { type: String, required: true },
     description: { type: String, default: '' },
@@ -353,7 +353,7 @@ app.get('/api/health', (req, res) => {
 app.get('/api/content', async (req, res) => {
   try {
     const items = await Item.find({ published: true }).sort({ createdAt: 1 }).lean();
-    const result = { services: [], prices: [], gallery: [], birthday: [] };
+    const result = { services: [], prices: [], gallery: [], birthday: [], hero: [], about: [] };
 
     items.forEach((item) => {
       if (result[item.type]) {
@@ -393,7 +393,7 @@ app.post('/api/auth/login', loginLimit, (req, res) => {
 app.get('/api/admin/content', auth, async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: 1 }).lean();
-    const result = { services: [], prices: [], gallery: [], birthday: [] };
+    const result = { services: [], prices: [], gallery: [], birthday: [], hero: [], about: [] };
 
     items.forEach((item) => {
       if (result[item.type]) {
@@ -416,13 +416,13 @@ app.post('/api/admin/items', auth, async (req, res) => {
     const { type, title, description = '', price = '', published = true } = req.body || {};
 
     if (
-      !['services', 'prices', 'gallery', 'birthday'].includes(type) ||
+      !['services', 'prices', 'gallery', 'birthday', 'hero', 'about'].includes(type) ||
       !String(title || '').trim()
     ) {
       return res.status(400).json({ error: 'Invalid type/title' });
     }
 
-    if (type === 'gallery') {
+    if (IMAGE_TYPES.includes(type)) {
       return res.status(400).json({ error: 'Use the gallery upload endpoint for images' });
     }
 
@@ -446,11 +446,13 @@ app.post('/api/admin/items', auth, async (req, res) => {
 /* =========================================================
    CLOUDINARY UPLOAD HELPER
 ========================================================= */
-function uploadToCloudinary(buffer) {
+const IMAGE_TYPES = ['gallery', 'hero', 'about'];
+
+function uploadToCloudinary(buffer, folderName = 'gallery') {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: 'rudhat-alsaadah/gallery',
+        folder: 'rudhat-alsaadah/' + folderName,
         resource_type: 'image',
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
       },
@@ -482,12 +484,14 @@ app.post('/api/admin/gallery/upload', auth, handleUpload, async (req, res) => {
         ? true
         : req.body.published === true || req.body.published === 'true';
 
-    const cloudResult = await uploadToCloudinary(req.file.buffer);
+    const imgType = IMAGE_TYPES.includes(req.body?.type) ? req.body.type : 'gallery';
+
+    const cloudResult = await uploadToCloudinary(req.file.buffer, imgType);
     uploadedPublicId = cloudResult.public_id || '';
 
     const newItem = new Item({
       id: crypto.randomUUID(),
-      type: 'gallery',
+      type: imgType,
       title: title.substring(0, 200),
       description: description.substring(0, 1000),
       imageUrl: cloudResult.secure_url,
@@ -506,6 +510,25 @@ app.post('/api/admin/gallery/upload', auth, handleUpload, async (req, res) => {
         }
       }
       throw dbError;
+    }
+
+    // Hero / About hold ONE photo: the new upload replaces the old one.
+    if (imgType !== 'gallery') {
+      try {
+        const olds = await Item.find({ type: imgType, id: { $ne: newItem.id } });
+        for (const old of olds) {
+          if (old.publicId) {
+            try {
+              await cloudinary.uploader.destroy(old.publicId, { resource_type: 'image' });
+            } catch (e) {
+              console.error('Old ' + imgType + ' image cleanup error:', e.message);
+            }
+          }
+          await Item.deleteOne({ id: old.id });
+        }
+      } catch (e) {
+        console.error('Replace ' + imgType + ' photo error:', e.message);
+      }
     }
 
     res.status(201).json(adminItemJson(newItem));
