@@ -280,13 +280,22 @@ function auth(req, res, next) {
 /* =========================================================
    RESPONSE HELPERS
 ========================================================= */
+// Cloudinary delivery optimisation for the PUBLIC site only:
+// f_auto = best format (WebP/AVIF), q_auto = smart compression, w_1400 = max width.
+// The original upload stays untouched (admin still sees it).
+function optimizeImageUrl(url) {
+  const u = String(url || '');
+  if (!u.includes('res.cloudinary.com') || !u.includes('/image/upload/')) return u;
+  return u.replace('/image/upload/', '/image/upload/f_auto,q_auto,w_1400,c_limit/');
+}
+
 function publicItemJson(item) {
   return {
     id: item.id,
     title: item.title,
     description: item.description,
     price: item.price,
-    imageUrl: item.imageUrl || '',
+    imageUrl: optimizeImageUrl(item.imageUrl),
     published: item.published
   };
 }
@@ -601,6 +610,19 @@ function isRealDate(d) {
   const t = new Date(d + 'T00:00:00Z');
   return !isNaN(t) && t.toISOString().slice(0, 10) === d;
 }
+function isFridayDate(d) {
+  return new Date(d + 'T00:00:00Z').getUTCDay() === 5;
+}
+function to12h(t) {
+  const [h, m] = t.split(':').map(Number);
+  return ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
+}
+// Is "HH:MM" inside open..close? Handles closing after midnight (e.g. 14:00 -> 01:00).
+function withinHours(t, open, close) {
+  if (open === close) return true;
+  if (open < close) return t >= open && t < close;
+  return t >= open || t < close;
+}
 function bookingJson(b) {
   return {
     id: b.id,
@@ -628,6 +650,19 @@ const SITE_URL = (process.env.SITE_URL || 'https://rudhat-alsaadah-entertainment
 const escHtml = (v) =>
   String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+function maskEmail(e) {
+  const [u, d] = String(e || '').split('@');
+  return u ? u.slice(0, 2) + '***@' + (d || '?') : '(empty)';
+}
+
+function mailStatus() {
+  if (process.env.RESEND_API_KEY) {
+    return 'Resend ON, NOTIFY_EMAIL=' + maskEmail(process.env.NOTIFY_EMAIL || process.env.GMAIL_USER);
+  }
+  if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) return 'Gmail SMTP ON';
+  return 'OFF (no RESEND_API_KEY / GMAIL settings found)';
+}
+
 function mailConfigured() {
   return !!(process.env.RESEND_API_KEY || (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD));
 }
@@ -653,6 +688,7 @@ async function sendMail({ subject, html, text }) {
       signal: AbortSignal.timeout(10000)
     });
     if (!r.ok) throw new Error('Resend error ' + r.status + ': ' + (await r.text()).slice(0, 300));
+    console.log('Booking email SENT via Resend to ' + maskEmail(to));
     return;
   }
 
@@ -670,6 +706,7 @@ async function sendMail({ subject, html, text }) {
     html,
     text
   });
+  console.log('Booking email SENT via Gmail to ' + maskEmail(to));
 }
 
 async function notifyNewBooking(b) {
@@ -678,6 +715,7 @@ async function notifyNewBooking(b) {
     return;
   }
   const ref = b.id.slice(0, 8).toUpperCase();
+  console.log('Booking email: sending for ' + ref + ' (' + mailStatus() + ')');
   const waLink = 'https://wa.me/' + b.phone.replace(/\D/g, '');
   const rows = [
     ['Reference', ref],
@@ -749,6 +787,17 @@ app.post('/api/bookings', bookingLimit, async (req, res) => {
     }
     if (!TIME_RE.test(time)) {
       return res.status(400).json({ error: 'Please choose a valid time.' });
+    }
+    const st = await getSettings();
+    const friday = isFridayDate(date);
+    const open = friday ? st.fridayOpen : st.weekdayOpen;
+    const close = friday ? st.fridayClose : st.weekdayClose;
+    if (!withinHours(time, open, close)) {
+      return res.status(400).json({
+        error:
+          'We are open ' + to12h(open) + ' – ' + to12h(close) +
+          (friday ? ' on Fridays' : ' on this day') + '. Please choose a time within opening hours.'
+      });
     }
     if (!Number.isInteger(children) || children < 1 || children > 100) {
       return res.status(400).json({ error: 'Number of children must be between 1 and 100.' });
@@ -967,4 +1016,5 @@ app.get('*', sendIndex);
 
 app.listen(PORT, () => {
   console.log(`Rudhat running on port ${PORT}`);
+  console.log('Email notifications: ' + mailStatus());
 });
