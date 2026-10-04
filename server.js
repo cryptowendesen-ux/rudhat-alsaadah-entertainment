@@ -617,6 +617,107 @@ function bookingJson(b) {
   };
 }
 
+/* =========================================================
+   BOOKING EMAIL NOTIFICATION
+   Option A (recommended on Render FREE): RESEND_API_KEY  -> HTTPS API, no SMTP port needed
+   Option B: GMAIL_USER + GMAIL_APP_PASSWORD -> Gmail SMTP (needs Render paid plan / other host,
+             because Render free blocks SMTP ports 25/465/587)
+   If neither is set, bookings still save; a warning is logged.
+========================================================= */
+const SITE_URL = (process.env.SITE_URL || 'https://rudhat-alsaadah-entertainment.onrender.com').replace(/\/$/, '');
+const escHtml = (v) =>
+  String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function mailConfigured() {
+  return !!(process.env.RESEND_API_KEY || (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD));
+}
+
+async function sendMail({ subject, html, text }) {
+  const to = process.env.NOTIFY_EMAIL || process.env.GMAIL_USER;
+  if (!to) throw new Error('NOTIFY_EMAIL is not set');
+
+  if (process.env.RESEND_API_KEY) {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + process.env.RESEND_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: process.env.MAIL_FROM || 'Rudhat Bookings <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+        text
+      }),
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!r.ok) throw new Error('Resend error ' + r.status + ': ' + (await r.text()).slice(0, 300));
+    return;
+  }
+
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+    connectionTimeout: 10000,
+    socketTimeout: 15000
+  });
+  await transporter.sendMail({
+    from: '"Rudhat Bookings" <' + process.env.GMAIL_USER + '>',
+    to,
+    subject,
+    html,
+    text
+  });
+}
+
+async function notifyNewBooking(b) {
+  if (!mailConfigured()) {
+    console.warn('Email notification skipped: set RESEND_API_KEY or GMAIL_USER + GMAIL_APP_PASSWORD.');
+    return;
+  }
+  const ref = b.id.slice(0, 8).toUpperCase();
+  const waLink = 'https://wa.me/' + b.phone.replace(/\D/g, '');
+  const rows = [
+    ['Reference', ref],
+    ['Name', b.name],
+    ['Phone', b.phone],
+    ['Date', b.date],
+    ['Time', b.time],
+    ['Children', b.children],
+    ['Package', b.packagePrice || '-'],
+    ['Message', b.message || '-']
+  ];
+  const html =
+    '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto">' +
+    '<h2 style="margin:0 0 12px">🎂 New birthday booking</h2>' +
+    '<table style="border-collapse:collapse;width:100%">' +
+    rows
+      .map(
+        ([k, v]) =>
+          '<tr><td style="padding:8px;border-bottom:1px solid #eee;color:#64748b;width:110px">' +
+          escHtml(k) +
+          '</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">' +
+          escHtml(v) +
+          '</td></tr>'
+      )
+      .join('') +
+    '</table>' +
+    '<p style="margin-top:18px">' +
+    '<a href="' + escHtml(waLink) + '" style="background:#25d366;color:#fff;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:bold">💬 WhatsApp customer</a> ' +
+    '<a href="' + escHtml(SITE_URL + '/admin/') + '" style="background:#18324a;color:#fff;padding:10px 16px;border-radius:999px;text-decoration:none;font-weight:bold">Open dashboard</a>' +
+    '</p></div>';
+  const text =
+    rows.map(([k, v]) => k + ': ' + v).join('\n') + '\n\nWhatsApp: ' + waLink + '\nDashboard: ' + SITE_URL + '/admin/';
+
+  await sendMail({
+    subject: '🎂 New booking ' + ref + ' – ' + b.name + ' (' + b.date + ' ' + b.time + ')',
+    html,
+    text
+  });
+}
+
 app.post('/api/bookings', bookingLimit, async (req, res) => {
   try {
     const body = req.body || {};
@@ -671,6 +772,9 @@ app.post('/api/bookings', bookingLimit, async (req, res) => {
       packagePrice: bday ? bday.price : ''
     });
     await booking.save();
+
+    // Fire-and-forget: a mail failure must never fail the customer's booking.
+    notifyNewBooking(booking).catch((e) => console.error('Booking email failed:', e.message));
 
     res.status(201).json({ ok: true, reference: booking.id.slice(0, 8).toUpperCase() });
   } catch (err) {
