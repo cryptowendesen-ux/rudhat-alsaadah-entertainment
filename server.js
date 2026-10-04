@@ -93,7 +93,8 @@ const itemSchema = new mongoose.Schema(
     price: { type: String, default: '' },
     imageUrl: { type: String, default: '' },
     publicId: { type: String, default: '' },
-    published: { type: Boolean, default: true }
+    published: { type: Boolean, default: true },
+    featured: { type: Boolean, default: false }
   },
   { timestamps: true }
 );
@@ -296,7 +297,8 @@ function publicItemJson(item) {
     description: item.description,
     price: item.price,
     imageUrl: optimizeImageUrl(item.imageUrl),
-    published: item.published
+    published: item.published,
+    featured: !!item.featured
   };
 }
 
@@ -309,7 +311,8 @@ function adminItemJson(item) {
     price: item.price,
     imageUrl: item.imageUrl || '',
     publicId: item.publicId || '',
-    published: item.published
+    published: item.published,
+    featured: !!item.featured
   };
 }
 
@@ -413,7 +416,7 @@ app.get('/api/admin/content', auth, async (req, res) => {
 ========================================================= */
 app.post('/api/admin/items', auth, async (req, res) => {
   try {
-    const { type, title, description = '', price = '', published = true } = req.body || {};
+    const { type, title, description = '', price = '', published = true, featured = false } = req.body || {};
 
     if (
       !['services', 'prices', 'gallery', 'birthday', 'hero', 'about'].includes(type) ||
@@ -432,7 +435,8 @@ app.post('/api/admin/items', auth, async (req, res) => {
       title: clip(title, 200).trim(),
       description: clip(description, 1000),
       price: clip(price, 100),
-      published: toBool(published, true)
+      published: toBool(published, true),
+      featured: type === 'prices' ? toBool(featured, false) : false
     });
 
     await newItem.save();
@@ -559,6 +563,7 @@ app.put('/api/admin/items/:type/:id', auth, async (req, res) => {
     if (b.description !== undefined) item.description = clip(b.description, 1000);
     if (b.price !== undefined) item.price = clip(b.price, 100);
     if (b.published !== undefined) item.published = toBool(b.published, item.published);
+    if (b.featured !== undefined && item.type === 'prices') item.featured = toBool(b.featured, false);
 
     await item.save();
     res.json(adminItemJson(item));
