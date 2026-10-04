@@ -466,6 +466,8 @@ textarea{
       <option value="prices">Price</option>
       <option value="gallery">Gallery</option>
       <option value="birthday">Birthday</option>
+      <option value="hero">Home Page Photo</option>
+      <option value="about">About Photo</option>
     </select>
 
     <div id="normalFields">
@@ -533,7 +535,16 @@ let data = {
   services:[],
   prices:[],
   gallery:[],
-  birthday:[]
+  birthday:[],
+  hero:[],
+  about:[]
+};
+
+const IMG_TYPES = ['gallery','hero','about'];
+const isImg = t => IMG_TYPES.includes(t);
+const IMG_DEFAULT_TITLE = {
+  hero:'Rudhat Alsaadah play area',
+  about:'Inside Rudhat Alsaadah'
 };
 
 let editing = null;
@@ -607,6 +618,8 @@ function escapeHtml(value){
 function render(){
 
   const sections = [
+    ['hero','🏠 Home Page Photo (top of website)'],
+    ['about','ℹ️ About Photo'],
     ['services','🎨 Services'],
     ['prices','💰 Prices'],
     ['gallery','🖼️ Gallery'],
@@ -621,14 +634,14 @@ function render(){
           class="add"
           onclick="openAdd('${type}')"
         >
-          ＋ ${type === 'gallery' ? 'Add Photo' : 'Add'}
+          ＋ ${isImg(type) ? ((type !== 'gallery' && data[type].length) ? 'Change Photo' : 'Add Photo') : 'Add'}
         </button>
       </div>
 
       ${
         data[type].length
         ? data[type].map(item => {
-          if(type === 'gallery'){
+          if(isImg(type)){
             return `
               <div class="row gallery-row">
                 ${
@@ -645,8 +658,8 @@ function render(){
                   <div class="title">${escapeHtml(item.title)}</div>
                   <div class="desc">${escapeHtml(item.description || '')}</div>
                 </div>
-                <button class="edit" onclick="openEdit('gallery','${item.id}')">Edit</button>
-                <button class="delete" onclick="removeItem('gallery','${item.id}')">Delete</button>
+                <button class="edit" onclick="openEdit('${type}','${item.id}')">Edit</button>
+                <button class="delete" onclick="removeItem('${type}','${item.id}')">Delete</button>
               </div>
             `;
           }
@@ -687,7 +700,7 @@ async function load(){
 function updateModalFields(){
   const type = typeSelect.value;
 
-  if(type === 'gallery'){
+  if(isImg(type)){
     normalFields.style.display='block';
     priceGroup.style.display='none';
     galleryFields.style.display='block';
@@ -705,7 +718,7 @@ function openAdd(type){
   editing = null;
 
   document.getElementById('modalTitle').textContent =
-    type === 'gallery' ? 'Add Gallery Photo' : 'Add Item';
+    isImg(type) ? 'Add Photo' : 'Add Item';
 
   typeSelect.value = type;
   typeSelect.disabled = false;
@@ -740,7 +753,7 @@ function openEdit(type,id){
   editing = { type, id };
 
   document.getElementById('modalTitle').textContent =
-    type === 'gallery' ? 'Edit Gallery Photo' : 'Edit Item';
+    isImg(type) ? 'Edit Photo' : 'Edit Item';
 
   typeSelect.value = type;
   typeSelect.disabled = true;
@@ -754,7 +767,7 @@ function openEdit(type,id){
   imagePreview.src='';
   imagePreview.classList.remove('show');
 
-  if(type === 'gallery' && item.imageUrl){
+  if(isImg(type) && item.imageUrl){
     currentImage.src = item.imageUrl;
     currentImage.classList.add('show');
   }else{
@@ -822,8 +835,12 @@ document.getElementById('cancel').onclick = () => {
 ========================================================= */
 saveButton.onclick = async () => {
   const type = typeSelect.value;
-  const title = titleInput.value.trim();
+  let title = titleInput.value.trim();
   const description = descriptionInput.value;
+
+  if(!title && isImg(type) && !editing){
+    title = IMG_DEFAULT_TITLE[type] || '';
+  }
 
   if(!title){
     errorBox.textContent = 'Title is required.';
@@ -835,7 +852,7 @@ saveButton.onclick = async () => {
     saveButton.textContent='Saving...';
     errorBox.textContent='';
 
-    if(type === 'gallery' && !editing){
+    if(isImg(type) && !editing){
       const file = imageInput.files[0];
 
       if(!file){
@@ -847,6 +864,7 @@ saveButton.onclick = async () => {
 
       const formData = new FormData();
       formData.append('image', file);
+      formData.append('type', type);
       formData.append('title', title);
       formData.append('description', description);
       formData.append('published', 'true');
@@ -856,7 +874,7 @@ saveButton.onclick = async () => {
         body:formData
       });
     }
-    else if(type === 'gallery' && editing){
+    else if(isImg(type) && editing){
       await api(`/api/admin/items/${editing.type}/${editing.id}`, {
         method:'PUT',
         body:JSON.stringify({
@@ -903,7 +921,7 @@ saveButton.onclick = async () => {
    DELETE
 ========================================================= */
 async function removeItem(type,id){
-  const message = type === 'gallery'
+  const message = isImg(type)
     ? 'Delete this photo? This will also delete the image from Cloudinary.'
     : 'Delete this item?';
 
