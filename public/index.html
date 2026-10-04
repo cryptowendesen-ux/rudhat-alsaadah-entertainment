@@ -16,8 +16,8 @@
 <meta property="og:url" content="https://rudhat-alsaadah-entertainment.onrender.com/">
 <meta property="og:site_name" content="RUDHAT ALSAADAH ENTERTAINMENT">
 <meta property="og:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="1080">
+<meta property="og:image:height" content="559">
 <meta property="og:image:alt" content="RUDHAT ALSAADAH ENTERTAINMENT">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="RUDHAT ALSAADAH | Kids Entertainment">
@@ -96,6 +96,17 @@ section{padding:82px 0;scroll-margin-top:90px}
 .hero-card.has-photo .hero-badge{z-index:2}
 .aboutvisual{position:relative;overflow:hidden}
 .aboutvisual.has-photo{font-size:0}
+
+/* Price badge, merged birthday, review call */
+.pricecard{position:relative}
+.pricecard .pop{position:absolute;top:-12px;inset-inline-end:18px;background:var(--pink);color:#fff!important;font-size:12px;padding:5px 12px;border-radius:999px;box-shadow:0 8px 18px rgba(255,95,135,.3)}
+.offer .offer-note{margin-top:10px;font-size:14px;color:#c7d4df}
+.offer-btns .btn.light{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.review-call{margin-top:0;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px 30px;box-shadow:var(--shadow)}
+.review-call h3{font:800 28px "Baloo 2",Arial,sans-serif;margin:0 0 4px}
+.review-call p{margin:0;color:var(--muted)}
+.privacy-note{margin:10px 0 0;font-size:12px;color:var(--muted);text-align:center}
+@media(max-width:700px){.review-call{flex-direction:column;align-items:flex-start;padding:22px}.review-call .btn{width:100%}}
 
 /* Section heads */
 .sectionhead{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:31px}
@@ -426,10 +437,11 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <div class="kicker">Birthday celebrations</div>
       <h2>Make their big day unforgettable. 🎂</h2>
       <p>Celebrate with fun, games and happy memories at Rudhat Alsaadah.</p>
+      <p class="offer-note" id="birthdayDescription" hidden></p>
     </div>
     <div class="offer-btns">
-      <div class="price" data-bind="birthdayPrice">AED 300</div>
-      <a class="btn primary" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">Ask About Birthday</a>
+      <div class="price" id="birthdayPrice" data-bind="birthdayPrice">AED 300</div>
+      <a class="btn light" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Ask on WhatsApp</a>
     </div>
   </div>
   <div class="birthday-booking-trigger">
@@ -445,20 +457,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   <div class="prices" id="pricesList" aria-busy="true"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
 </div></section>
 
-<section id="package"><div class="container package">
-  <div class="package-main">
-    <div class="kicker">Birthday package</div>
-    <h3 id="birthdayTitle">A special day made for them. 🎂</h3>
-    <div class="package-price" id="birthdayPrice" data-bind="birthdayPrice">AED 300</div>
-    <p id="birthdayDescription">For birthday enquiries, message the team directly on WhatsApp to discuss the celebration.</p>
-    <a class="btn primary" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">🎂 Ask About Birthday</a>
-  </div>
-  <div class="box">
-    <div class="kicker">Why visit?</div>
-    <h3>Made for fun.</h3>
-    <div class="package-list">
-      <div>🎨 Creative activities</div><div>💃 Music &amp; movement</div><div>🧩 Educational games</div><div>🛡️ Clean &amp; safe environment</div>
-    </div>
+<section id="reviews"><div class="container">
+  <div class="review-call">
+    <div><h3>Loved your visit? ⭐</h3><p>Your review helps other parents find us. It takes less than a minute.</p></div>
+    <a class="btn primary" href="https://maps.google.com/?q=25.325012,55.379532" target="_blank" rel="noopener noreferrer">⭐ Leave a Review</a>
   </div>
 </div></section>
 
@@ -471,6 +473,9 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE.</p></details>
     <details><summary>What are the opening hours?</summary><p data-bind="faqHours">Saturday–Thursday: 9:00 AM–9:00 PM. Friday: 2:00 PM–10:00 PM.</p></details>
     <details><summary>How much is playtime?</summary><p data-bind="faqPlay">Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.</p></details>
+    <details><summary>How much is a birthday package?</summary><p>The birthday package is <span data-bind="birthdayPrice">AED 300</span>. Tap “Book Birthday Party” or message us on WhatsApp.</p></details>
+    <details><summary>What activities do you offer?</summary><p>Art and coloring, Zumba and dancing, educational games and skill-development activities.</p></details>
+    <details><summary>Can I contact you on WhatsApp?</summary><p>Yes. Use any WhatsApp button on this page and our team will reply.</p></details>
     <details><summary>How can I ask about a birthday booking?</summary><p>Use the WhatsApp booking buttons on this website or call <span data-bind="displayPhone">+971 58 518 7788</span>.</p></details>
   </div>
 </div></section>
@@ -551,6 +556,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <p class="form-error" id="bookingError" role="alert" hidden></p>
       <button type="submit" class="booking-submit">🎂 Send Booking Request</button>
       <p class="booking-note">Birthday package: <strong data-bind="birthdayPrice">AED 300</strong></p>
+      <p class="privacy-note">We use your details only to arrange your booking.</p>
     </form>
     <div class="booking-success" id="bookingSuccess" hidden>
       <h3 id="bookingSuccessTitle">✅ Request received!</h3>
@@ -654,8 +660,9 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   function renderPrices(data) {
     document.getElementById('pricesList').innerHTML = (data.prices || []).map(function (p, i) {
       var title = String(p.title || '');
-      var cls = 'pricecard' + (i === 1 ? ' hot' : '') + (title.toLowerCase().indexOf('unlimited') !== -1 ? ' unlimited' : '');
-      return '<div class="' + cls + '"><span>' + esc(title) + '</span><strong>' + esc(p.price) +
+      var cls = 'pricecard' + (p.featured ? ' hot' : '') + (title.toLowerCase().indexOf('unlimited') !== -1 ? ' unlimited' : '');
+      return '<div class="' + cls + '">' + (p.featured ? '<span class="pop">⭐ Most Popular</span>' : '') +
+        '<span>' + esc(title) + '</span><strong>' + esc(p.price) +
         '</strong><span>' + esc(p.description) + '</span></div>';
     }).join('');
   }
@@ -664,9 +671,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     var b = (data.birthday || [])[0];
     if (!b) return;
     if (b.price) BIRTHDAY_PRICE = b.price;
-    document.getElementById('birthdayTitle').textContent = b.title || 'Birthday Package 🎂';
-    if (BIRTHDAY_PRICE) document.getElementById('birthdayPrice').textContent = BIRTHDAY_PRICE;
-    if (b.description) document.getElementById('birthdayDescription').textContent = b.description;
+    var bp = document.getElementById('birthdayPrice');
+    if (bp && BIRTHDAY_PRICE) bp.textContent = BIRTHDAY_PRICE;
+    var bd = document.getElementById('birthdayDescription');
+    if (bd && b.description) { bd.textContent = b.description; bd.hidden = false; }
   }
 
   /* Every price / hour / phone on the page comes from these few values */
@@ -1042,6 +1050,17 @@ html[dir=rtl] .wa{right:auto;left:20px}
 (function () {
   'use strict';
   var AR = {
+    '⭐ Most Popular': '⭐ الأكثر طلباً',
+    '💬 Ask on WhatsApp': '💬 اسأل عبر واتساب',
+    'Loved your visit? ⭐': 'أعجبتكم زيارتكم؟ ⭐',
+    'Your review helps other parents find us. It takes less than a minute.': 'تقييمكم يساعد أولياء الأمور الآخرين على الوصول إلينا. يستغرق أقل من دقيقة.',
+    '⭐ Leave a Review': '⭐ اكتب تقييماً',
+    'How much is a birthday package?': 'كم سعر باقة عيد الميلاد؟',
+    'What activities do you offer?': 'ما الأنشطة المتوفرة؟',
+    'Art and coloring, Zumba and dancing, educational games and skill-development activities.': 'الرسم والتلوين، والزومبا والرقص، والألعاب التعليمية، وأنشطة تنمية المهارات.',
+    'Can I contact you on WhatsApp?': 'هل يمكنني التواصل معكم عبر واتساب؟',
+    'Yes. Use any WhatsApp button on this page and our team will reply.': 'نعم. استخدم أي زر واتساب في هذه الصفحة وسيرد فريقنا.',
+    'We use your details only to arrange your booking.': 'نستخدم بياناتك فقط لترتيب حجزك.',
     '✨ FUN • LEARN • GROW': '✨ مرح • تعلّم • نمو',
     'RUDHAT ALSAADAH': 'روضة السعادة', 'ENTERTAINMENT': 'للترفيه',
     'Home': 'الرئيسية', 'About': 'من نحن', 'Services': 'خدماتنا', 'Gallery': 'المعرض', 'Prices': 'الأسعار',
