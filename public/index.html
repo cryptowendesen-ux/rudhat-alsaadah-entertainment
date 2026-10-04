@@ -88,6 +88,15 @@ section{padding:82px 0;scroll-margin-top:90px}
 .stat strong{display:block;font:800 28px "Baloo 2",Arial,sans-serif}
 .stat span{font-size:12px;color:var(--muted);font-weight:800}
 
+/* Real photos (set from the admin dashboard) */
+.hero-photo,.about-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.hero-card.has-photo{padding:0}
+.hero-card.has-photo:before,.hero-card.has-photo .bubble,.hero-card.has-photo .playground{display:none}
+.hero-card.has-photo:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(24,50,74,.35),rgba(24,50,74,0) 45%);pointer-events:none}
+.hero-card.has-photo .hero-badge{z-index:2}
+.aboutvisual{position:relative;overflow:hidden}
+.aboutvisual.has-photo{font-size:0}
+
 /* Section heads */
 .sectionhead{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:31px}
 .kicker{color:var(--pink);font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:12px}
@@ -701,8 +710,38 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   /* ---- Content loading: cache + one automatic retry (no page reload) ---- */
   var CACHE_KEY = 'rudhat_content_v1';
 
+  function setPhoto(boxSel, imgClass, list) {
+    var box = document.querySelector(boxSel);
+    if (!box) return;
+    var old = box.querySelector('.' + imgClass);
+    var item = (list || []).filter(function (g) { return safeUrl(g.imageUrl); })[0];
+    if (!item) {
+      if (old) old.remove();
+      box.classList.remove('has-photo');
+      return;
+    }
+    var url = safeUrl(item.imageUrl);
+    if (old && old.getAttribute('src') === url) return;
+    if (old) old.remove();
+    var img = document.createElement('img');
+    img.className = imgClass;
+    img.src = url;
+    img.alt = item.title || '';
+    img.decoding = 'async';
+    if (imgClass === 'hero-photo') img.setAttribute('fetchpriority', 'high');
+    else img.loading = 'lazy';
+    box.insertBefore(img, box.firstChild);
+    box.classList.add('has-photo');
+  }
+
+  function renderSitePhotos(data) {
+    setPhoto('.hero-card', 'hero-photo', data.hero);
+    setPhoto('.aboutvisual', 'about-photo', data.about);
+  }
+
   function renderAll(data) {
     if (data.settings && data.settings.whatsapp) PHONE = String(data.settings.whatsapp);
+    renderSitePhotos(data);
     renderServices(data);
     renderGallery(data);
     renderPrices(data);
