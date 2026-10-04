@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RUDHAT ADMIN DASHBOARD</title>
 
@@ -167,6 +168,30 @@ button{
   color:#64748b;
   padding:12px 0
 }
+
+/* =========================
+   BOOKINGS + SETTINGS
+========================= */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{border:1px solid #cbd5e1;background:#fff;border-radius:999px;padding:7px 13px;font-weight:700;font-size:13px;color:#334155}
+.tab.on{background:#0f172a;border-color:#0f172a;color:#fff}
+.badge{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;vertical-align:middle}
+.badge.pending{background:#fef3c7;color:#92400e}
+.badge.confirmed{background:#dcfce7;color:#166534}
+.badge.cancelled{background:#fee2e2;color:#991b1b}
+.booking-row{align-items:flex-start;flex-wrap:wrap}
+.booking-row .desc a{color:#2563eb;font-weight:700}
+.bactions{display:flex;gap:6px;flex-wrap:wrap}
+.bactions button{border:0;border-radius:8px;padding:8px 11px;font-weight:700;font-size:13px}
+.b-confirm{background:#dcfce7;color:#166534}
+.b-cancel{background:#fef3c7;color:#92400e}
+.b-reopen{background:#e0f2fe;color:#075985}
+.b-wa{background:#25D366;color:#fff;text-decoration:none;border-radius:8px;padding:8px 11px;font-weight:700;font-size:13px}
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.hint{font-size:12px;color:#64748b;margin-top:10px}
+.msg-ok{color:#166534;font-weight:700;margin-left:10px}
+.msg-err{color:#b91c1c;font-weight:700;margin-left:10px}
+@media(max-width:600px){.sgrid{grid-template-columns:1fr}}
 
 /* =========================
    GALLERY
@@ -390,25 +415,36 @@ textarea{
   </div>
 
   <section class="cards">
-    <div class="card">
-      <span>SERVICES</span>
-      <strong id="serviceCount">0</strong>
-    </div>
+    <div class="card"><span>PENDING</span><strong id="pendingCount">0</strong></div>
+    <div class="card"><span>CONFIRMED</span><strong id="confirmedCount">0</strong></div>
+    <div class="card"><span>CANCELLED</span><strong id="cancelledCount">0</strong></div>
+    <div class="card"><span>ALL BOOKINGS</span><strong id="totalCount">0</strong></div>
+  </section>
 
-    <div class="card">
-      <span>PRICE PLANS</span>
-      <strong id="priceCount">0</strong>
+  <section class="panel" id="bookingsPanel">
+    <div class="panelhead">
+      <h2>📅 Birthday Bookings</h2>
+      <button class="add" onclick="loadBookings()">↻ Refresh</button>
     </div>
+    <div class="tabs" id="bookingTabs"></div>
+    <div id="bookingsList"><div class="empty">Loading…</div></div>
+  </section>
 
-    <div class="card">
-      <span>GALLERY</span>
-      <strong id="galleryCount">0</strong>
+  <section class="panel" id="settingsPanel">
+    <div class="panelhead"><h2>⚙️ Phone &amp; Opening Hours</h2></div>
+    <div class="sgrid">
+      <div><label for="sPhone">DISPLAY PHONE</label><input id="sPhone" placeholder="+971 58 518 7788"></div>
+      <div><label for="sWhatsapp">WHATSAPP NUMBER (digits, with country code)</label><input id="sWhatsapp" inputmode="numeric" placeholder="971585187788"></div>
+      <div><label for="sWOpen">SAT–THU OPENS</label><input id="sWOpen" type="time"></div>
+      <div><label for="sWClose">SAT–THU CLOSES</label><input id="sWClose" type="time"></div>
+      <div><label for="sFOpen">FRIDAY OPENS</label><input id="sFOpen" type="time"></div>
+      <div><label for="sFClose">FRIDAY CLOSES</label><input id="sFClose" type="time"></div>
     </div>
-
-    <div class="card">
-      <span>BIRTHDAY</span>
-      <strong id="birthdayCount">0</strong>
+    <div class="actions" style="align-items:center">
+      <button class="save" id="saveSettings" style="flex:none;padding:12px 22px">Save settings</button>
+      <span id="settingsMsg"></span>
     </div>
+    <div class="hint">Prices are edited in the <b>Prices</b> and <b>Birthday</b> sections below. They update everywhere on the website automatically (hero, FAQ, birthday section, WhatsApp messages). The item titled “Per Hour” is used as the hourly price.</div>
   </section>
 
   <div id="content"></div>
@@ -569,10 +605,6 @@ function escapeHtml(value){
    RENDER DASHBOARD
 ========================================================= */
 function render(){
-  document.getElementById('serviceCount').textContent = data.services.length;
-  document.getElementById('priceCount').textContent = data.prices.length;
-  document.getElementById('galleryCount').textContent = data.gallery.length;
-  document.getElementById('birthdayCount').textContent = data.birthday.length;
 
   const sections = [
     ['services','🎨 Services'],
@@ -885,6 +917,140 @@ async function removeItem(type,id){
   }
 }
 
+
+/* =========================================================
+   BOOKINGS
+========================================================= */
+let bookings = [];
+let bCounts = { pending:0, confirmed:0, cancelled:0, total:0 };
+let bFilter = 'pending';
+
+function fmt12(t){
+  const m = /^(\d\d):(\d\d)$/.exec(t || '');
+  if(!m) return t || '';
+  let h = +m[1];
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m[2] + ' ' + ap;
+}
+
+function waDigits(phone){
+  return String(phone || '').replace(/\D/g,'');
+}
+
+async function loadBookings(){
+  try{
+    const r = await api('/api/admin/bookings');
+    if(!r) return;
+    bookings = r.bookings;
+    bCounts = r.counts;
+    renderBookings();
+  }catch(e){
+    document.getElementById('bookingsList').innerHTML =
+      '<div class="empty">Could not load bookings: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function renderBookings(){
+  document.getElementById('pendingCount').textContent = bCounts.pending;
+  document.getElementById('confirmedCount').textContent = bCounts.confirmed;
+  document.getElementById('cancelledCount').textContent = bCounts.cancelled;
+  document.getElementById('totalCount').textContent = bCounts.total;
+  document.title = (bCounts.pending ? '(' + bCounts.pending + ') ' : '') + 'RUDHAT ADMIN DASHBOARD';
+
+  const tabs = [
+    ['pending','Pending',bCounts.pending],
+    ['confirmed','Confirmed',bCounts.confirmed],
+    ['cancelled','Cancelled',bCounts.cancelled],
+    ['all','All',bCounts.total]
+  ];
+  document.getElementById('bookingTabs').innerHTML = tabs.map(([k,label,n]) =>
+    `<button class="tab ${bFilter===k?'on':''}" onclick="setBookingFilter('${k}')">${label} (${n})</button>`
+  ).join('');
+
+  const list = bookings.filter(b => bFilter === 'all' || b.status === bFilter);
+  document.getElementById('bookingsList').innerHTML = list.length
+    ? list.map(b => {
+        const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(
+          'Hello ' + b.name + ', this is RUDHAT ALSAADAH regarding your birthday booking (Ref: ' + b.reference + ') on ' + b.date + ' at ' + fmt12(b.time) + '.'
+        );
+        const acts = [];
+        if(b.status !== 'confirmed') acts.push(`<button class="b-confirm" onclick="setBookingStatus('${escapeHtml(b.id)}','confirmed')">✔ Confirm</button>`);
+        if(b.status !== 'cancelled') acts.push(`<button class="b-cancel" onclick="setBookingStatus('${escapeHtml(b.id)}','cancelled')">✖ Cancel</button>`);
+        if(b.status !== 'pending') acts.push(`<button class="b-reopen" onclick="setBookingStatus('${escapeHtml(b.id)}','pending')">↺ Pending</button>`);
+        return `
+          <div class="row booking-row">
+            <div class="info">
+              <div class="title">${escapeHtml(b.name)} <span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></div>
+              <div class="desc">📅 ${escapeHtml(b.date)} · ⏰ ${escapeHtml(fmt12(b.time))} · 👧 ${escapeHtml(b.children)} children</div>
+              <div class="desc">📱 <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a> · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}</div>
+              ${b.message ? `<div class="desc">💬 ${escapeHtml(b.message)}</div>` : ''}
+            </div>
+            <div class="bactions">
+              ${acts.join('')}
+              <a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">WhatsApp</a>
+              <button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>
+            </div>
+          </div>`;
+      }).join('')
+    : '<div class="empty">No bookings here.</div>';
+}
+
+function setBookingFilter(k){ bFilter = k; renderBookings(); }
+
+async function setBookingStatus(id, status){
+  try{
+    await api('/api/admin/bookings/' + encodeURIComponent(id), {
+      method:'PATCH',
+      body:JSON.stringify({ status })
+    });
+    await loadBookings();
+  }catch(e){ alert(e.message); }
+}
+
+async function removeBooking(id){
+  if(!confirm('Delete this booking permanently?')) return;
+  try{
+    await api('/api/admin/bookings/' + encodeURIComponent(id), { method:'DELETE' });
+    await loadBookings();
+  }catch(e){ alert(e.message); }
+}
+
+/* =========================================================
+   SETTINGS (phone + opening hours)
+========================================================= */
+const sFields = {
+  displayPhone:'sPhone', whatsapp:'sWhatsapp',
+  weekdayOpen:'sWOpen', weekdayClose:'sWClose',
+  fridayOpen:'sFOpen', fridayClose:'sFClose'
+};
+
+async function loadSettings(){
+  try{
+    const st = await api('/api/admin/settings');
+    if(!st) return;
+    Object.entries(sFields).forEach(([k,id]) => { document.getElementById(id).value = st[k] || ''; });
+  }catch(e){
+    document.getElementById('settingsMsg').innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
+  }
+}
+
+document.getElementById('saveSettings').onclick = async () => {
+  const btn = document.getElementById('saveSettings');
+  const msg = document.getElementById('settingsMsg');
+  const body = {};
+  Object.entries(sFields).forEach(([k,id]) => { body[k] = document.getElementById(id).value.trim(); });
+  btn.disabled = true;
+  msg.innerHTML = '';
+  try{
+    await api('/api/admin/settings', { method:'PUT', body:JSON.stringify(body) });
+    msg.innerHTML = '<span class="msg-ok">Saved ✓ — the website is updated.</span>';
+  }catch(e){
+    msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
+  }
+  btn.disabled = false;
+};
+
 /* =========================================================
    LOGOUT
 ========================================================= */
@@ -900,6 +1066,9 @@ modal.addEventListener('click', event => {
 });
 
 load();
+loadBookings();
+loadSettings();
+setInterval(loadBookings, 60000);
 </script>
 
 </body>
