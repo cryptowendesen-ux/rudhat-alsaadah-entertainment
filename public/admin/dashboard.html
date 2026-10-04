@@ -484,6 +484,10 @@ textarea{
     </div>
 
     <!-- GALLERY ONLY -->
+    <div id="featuredGroup" style="display:none;margin:10px 0">
+      <label style="display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer"><input type="checkbox" id="featured" style="width:auto"> ⭐ Mark as “Most Popular” (shown on the website)</label>
+    </div>
+
     <div id="galleryFields" style="display:none">
       <label>PHOTO</label>
       <input
@@ -558,6 +562,8 @@ const descriptionInput = document.getElementById('description');
 const priceInput = document.getElementById('price');
 const priceGroup = document.getElementById('priceGroup');
 const imageInput = document.getElementById('image');
+const featuredInput = document.getElementById('featured');
+const featuredGroup = document.getElementById('featuredGroup');
 
 const normalFields = document.getElementById('normalFields');
 const galleryFields = document.getElementById('galleryFields');
@@ -667,7 +673,7 @@ function render(){
           return `
             <div class="row">
               <div class="info">
-                <div class="title">${escapeHtml(item.title)}</div>
+                <div class="title">${item.featured ? '⭐ ' : ''}${escapeHtml(item.title)}</div>
                 <div class="desc">${escapeHtml(item.description || '')}</div>
               </div>
               <div class="price">${escapeHtml(item.price || '')}</div>
@@ -699,6 +705,7 @@ async function load(){
 ========================================================= */
 function updateModalFields(){
   const type = typeSelect.value;
+  featuredGroup.style.display = type === 'prices' ? 'block' : 'none';
 
   if(isImg(type)){
     normalFields.style.display='block';
@@ -727,6 +734,7 @@ function openAdd(type){
   descriptionInput.value='';
   priceInput.value='';
   imageInput.value='';
+  featuredInput.checked=false;
 
   imagePreview.src='';
   imagePreview.classList.remove('show');
@@ -761,6 +769,7 @@ function openEdit(type,id){
   titleInput.value = item.title || '';
   descriptionInput.value = item.description || '';
   priceInput.value = item.price || '';
+  featuredInput.checked = !!item.featured;
 
   imageInput.value='';
 
@@ -891,6 +900,7 @@ saveButton.onclick = async () => {
           title,
           description,
           price:priceInput.value,
+          featured:featuredInput.checked,
           published:true
         })
       });
@@ -902,6 +912,7 @@ saveButton.onclick = async () => {
           title,
           description,
           price:priceInput.value,
+          featured:featuredInput.checked,
           published:true,
           type
         })
