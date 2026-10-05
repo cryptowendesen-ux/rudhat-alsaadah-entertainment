@@ -26,7 +26,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎈</text></svg>">
 <link rel="canonical" href="https://rudhat-alsaadah-entertainment.onrender.com/">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"geo":{"@type":"GeoCoordinates","latitude":25.325012,"longitude":55.379532},"hasMap":"https://maps.google.com/?q=25.325012,55.379532","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
+{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"hasMap":"https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
 </script>
 
 <style>
@@ -88,6 +88,46 @@ section{padding:82px 0;scroll-margin-top:90px}
 .stat strong{display:block;font:800 28px "Baloo 2",Arial,sans-serif}
 .stat span{font-size:12px;color:var(--muted);font-weight:800}
 
+/* Social links + hero stats (Stage 1) */
+.stat em.stat-fri{display:block;font-style:normal;font-size:12px;font-weight:900;color:var(--pink);margin-top:4px}
+.stat em.stat-fri b{font-weight:900}
+.socials{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.socials[hidden]{display:none}
+.soc{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#fff;transition:transform .2s ease,background .2s ease}
+.soc[hidden]{display:none}
+.soc:hover{transform:translateY(-2px);background:var(--pink)}
+.soc svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.soc svg .f{fill:currentColor;stroke:none}
+.socials.on-light .soc{background:#fff4f7;color:var(--ink);border:1px solid var(--line)}
+.socials.on-light .soc:hover{background:var(--pink);color:#fff}
+.follow-row{justify-content:center;margin-top:24px;font-weight:900}
+
+/* Stage 2: time slots + birthday packages */
+.birthday-form [hidden]{display:none!important}
+.birthday-form select{width:100%;border:1px solid #dce2ea;border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);background:#fff;outline:none}
+.birthday-form select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(65,140,255,.12)}
+.slot-field{display:flex;flex-direction:column;gap:7px}
+.slot-label{font-weight:700;font-size:.92rem}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.slot{border:1px solid #dce2ea;background:#fff;color:var(--ink);border-radius:12px;padding:10px 6px;font:800 14px Nunito,Arial,sans-serif;cursor:pointer;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.slot:hover:not(:disabled){transform:translateY(-1px);border-color:var(--pink)}
+.slot.on{background:var(--pink);border-color:var(--pink);color:#fff}
+.slot:disabled{background:#f4efe9;color:#9aa6b2;text-decoration:line-through;cursor:not-allowed}
+.slot-hint{grid-column:1/-1;margin:0;color:var(--muted);font-size:14px;font-weight:700}
+.packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
+.packages[hidden]{display:none}
+.pkg{background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 28px rgba(24,50,74,.05);transition:transform .25s ease,box-shadow .25s ease}
+.pkg:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.pkg h3{font:800 24px "Baloo 2",Arial,sans-serif;margin:0}
+.pkg-price{font:900 36px/1 "Baloo 2",Arial,sans-serif;color:var(--pink)}
+.pkg ul{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:7px;color:var(--muted);font-weight:700;font-size:14px}
+.pkg li:before{content:"✓";color:#20c76a;font-weight:900;margin-inline-end:8px}
+.pkg .btn{margin-top:auto;width:100%}
+
+.feature p.pl{white-space:pre-line}
+.loc-link{color:inherit;text-decoration:none}
+.loc-link:hover{text-decoration:underline}
+.mapbtn.loc-link:hover{text-decoration:none}
 /* Real photos (set from the admin dashboard) */
 .hero-photo,.about-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .hero-card.has-photo{padding:0}
@@ -312,7 +352,11 @@ footer{background:#10283b;color:#fff;padding:45px 0 25px}
   .menu-btn{width:44px;height:44px;font-size:23px}
   .links{left:3%;right:3%;border-radius:22px}
   .hero{padding-top:50px}.hero h1{font-size:57px}.hero-card{min-height:370px}
-  .features,.prices,.stats,.trust-grid,.reviews-grid{grid-template-columns:1fr}
+  .features,.prices,.trust-grid,.reviews-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px}
+  .stat{padding:12px 8px;border-radius:16px}
+  .stat strong{font-size:16px}
+  .stat span,.stat em.stat-fri{font-size:10px}
   .pricecard.unlimited{grid-column:span 1}
   .offer{grid-template-columns:1fr;padding:29px}.price{font-size:49px}
   .sectionhead{display:block}.sectionhead h2{font-size:37px;margin-bottom:9px}
@@ -374,11 +418,11 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <a class="btn primary" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Book on WhatsApp</a>
       <a class="btn light" href="#prices">View Prices →</a>
     </div>
-    <p class="location"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></p>
+    <p class="location"><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></a></p>
     <div class="stats">
       <div class="stat"><strong data-bind="hourlyPrice">AED 20</strong><span>PER HOUR</span></div>
       <div class="stat"><strong data-bind="birthdayPrice">AED 300</strong><span>BIRTHDAY</span></div>
-      <div class="stat"><strong data-bind="weekdayShort">9AM–9PM</strong><span>SAT–THU</span></div>
+      <div class="stat"><strong data-bind="weekdayShort">9AM–9PM</strong><span>SAT–THU</span><em class="stat-fri">FRI <b data-bind="fridayShort">2PM–10PM</b></em></div>
     </div>
   </div>
   <div class="hero-card">
@@ -412,6 +456,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <p>See the fun, creativity and happy moments at Rudhat Alsaadah.</p>
   </div>
   <div class="gallery" id="galleryList" aria-busy="true"><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div><div class="gallery-skel skel" aria-hidden="true"></div></div>
+  <div class="socials on-light follow-row" hidden><span>Follow us for more videos</span><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div>
 </div></section>
 
 <section id="why-us"><div class="container">
@@ -444,6 +489,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <a class="btn light" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Ask on WhatsApp</a>
     </div>
   </div>
+  <div class="packages" id="birthdayPackages" hidden></div>
   <div class="birthday-booking-trigger">
     <button type="button" class="birthday-book-btn" id="openBirthdayModal" aria-haspopup="dialog">🎂 Book Birthday Party</button>
   </div>
@@ -460,8 +506,16 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 <section id="reviews"><div class="container">
   <div class="review-call">
     <div><h3>Loved your visit? ⭐</h3><p>Your review helps other parents find us. It takes less than a minute.</p></div>
-    <a class="btn primary" href="https://maps.google.com/?q=25.325012,55.379532" target="_blank" rel="noopener noreferrer">⭐ Leave a Review</a>
+    <a class="btn primary" id="reviewLink" href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">⭐ Leave a Review</a>
   </div>
+</div></section>
+
+<section id="info" hidden><div class="container">
+  <div class="sectionhead">
+    <div><div class="kicker">Before you visit</div><h2>Plan your visit.</h2></div>
+    <p>The things parents ask us most, in one place.</p>
+  </div>
+  <div class="features" id="infoList"></div>
 </div></section>
 
 <section id="faq"><div class="container">
@@ -470,10 +524,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <p>Quick answers based on the information currently provided for the venue.</p>
   </div>
   <div class="faq">
-    <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE.</p></details>
+    <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE. <a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a></p></details>
     <details><summary>What are the opening hours?</summary><p data-bind="faqHours">Saturday–Thursday: 9:00 AM–9:00 PM. Friday: 2:00 PM–10:00 PM.</p></details>
     <details><summary>How much is playtime?</summary><p data-bind="faqPlay">Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.</p></details>
-    <details><summary>How much is a birthday package?</summary><p>The birthday package is <span data-bind="birthdayPrice">AED 300</span>. Tap “Book Birthday Party” or message us on WhatsApp.</p></details>
+    <details><summary>How much is a birthday package?</summary><p>Birthday packages start from <span data-bind="birthdayPrice">AED 300</span>. Tap “Book Birthday Party” or message us on WhatsApp.</p></details>
     <details><summary>What activities do you offer?</summary><p>Art and coloring, Zumba and dancing, educational games and skill-development activities.</p></details>
     <details><summary>Can I contact you on WhatsApp?</summary><p>Yes. Use any WhatsApp button on this page and our team will reply.</p></details>
     <details><summary>How can I ask about a birthday booking?</summary><p>Use the WhatsApp booking buttons on this website or call <span data-bind="displayPhone">+971 58 518 7788</span>.</p></details>
@@ -490,9 +544,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
         <div>🕘 <b>Sat–Thu:</b> <span data-bind="weekdayHours">9:00 AM – 9:00 PM</span></div>
         <div>🌙 <b>Friday:</b> <span data-bind="fridayHours">2:00 PM – 10:00 PM</span></div>
         <div>📞 <a href="tel:+971585187788" data-tel data-bind="displayPhone">+971 58 518 7788</a></div>
-        <div>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</div>
+        <div><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</a></div>
       </div>
-      <a class="btn mapbtn" href="https://maps.google.com/?q=25.325012,55.379532" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a>
+      <a class="btn mapbtn" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a>
+      <div class="socials on-light" hidden><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div>
     </div>
     <div class="box">
       <div class="kicker">Ready to book?</div>
@@ -512,8 +567,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
 <footer><div class="container">
   <div class="footergrid">
-    <div><div class="footbrand">🎈 RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE</p></div>
-    <div class="footlinks"><a href="#about">About</a><a href="#activities">Services</a><a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#faq">FAQ</a></div>
+    <div><div class="footbrand">🎈 RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE</p><div class="socials" hidden><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div></div>
+    <div class="footlinks"><a href="#about">About</a><a href="#activities">Services</a><a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#info" id="infoLink" hidden>Visitor Info</a><a href="#faq">FAQ</a><a href="/card">Play Card</a><a href="/privacy">Privacy</a></div>
   </div>
   <div class="copy">© 2026 Rudhat Alsaadah Entertainment. All rights reserved.</div>
 </div></footer>
@@ -545,17 +600,23 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     </div>
     <form id="birthdayBookingForm" class="birthday-form">
       <div class="form-grid">
+        <label class="full-field" id="pkgField" hidden>Package<select id="bookingPackage"></select></label>
         <label>Your Name<input type="text" id="bookingName" required placeholder="Your name" autocomplete="name"></label>
         <label>WhatsApp Number<input type="tel" id="bookingPhone" required inputmode="tel" maxlength="25" pattern="^\+?[0-9\s\-\(\)]{9,25}$" title="Enter 9–15 digits, e.g. +971 50 123 4567 or 050 123 4567" placeholder="+971 5X XXX XXXX" autocomplete="tel"></label>
         <label>Preferred Date<input type="date" id="bookingDate" required></label>
-        <label>Preferred Time<input type="time" id="bookingTime" required></label>
         <label>Number of Children<input type="number" id="bookingChildren" min="1" max="100" required placeholder="e.g. 10"></label>
+        <div class="full-field slot-field">
+          <span class="slot-label">Preferred Time</span>
+          <div class="slots" id="slotBox" aria-live="polite"><p class="slot-hint">Choose a date to see available times.</p></div>
+          <input type="time" id="bookingTime" hidden>
+        </div>
         <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="bookingWebsite" tabindex="-1" autocomplete="off"></label></div>
         <label class="full-field">Additional Message<textarea id="bookingMessage" rows="3" placeholder="Anything else you'd like us to know?"></textarea></label>
       </div>
       <p class="form-error" id="bookingError" role="alert" hidden></p>
       <button type="submit" class="booking-submit">🎂 Send Booking Request</button>
-      <p class="booking-note">Birthday package: <strong data-bind="birthdayPrice">AED 300</strong></p>
+      <p class="booking-note">Birthday package: <strong id="pkgNoteVal">AED 300</strong></p>
+      <p class="booking-note">By sending this request you agree to our <a href="/privacy" target="_blank" rel="noopener" style="text-decoration:underline">Privacy Policy</a>.</p>
       <p class="privacy-note">We use your details only to arrange your booking.</p>
     </form>
     <div class="booking-success" id="bookingSuccess" hidden>
@@ -574,6 +635,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   /* ===== Settings (overwritten by /api/content; these are only fallbacks) ===== */
   var PHONE = '971585187788';
   var BIRTHDAY_PRICE = '';
+  var PACKAGES = [];
 
   var esc = function (v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
@@ -667,14 +729,72 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     }).join('');
   }
 
+  /* ---- Birthday packages: cards, booking-form select, price note ---- */
+  var priceNum = function (p) {
+    var m = String(p || '').replace(/,/g, '').match(/\d+(\.\d+)?/);
+    return m ? parseFloat(m[0]) : Infinity;
+  };
+  var pkgLabel = function (p) { return p ? p.title + (p.price ? ' · ' + p.price : '') : ''; };
+
+  function selectedPackage() {
+    var fld = document.getElementById('pkgField');
+    var sel = document.getElementById('bookingPackage');
+    if (fld && sel && !fld.hidden) {
+      for (var i = 0; i < PACKAGES.length; i++) if (PACKAGES[i].id === sel.value) return PACKAGES[i];
+    }
+    return PACKAGES.length === 1 ? PACKAGES[0] : null;
+  }
+  function updatePkgNote() {
+    var strong = document.getElementById('pkgNoteVal');
+    if (!strong) return;
+    var p = selectedPackage();
+    var t = p ? (PACKAGES.length > 1 ? pkgLabel(p) : p.price) : BIRTHDAY_PRICE;
+    if (t) strong.textContent = t;
+  }
+
   function renderBirthday(data) {
-    var b = (data.birthday || [])[0];
-    if (!b) return;
-    if (b.price) BIRTHDAY_PRICE = b.price;
+    var list = data.birthday || [];
+    if (!list.length) return;
+    PACKAGES = list;
+    var multi = list.length > 1;
+    var cheapest = list.reduce(function (a, b) { return priceNum(b.price) < priceNum(a.price) ? b : a; }, list[0]);
+    if (cheapest.price) BIRTHDAY_PRICE = cheapest.price;
+
     var bp = document.getElementById('birthdayPrice');
     if (bp && BIRTHDAY_PRICE) bp.textContent = BIRTHDAY_PRICE;
     var bd = document.getElementById('birthdayDescription');
-    if (bd && b.description) { bd.textContent = b.description; bd.hidden = false; }
+    if (bd) {
+      if (!multi && list[0].description) { bd.textContent = list[0].description; bd.hidden = false; }
+      else { bd.hidden = true; }
+    }
+
+    var box = document.getElementById('birthdayPackages');
+    if (box) {
+      if (multi) {
+        box.innerHTML = list.map(function (p) {
+          var items = String(p.description || '').split(/\r?\n|•/).map(function (x) { return x.trim(); }).filter(Boolean);
+          return '<div class="pkg"><h3>' + esc(p.title) + '</h3><div class="pkg-price">' + esc(p.price) + '</div>' +
+            (items.length ? '<ul>' + items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+            '<button type="button" class="btn primary" data-pkg="' + esc(p.id) + '">🎂 Choose</button></div>';
+        }).join('');
+        box.hidden = false;
+      } else {
+        box.innerHTML = '';
+        box.hidden = true;
+      }
+    }
+
+    var sel = document.getElementById('bookingPackage');
+    var fld = document.getElementById('pkgField');
+    if (sel && fld) {
+      var keep = sel.value;
+      sel.innerHTML = list.map(function (p) {
+        return '<option value="' + esc(p.id) + '">' + esc(pkgLabel(p)) + '</option>';
+      }).join('');
+      if (keep && list.some(function (p) { return p.id === keep; })) sel.value = keep;
+      fld.hidden = !multi;
+    }
+    updatePkgNote();
   }
 
   /* Every price / hour / phone on the page comes from these few values */
@@ -693,6 +813,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       map.weekdayHours = wd;
       map.fridayHours = fr;
       map.weekdayShort = fmtShort(s.weekdayOpen) + '–' + fmtShort(s.weekdayClose);
+      map.fridayShort = fmtShort(s.fridayOpen) + '–' + fmtShort(s.fridayClose);
       map.faqHours = 'Saturday–Thursday: ' + wd.replace(' – ', '–') + '. Friday: ' + fr.replace(' – ', '–') + '.';
     }
 
@@ -747,8 +868,74 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     setPhoto('.aboutvisual', 'about-photo', data.about);
   }
 
+  /* Social links + review link come from the admin Settings; empty = hidden */
+  function renderLinks(data) {
+    var st = data.settings || {};
+    document.querySelectorAll('[data-soc]').forEach(function (a) {
+      var u = safeUrl(st[a.getAttribute('data-soc')]);
+      if (u && /^https?:\/\//i.test(u)) { a.href = u; a.hidden = false; }
+      else { a.hidden = true; a.removeAttribute('href'); }
+    });
+    document.querySelectorAll('.socials').forEach(function (w) {
+      w.hidden = !w.querySelector('[data-soc]:not([hidden])');
+    });
+    var mu = safeUrl(st.mapUrl);
+    if (mu && /^https?:\/\//i.test(mu)) {
+      document.querySelectorAll('[data-map]').forEach(function (a) { a.href = mu; });
+    }
+    var rv = document.getElementById('reviewLink');
+    if (rv && mu && /^https?:\/\//i.test(mu)) rv.href = mu;
+    var ru = safeUrl(st.reviewUrl);
+    if (rv && ru && /^https?:\/\//i.test(ru)) rv.href = ru;
+  }
+
+  /* Arabic texts typed in the admin (titleAr / descriptionAr) are handed to the translator below */
+  function registerAr(data) {
+    var m = (window.RudhatAR = Object.create(null));
+    var split = function (v) { return String(v || '').split(/\r?\n|•/).map(function (x) { return x.trim(); }).filter(Boolean); };
+    ['services', 'prices', 'birthday', 'gallery', 'info'].forEach(function (k) {
+      (data[k] || []).forEach(function (it) {
+        var t = String(it.title || '').trim(), d = String(it.description || '').trim();
+        if (t && it.titleAr) m[t] = it.titleAr;
+        if (d && it.descriptionAr) {
+          m[d] = it.descriptionAr;
+          var de = split(d), da = split(it.descriptionAr);
+          if (de.length > 1 && de.length === da.length) de.forEach(function (x, i) { m[x] = da[i]; });
+        }
+        if (k === 'birthday' && t && it.titleAr && it.price) {
+          m[t + ' · ' + it.price] = it.titleAr + ' · ' + String(it.price).replace(/\bAED\b/g, 'د.إ');
+        }
+      });
+    });
+  }
+
+  function infoIcon(it) {
+    var s = (String(it.title || '') + ' ' + String(it.titleAr || '')).toLowerCase();
+    if (/age|year|عمر|سن/.test(s)) return '👶';
+    if (/parent|guardian|والد|أهل|ولي/.test(s)) return '👨‍👩‍👧';
+    if (/sock|جورب|شراب/.test(s)) return '🧦';
+    if (/safe|rule|أمان|سلامة|قواعد|قوانين/.test(s)) return '🛡️';
+    if (/park|موقف/.test(s)) return '🅿️';
+    if (/pay|card|cash|دفع|بطاقة|نقد/.test(s)) return '💳';
+    if (/valid|expir|صلاحية|انتهاء/.test(s)) return '⏳';
+    return '📌';
+  }
+  function renderInfo(data) {
+    var list = data.info || [];
+    var sec = document.getElementById('info'), box = document.getElementById('infoList'), link = document.getElementById('infoLink');
+    if (!sec || !box) return;
+    sec.hidden = !list.length;
+    if (link) link.hidden = !list.length;
+    box.innerHTML = list.map(function (it) {
+      return '<div class="feature"><div class="icon">' + infoIcon(it) + '</div><h3>' + esc(it.title) + '</h3><p class="pl">' + esc(it.description) + '</p></div>';
+    }).join('');
+  }
+
   function renderAll(data) {
     if (data.settings && data.settings.whatsapp) PHONE = String(data.settings.whatsapp);
+    registerAr(data);
+    renderInfo(data);
+    renderLinks(data);
     renderSitePhotos(data);
     renderServices(data);
     renderGallery(data);
@@ -884,6 +1071,52 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   var submitBtn = form.querySelector('.booking-submit');
   var submitLabel = submitBtn.textContent;
 
+  /* ---- Available times for the chosen date (from /api/availability) ---- */
+  var timeInput = document.getElementById('bookingTime');
+  var slotBox = document.getElementById('slotBox');
+  var slotReq = 0;
+  function setHint(t) { slotBox.innerHTML = '<p class="slot-hint">' + esc(t) + '</p>'; }
+  function loadSlots() {
+    timeInput.value = '';
+    timeInput.hidden = true;
+    var d = dateInput.value;
+    if (!d) { setHint('Choose a date to see available times.'); return; }
+    var my = ++slotReq;
+    setHint('Loading times…');
+    fetch('/api/availability?date=' + encodeURIComponent(d))
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+      })
+      .then(function (res) {
+        if (my !== slotReq) return;
+        if (!res.ok) { setHint(res.j.error || 'Could not load times. Type your preferred time below.'); return; }
+        var slots = res.j.slots || [];
+        if (!slots.some(function (s) { return s.available; })) {
+          setHint(res.j.full ? 'Sorry, we are fully booked on this day. Please choose another date.' : 'No available times on this date. Please choose another day.');
+          return;
+        }
+        slotBox.innerHTML = slots.map(function (s) {
+          return '<button type="button" class="slot" data-t="' + esc(s.time) + '" aria-pressed="false"' + (s.available ? '' : ' disabled') + '>' + esc(fmt12(s.time)) + '</button>';
+        }).join('');
+      })
+      .catch(function () {
+        if (my !== slotReq) return;
+        setHint('Could not load times. Type your preferred time below.');
+        timeInput.hidden = false;
+      });
+  }
+  slotBox.addEventListener('click', function (e) {
+    var b = e.target.closest('.slot');
+    if (!b || b.disabled) return;
+    timeInput.value = b.getAttribute('data-t');
+    slotBox.querySelectorAll('.slot').forEach(function (x) {
+      x.classList.toggle('on', x === b);
+      x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+    });
+  });
+  dateInput.addEventListener('change', loadSlots);
+  document.getElementById('bookingPackage').addEventListener('change', updatePkgNote);
+
   var phoneInput = document.getElementById('bookingPhone');
   function phoneDigits(v) { return String(v || '').replace(/\D/g, ''); }
   function checkPhone() {
@@ -901,6 +1134,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
+    loadSlots();
     document.getElementById('bookingName').focus();
   }
   function closeModal() {
@@ -910,6 +1144,13 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     openBtn.focus();
   }
   openBtn.addEventListener('click', openModal);
+  document.getElementById('birthdayPackages').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-pkg]');
+    if (!b) return;
+    openModal();
+    document.getElementById('bookingPackage').value = b.getAttribute('data-pkg');
+    updatePkgNote();
+  });
   document.getElementById('closeBirthdayModal').addEventListener('click', closeModal);
   document.getElementById('birthdayModalBackdrop').addEventListener('click', closeModal);
   document.getElementById('bookingDoneBtn').addEventListener('click', closeModal);
@@ -917,7 +1158,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   /* Keeps Tab / Shift+Tab inside an open dialog (also pulls focus back in if it ever escaped) */
   function trapTab(e, box) {
     var f = Array.prototype.filter.call(
-      box.querySelectorAll('button, input, textarea, a[href]'),
+      box.querySelectorAll('button, input, select, textarea, a[href]'),
       function (el) { return el.offsetParent !== null && el.tabIndex !== -1 && !el.disabled; }
     );
     if (!f.length) { e.preventDefault(); return; }
@@ -954,7 +1195,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       '📅 Date: ' + p.date,
       '⏰ Time: ' + p.time,
       '👧 Children: ' + p.children,
-      '💰 Package: ' + (BIRTHDAY_PRICE || 'Birthday package'),
+      '💰 Package: ' + (function () {
+        var pk = PACKAGES.filter(function (x) { return x.id === p.packageId; })[0];
+        return pk ? pkgLabel(pk) : (BIRTHDAY_PRICE || 'Birthday package');
+      })(),
       '💬 Message: ' + (p.message || 'No additional message')
     ].join('\n');
   }
@@ -968,7 +1212,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     document.getElementById('bookingWaLink').href = waLink(bookingText(p, saved ? ref : ''));
     form.hidden = true;
     successBox.hidden = false;
-    if (saved) form.reset();
+    if (saved) { form.reset(); loadSlots(); updatePkgNote(); }
     document.getElementById('bookingWaLink').focus();
   }
 
@@ -977,12 +1221,18 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     checkPhone();
     if (!form.reportValidity()) return;
     var v = function (id) { return document.getElementById(id).value.trim(); };
+    if (!v('bookingTime')) {
+      errBox.textContent = 'Please choose a time.';
+      errBox.hidden = false;
+      return;
+    }
     var payload = {
       name: v('bookingName'),
       phone: v('bookingPhone'),
       date: v('bookingDate'),
       time: v('bookingTime'),
       children: Number(v('bookingChildren')),
+      packageId: document.getElementById('pkgField').hidden ? '' : document.getElementById('bookingPackage').value,
       message: v('bookingMessage'),
       website: v('bookingWebsite') /* honeypot: must stay empty */
     };
@@ -1006,6 +1256,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
           /* Validation / rate-limit problem: stay on the form and explain */
           errBox.textContent = res.data.error || 'Please check your details and try again.';
           errBox.hidden = false;
+          if (res.status === 409) loadSlots();
           return;
         }
         showSuccess(payload, res.ok ? res.data.reference : '', res.ok);
@@ -1131,7 +1382,19 @@ html[dir=rtl] .wa{right:auto;left:20px}
     'Ask us': 'اسألنا', 'Message us on WhatsApp for current prices.': 'راسلنا على واتساب لمعرفة الأسعار الحالية.',
     'Services are temporarily unavailable. Please message us on WhatsApp.': 'الخدمات غير متاحة مؤقتاً. يرجى مراسلتنا على واتساب.',
     'Prices are temporarily unavailable. Please message us on WhatsApp.': 'الأسعار غير متاحة مؤقتاً. يرجى مراسلتنا على واتساب.',
-    'Gallery is temporarily unavailable.': 'المعرض غير متاح مؤقتاً.'
+    'Gallery is temporarily unavailable.': 'المعرض غير متاح مؤقتاً.',
+    'Play Card': 'بطاقة اللعب', 'Privacy': 'الخصوصية', 'Visitor Info': 'معلومات الزائر',
+    'Before you visit': 'قبل زيارتك', 'Plan your visit.': 'خطط لزيارتك.',
+    'The things parents ask us most, in one place.': 'أكثر ما يسأل عنه الأهل في مكان واحد.',
+    'By sending this request you agree to our': 'بإرسال هذا الطلب فإنك توافق على', 'Privacy Policy': 'سياسة الخصوصية',
+    'FRI': 'الجمعة', 'Follow us for more videos': 'تابعونا لمزيد من الفيديوهات',
+    '🎂 Choose': '🎂 اختر', 'Package': 'الباقة',
+    'Choose a date to see available times.': 'اختر تاريخاً لعرض الأوقات المتاحة.',
+    'Loading times…': 'جارٍ تحميل الأوقات…',
+    'No available times on this date. Please choose another day.': 'لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار يوم آخر.',
+    'Sorry, we are fully booked on this day. Please choose another date.': 'عذراً، لا توجد أماكن متاحة في هذا اليوم. يرجى اختيار تاريخ آخر.',
+    'Could not load times. Type your preferred time below.': 'تعذّر تحميل الأوقات. اكتب الوقت المفضل أدناه.',
+    'Please choose a time.': 'يرجى اختيار وقت.'
   };
   var RX = [
     [/\bAED\b/g, 'د.إ'], [/\bAM\b/g, 'ص'], [/\bPM\b/g, 'م'],
@@ -1144,7 +1407,7 @@ html[dir=rtl] .wa{right:auto;left:20px}
 
   function tr(node) {
     var src = orig.has(node) ? orig.get(node) : node.nodeValue;
-    var t = src.trim(), out = AR[t];
+    var t = src.trim(), out = (window.RudhatAR && window.RudhatAR[t]) || AR[t];
     if (out) { out = src.replace(t, out); }
     else {
       out = src;
@@ -1221,8 +1484,9 @@ html[dir=rtl] .wa{right:auto;left:20px}
   ============================================================ -->
 <style>
 :focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.skip{position:absolute;left:-999px;top:8px;z-index:3000;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:900}
-.skip:focus{left:8px}
+/* hidden with clip (not left:-999px): in Arabic/RTL a far-left element made the whole page ~1000px wider than the screen */
+.skip{position:absolute;left:8px;top:8px;z-index:3000;background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:900;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+.skip:focus{clip-path:none;width:auto;height:auto;overflow:visible}
 .open-badge{display:inline-flex;align-items:center;gap:8px;margin-inline-start:8px;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:900;font-size:13px}
 .open-badge i{width:9px;height:9px;border-radius:50%;background:#20c76a;animation:pulse 2s infinite}
 .open-badge.closed i{background:#e11d48;animation:none}
