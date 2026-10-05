@@ -397,6 +397,63 @@ textarea{
     padding:20px
   }
 }
+
+/* Stage 3: overview, calendar, customers */
+.panelhead .headbtns{display:flex;gap:8px;flex-wrap:wrap}
+.search{margin-bottom:12px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tiles .card{box-shadow:none;border:1px solid #e2e8f0;padding:16px}
+.tiles .card strong{font-size:24px}
+.card small{display:block;color:#64748b;font-size:12px;margin-top:4px;font-weight:600}
+.mini{font-size:14px;color:#334155;margin:22px 0 10px}
+.bars{display:flex;gap:10px;align-items:flex-end;height:140px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%}
+.bar i{display:block;width:100%;max-width:52px;background:#38bdf8;border-radius:8px 8px 0 0;min-height:3px}
+.bar.now i{background:#0f172a}
+.bar b{font-size:12px}
+.bar span{font-size:11px;color:#64748b;font-weight:700}
+.calnav{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.calnav strong{flex:1;text-align:center;font-size:16px}
+.calnav .add{padding:8px 13px}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calhead{font-size:11px;font-weight:800;color:#64748b;text-align:center;padding:4px 0}
+.day{min-height:64px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding:5px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;font:inherit;color:inherit}
+.day.empty{border:0;background:none;cursor:default}
+.day .dn{font-weight:800;font-size:13px}
+.day.today{border-color:#0f172a;box-shadow:inset 0 0 0 1px #0f172a}
+.day.has-p{background:#fffbeb}
+.day.has-c{background:#f0fdf4}
+.day.full{background:#fef2f2;border-color:#fca5a5}
+.day.sel{background:#e0f2fe;border-color:#0284c7}
+.dots{display:flex;gap:3px;flex-wrap:wrap}
+.dots i{font-style:normal;font-size:11px;font-weight:800;border-radius:999px;padding:1px 6px}
+.dots .dp{background:#fde68a;color:#92400e}
+.dots .dc{background:#bbf7d0;color:#166534}
+.callegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:#64748b;margin:10px 0 4px}
+.callegend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.lg-p:before{background:#fde68a}.lg-c:before{background:#bbf7d0}.lg-f:before{background:#fecaca}
+.daydetail h3{margin:16px 0 6px;font-size:15px}
+.cust-row details{margin-top:6px;font-size:13px;color:#334155}
+.cust-row summary{cursor:pointer;font-weight:700;color:#2563eb}
+.cust-row .hist{margin:6px 0 0;padding-left:18px}
+.cust-row .hist li{margin:3px 0}
+@media(max-width:500px){.day{min-height:52px;padding:4px}.dots i{font-size:10px;padding:0 4px}.calgrid{gap:3px}}
+
+/* Stage 4: play cards */
+.card-row{align-items:flex-start;flex-wrap:wrap}
+.mono{font-family:monospace;letter-spacing:1px}
+.meter{height:8px;border-radius:99px;background:#e2e8f0;margin:7px 0 3px;overflow:hidden;max-width:360px}
+.meter i{display:block;height:100%;background:#22c55e}
+.meter.low i{background:#f59e0b}
+.meter.dead i{background:#94a3b8}
+.cardform{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px}
+.formbtns{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.card-row details{margin-top:6px;font-size:13px;color:#334155}
+.card-row summary{cursor:pointer;font-weight:700;color:#2563eb}
+.scanbox{position:fixed;inset:0;background:#000;z-index:60;display:flex;flex-direction:column}
+.scanbox[hidden]{display:none}
+.scanbox video{flex:1;min-height:0;width:100%;object-fit:cover}
+.scanbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;color:#fff;font-weight:700}
 </style>
 </head>
 
@@ -421,17 +478,86 @@ textarea{
     <div class="card"><span>ALL BOOKINGS</span><strong id="totalCount">0</strong></div>
   </section>
 
+  <section class="panel" id="statsPanel">
+    <div class="panelhead"><h2>📊 Overview</h2></div>
+    <div class="tiles" id="statTiles"></div>
+    <h3 class="mini">Parties per month (pending + confirmed)</h3>
+    <div class="bars" id="monthBars"></div>
+  </section>
+
   <section class="panel" id="bookingsPanel">
     <div class="panelhead">
       <h2>📅 Birthday Bookings</h2>
-      <button class="add" onclick="loadBookings()">↻ Refresh</button>
+      <div class="headbtns">
+        <button class="add" id="csvBookings">⬇ CSV</button>
+        <button class="add" onclick="loadBookings()">↻ Refresh</button>
+      </div>
     </div>
-    <div class="tabs" id="bookingTabs"></div>
-    <div id="bookingsList"><div class="empty">Loading…</div></div>
+    <div class="tabs" id="viewTabs"></div>
+
+    <div id="listView">
+      <input class="search" id="bSearch" placeholder="Search name, phone, reference or date…">
+      <div class="tabs" id="bookingTabs"></div>
+      <div id="bookingsList"><div class="empty">Loading…</div></div>
+    </div>
+
+    <div id="calendarView" hidden>
+      <div class="calnav">
+        <button class="add" id="calPrev" aria-label="Previous month">‹</button>
+        <strong id="calTitle"></strong>
+        <button class="add" id="calNext" aria-label="Next month">›</button>
+        <button class="add" id="calToday">Today</button>
+      </div>
+      <div class="calgrid" id="calGrid"></div>
+      <div class="callegend"><span class="lg-p">Pending</span><span class="lg-c">Confirmed</span><span class="lg-f">Day is full</span></div>
+      <div class="daydetail" id="dayDetail"></div>
+    </div>
   </section>
 
+  <section class="panel" id="customersPanel">
+    <div class="panelhead">
+      <h2>👨‍👩‍👧 Customers</h2>
+      <div class="headbtns"><button class="add" id="csvCustomers">⬇ CSV</button></div>
+    </div>
+    <input class="search" id="cSearch" placeholder="Search name or phone…">
+    <div id="customersList"><div class="empty">Loading…</div></div>
+  </section>
+
+  <section class="panel" id="cardsPanel">
+    <div class="panelhead">
+      <h2>🎟 Play Cards</h2>
+      <div class="headbtns">
+        <button class="add" id="scanBtn">📷 Scan</button>
+        <button class="add" id="newCardBtn">＋ New card</button>
+      </div>
+    </div>
+    <div class="cardform" id="cardForm" hidden>
+      <div class="sgrid">
+        <div><label for="kPkg">PACKAGE</label><select id="kPkg"></select></div>
+        <div><label for="kHours">HOURS</label><input id="kHours" type="number" min="0.5" step="0.5" placeholder="30"></div>
+        <div><label for="kName">CUSTOMER NAME</label><input id="kName" maxlength="100"></div>
+        <div><label for="kPhone">PHONE (optional)</label><input id="kPhone" inputmode="tel" placeholder="+971 50 123 4567"></div>
+        <div><label for="kChild">CHILD NAME (optional, shown on the card)</label><input id="kChild" maxlength="100"></div>
+        <div><label for="kExp">VALID UNTIL (optional)</label><input id="kExp" type="date"></div>
+      </div>
+      <div class="formbtns">
+        <button class="add" id="kCreate" type="button">Create card</button>
+        <button class="tab" id="kClose" type="button">Close</button>
+        <span id="kMsg"></span>
+      </div>
+    </div>
+    <input class="search" id="kSearch" placeholder="Search name, phone or card code…">
+    <div id="cardsList"><div class="empty">Loading…</div></div>
+    <div class="hint">The customer opens their card from the link or QR code and sees the balance. History notes are visible to the customer.</div>
+  </section>
+
+  <div class="scanbox" id="scanBox" hidden>
+    <video id="scanVideo" playsinline muted></video>
+    <div class="scanbar"><span>Point the camera at the customer's QR code</span><button class="add" id="scanClose" type="button">Close</button></div>
+  </div>
+
   <section class="panel" id="settingsPanel">
-    <div class="panelhead"><h2>⚙️ Phone &amp; Opening Hours</h2></div>
+    <div class="panelhead"><h2>⚙️ Contact, Hours &amp; Booking Rules</h2></div>
     <div class="sgrid">
       <div><label for="sPhone">DISPLAY PHONE</label><input id="sPhone" placeholder="+971 58 518 7788"></div>
       <div><label for="sWhatsapp">WHATSAPP NUMBER (digits, with country code)</label><input id="sWhatsapp" inputmode="numeric" placeholder="971585187788"></div>
@@ -439,12 +565,26 @@ textarea{
       <div><label for="sWClose">SAT–THU CLOSES</label><input id="sWClose" type="time"></div>
       <div><label for="sFOpen">FRIDAY OPENS</label><input id="sFOpen" type="time"></div>
       <div><label for="sFClose">FRIDAY CLOSES</label><input id="sFClose" type="time"></div>
+      <div><label for="sIg">INSTAGRAM LINK (optional)</label><input id="sIg" type="url" placeholder="https://www.instagram.com/yourpage"></div>
+      <div><label for="sTt">TIKTOK LINK (optional)</label><input id="sTt" type="url" placeholder="https://www.tiktok.com/@yourpage"></div>
+      <div><label for="sMap">GOOGLE MAPS LINK (location buttons)</label><input id="sMap" type="url" placeholder="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA"></div>
+      <div><label for="sReview">GOOGLE REVIEW LINK (optional)</label><input id="sReview" type="url" placeholder="https://g.page/r/.../review"></div>
+      <div><label for="sPartyMin">PARTY LENGTH (minutes)</label><input id="sPartyMin" type="number" min="30" max="720" step="15" placeholder="180"></div>
+      <div><label for="sParallel">PARTIES AT THE SAME TIME</label><input id="sParallel" type="number" min="1" max="20" placeholder="1"></div>
+      <div><label for="sPerDay">MAX PARTIES PER DAY</label><input id="sPerDay" type="number" min="1" max="50" placeholder="5"></div>
     </div>
     <div class="actions" style="align-items:center">
       <button class="save" id="saveSettings" style="flex:none;padding:12px 22px">Save settings</button>
       <span id="settingsMsg"></span>
     </div>
-    <div class="hint">Prices are edited in the <b>Prices</b> and <b>Birthday</b> sections below. They update everywhere on the website automatically (hero, FAQ, birthday section, WhatsApp messages). The item titled “Per Hour” is used as the hourly price.</div>
+    <div class="hint">Prices are edited in the <b>Prices</b> and <b>Birthday</b> sections below. They update everywhere on the website automatically (hero, FAQ, birthday section, WhatsApp messages). The item titled “Per Hour” is used as the hourly price. <b>Birthday packages:</b> add one item per package in the <b>Birthday</b> section — Title = package name, Price, and in Description write one included item per line. With 2 or more packages, customers choose a package when booking. <b>Booking rules:</b> a pending or confirmed booking holds its time; cancelled bookings free it.</div>
+  </section>
+
+  <section class="panel" id="securityPanel">
+    <div class="panelhead"><h2>🔒 Security</h2></div>
+    <div class="hint" style="margin:0 0 12px">Sessions last 8 hours. If a phone was lost, or someone else knew your password, sign out every device and then change <b>ADMIN_PASSWORD</b> in Render.</div>
+    <button class="delete" id="logoutAll" type="button">Sign out all devices</button>
+    <span id="secMsg" style="margin-left:10px"></span>
   </section>
 
   <div id="content"></div>
@@ -468,6 +608,7 @@ textarea{
       <option value="birthday">Birthday</option>
       <option value="hero">Home Page Photo</option>
       <option value="about">About Photo</option>
+      <option value="info">Good to Know (visitor info)</option>
     </select>
 
     <div id="normalFields">
@@ -481,6 +622,13 @@ textarea{
         <label>PRICE</label>
         <input id="price" placeholder="e.g. AED 50">
       </div>
+    </div>
+
+    <div id="arFields">
+      <label>ARABIC TITLE (optional)</label>
+      <input id="titleAr" dir="rtl" placeholder="العنوان بالعربية">
+      <label>ARABIC DESCRIPTION (optional)</label>
+      <textarea id="descriptionAr" dir="rtl" placeholder="الوصف بالعربية"></textarea>
     </div>
 
     <!-- GALLERY ONLY -->
@@ -560,6 +708,9 @@ const typeSelect = document.getElementById('type');
 const titleInput = document.getElementById('title');
 const descriptionInput = document.getElementById('description');
 const priceInput = document.getElementById('price');
+const titleArInput = document.getElementById('titleAr');
+const descriptionArInput = document.getElementById('descriptionAr');
+const arFields = document.getElementById('arFields');
 const priceGroup = document.getElementById('priceGroup');
 const imageInput = document.getElementById('image');
 const featuredInput = document.getElementById('featured');
@@ -629,7 +780,8 @@ function render(){
     ['services','🎨 Services'],
     ['prices','💰 Prices'],
     ['gallery','🖼️ Gallery'],
-    ['birthday','🎂 Birthday']
+    ['birthday','🎂 Birthday'],
+    ['info','📌 Good to Know (visitor info)']
   ];
 
   content.innerHTML = sections.map(([type,name]) => `
@@ -644,8 +796,9 @@ function render(){
         </button>
       </div>
 
+      ${type === 'info' ? '<div class="hint" style="margin:0 0 10px">Shown on the website as “Plan your visit”. Add one card per topic, for example: <b>Age range</b> · <b>Do parents stay?</b> · <b>Socks</b> · <b>Safety rules</b> · <b>Parking</b> · <b>Payment methods</b> · <b>Package validity</b>. Write only what is true for your venue. New lines in the description are kept.</div>' : ''}
       ${
-        data[type].length
+        (data[type] || []).length
         ? data[type].map(item => {
           if(isImg(type)){
             return `
@@ -673,7 +826,7 @@ function render(){
           return `
             <div class="row">
               <div class="info">
-                <div class="title">${item.featured ? '⭐ ' : ''}${escapeHtml(item.title)}</div>
+                <div class="title">${item.featured ? '⭐ ' : ''}${escapeHtml(item.title)}${item.titleAr ? ' <span class="badge confirmed">AR ✓</span>' : ''}</div>
                 <div class="desc">${escapeHtml(item.description || '')}</div>
               </div>
               <div class="price">${escapeHtml(item.price || '')}</div>
@@ -706,6 +859,7 @@ async function load(){
 function updateModalFields(){
   const type = typeSelect.value;
   featuredGroup.style.display = type === 'prices' ? 'block' : 'none';
+  arFields.style.display = (type === 'hero' || type === 'about') ? 'none' : 'block';
 
   if(isImg(type)){
     normalFields.style.display='block';
@@ -732,6 +886,8 @@ function openAdd(type){
 
   titleInput.value='';
   descriptionInput.value='';
+  titleArInput.value='';
+  descriptionArInput.value='';
   priceInput.value='';
   imageInput.value='';
   featuredInput.checked=false;
@@ -768,6 +924,8 @@ function openEdit(type,id){
 
   titleInput.value = item.title || '';
   descriptionInput.value = item.description || '';
+  titleArInput.value = item.titleAr || '';
+  descriptionArInput.value = item.descriptionAr || '';
   priceInput.value = item.price || '';
   featuredInput.checked = !!item.featured;
 
@@ -876,6 +1034,8 @@ saveButton.onclick = async () => {
       formData.append('type', type);
       formData.append('title', title);
       formData.append('description', description);
+      formData.append('titleAr', titleArInput.value);
+      formData.append('descriptionAr', descriptionArInput.value);
       formData.append('published', 'true');
 
       await api('/api/admin/gallery/upload', {
@@ -889,6 +1049,8 @@ saveButton.onclick = async () => {
         body:JSON.stringify({
           title,
           description,
+          titleAr:titleArInput.value,
+          descriptionAr:descriptionArInput.value,
           published:true
         })
       });
@@ -899,6 +1061,8 @@ saveButton.onclick = async () => {
         body:JSON.stringify({
           title,
           description,
+          titleAr:titleArInput.value,
+          descriptionAr:descriptionArInput.value,
           price:priceInput.value,
           featured:featuredInput.checked,
           published:true
@@ -911,6 +1075,8 @@ saveButton.onclick = async () => {
         body:JSON.stringify({
           title,
           description,
+          titleAr:titleArInput.value,
+          descriptionAr:descriptionArInput.value,
           price:priceInput.value,
           featured:featuredInput.checked,
           published:true,
@@ -980,12 +1146,67 @@ async function loadBookings(){
   }
 }
 
+/* ---------- helpers ---------- */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const isActive = b => b.status !== 'cancelled';
+const dubaiToday = () => new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Dubai' }).format(new Date());
+const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0,10); };
+const dowOf = iso => new Date(iso + 'T00:00:00Z').getUTCDay();
+const priceNum = p => { const m = String(p || '').replace(/,/g,'').match(/\d+(\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+const money = n => 'AED ' + Math.round(n).toLocaleString('en-US');
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+const niceDate = iso => WEEKDAYS[dowOf(iso)] + ', ' + (+iso.slice(8)) + ' ' + MONTHS[+iso.slice(5,7) - 1] + ' ' + iso.slice(0,4);
+const mostCommon = (arr, keyFn) => {
+  const m = {};
+  arr.forEach(x => { const k = keyFn(x); if(k) m[k] = (m[k] || 0) + 1; });
+  const e = Object.entries(m).sort((a,b) => b[1] - a[1])[0];
+  return e ? { key:e[0], n:e[1] } : null;
+};
+
+let bView = 'list';
+let bQuery = '';
+let bCap = 5;
+let calMonth = null;      // { y, m } (m: 0-11)
+let calSel = null;        // 'YYYY-MM-DD'
+
+/* ---------- one booking row (used by the list and the calendar day) ---------- */
+function bookingRowHtml(b){
+  const waText = b.status === 'confirmed'
+    ? 'Hello ' + b.name + ', your birthday booking at RUDHAT ALSAADAH is confirmed ✅\n📅 ' + b.date + ' · ⏰ ' + fmt12(b.time) + ' · 👧 ' + b.children + ' children\nRef: ' + b.reference + '\nWe look forward to celebrating with you 🎂'
+    : 'Hello ' + b.name + ', this is RUDHAT ALSAADAH regarding your birthday booking (Ref: ' + b.reference + ') on ' + b.date + ' at ' + fmt12(b.time) + '.';
+  const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(waText);
+  const acts = [];
+  if(b.status !== 'confirmed') acts.push(`<button class="b-confirm" onclick="setBookingStatus('${escapeHtml(b.id)}','confirmed')">✔ Confirm</button>`);
+  if(b.status !== 'cancelled') acts.push(`<button class="b-cancel" onclick="setBookingStatus('${escapeHtml(b.id)}','cancelled')">✖ Cancel</button>`);
+  if(b.status !== 'pending') acts.push(`<button class="b-reopen" onclick="setBookingStatus('${escapeHtml(b.id)}','pending')">↺ Pending</button>`);
+  return `
+    <div class="row booking-row">
+      <div class="info">
+        <div class="title">${escapeHtml(b.name)} <span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></div>
+        <div class="desc">📅 ${escapeHtml(b.date)} · ⏰ ${escapeHtml(fmt12(b.time))} · 👧 ${escapeHtml(b.children)} children${b.packageName ? ' · 🎁 ' + escapeHtml(b.packageName) + (b.packagePrice ? ' (' + escapeHtml(b.packagePrice) + ')' : '') : ''}</div>
+        <div class="desc">📱 <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a> · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}</div>
+        ${b.message ? `<div class="desc">💬 ${escapeHtml(b.message)}</div>` : ''}
+      </div>
+      <div class="bactions">
+        ${acts.join('')}
+        <a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${b.status === 'confirmed' ? '✅ Send confirmation' : 'WhatsApp'}</a>
+        <button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>
+      </div>
+    </div>`;
+}
+
 function renderBookings(){
   document.getElementById('pendingCount').textContent = bCounts.pending;
   document.getElementById('confirmedCount').textContent = bCounts.confirmed;
   document.getElementById('cancelledCount').textContent = bCounts.cancelled;
   document.getElementById('totalCount').textContent = bCounts.total;
   document.title = (bCounts.pending ? '(' + bCounts.pending + ') ' : '') + 'RUDHAT ADMIN DASHBOARD';
+
+  document.getElementById('viewTabs').innerHTML = [['list','📋 List'],['calendar','🗓 Calendar']].map(([k,label]) =>
+    `<button class="tab ${bView===k?'on':''}" onclick="setView('${k}')">${label}</button>`).join('');
+  document.getElementById('listView').hidden = bView !== 'list';
+  document.getElementById('calendarView').hidden = bView !== 'calendar';
 
   const tabs = [
     ['pending','Pending',bCounts.pending],
@@ -997,33 +1218,184 @@ function renderBookings(){
     `<button class="tab ${bFilter===k?'on':''}" onclick="setBookingFilter('${k}')">${label} (${n})</button>`
   ).join('');
 
-  const list = bookings.filter(b => bFilter === 'all' || b.status === bFilter);
+  const q = bQuery, qd = waDigits(bQuery) ? normPhone(bQuery) : '';
+  const list = bookings.filter(b => (bFilter === 'all' || b.status === bFilter) && (!q ||
+    (b.name || '').toLowerCase().includes(q) || (b.reference || '').toLowerCase().includes(q) ||
+    (b.date || '').includes(q) || (qd && normPhone(b.phone).includes(qd))));
   document.getElementById('bookingsList').innerHTML = list.length
-    ? list.map(b => {
-        const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(
-          'Hello ' + b.name + ', this is RUDHAT ALSAADAH regarding your birthday booking (Ref: ' + b.reference + ') on ' + b.date + ' at ' + fmt12(b.time) + '.'
-        );
-        const acts = [];
-        if(b.status !== 'confirmed') acts.push(`<button class="b-confirm" onclick="setBookingStatus('${escapeHtml(b.id)}','confirmed')">✔ Confirm</button>`);
-        if(b.status !== 'cancelled') acts.push(`<button class="b-cancel" onclick="setBookingStatus('${escapeHtml(b.id)}','cancelled')">✖ Cancel</button>`);
-        if(b.status !== 'pending') acts.push(`<button class="b-reopen" onclick="setBookingStatus('${escapeHtml(b.id)}','pending')">↺ Pending</button>`);
-        return `
-          <div class="row booking-row">
-            <div class="info">
-              <div class="title">${escapeHtml(b.name)} <span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span></div>
-              <div class="desc">📅 ${escapeHtml(b.date)} · ⏰ ${escapeHtml(fmt12(b.time))} · 👧 ${escapeHtml(b.children)} children</div>
-              <div class="desc">📱 <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a> · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}</div>
-              ${b.message ? `<div class="desc">💬 ${escapeHtml(b.message)}</div>` : ''}
-            </div>
-            <div class="bactions">
-              ${acts.join('')}
-              <a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">WhatsApp</a>
-              <button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>
-            </div>
-          </div>`;
-      }).join('')
+    ? list.map(bookingRowHtml).join('')
     : '<div class="empty">No bookings here.</div>';
+
+  renderStats();
+  if(bView === 'calendar') renderCalendar();
+  renderCustomers();
 }
+
+function setView(v){ bView = v; renderBookings(); }
+
+/* ---------- overview ---------- */
+function renderStats(){
+  const today = dubaiToday();
+  const month = today.slice(0,7);
+  const act = bookings.filter(isActive);
+  const kids = arr => arr.reduce((s,b) => s + (+b.children || 0), 0);
+
+  const todays = act.filter(b => b.date === today);
+  const next7 = act.filter(b => b.date >= today && b.date <= addDays(today, 6));
+  const thisMonth = act.filter(b => b.date.slice(0,7) === month);
+  const monthConf = thisMonth.filter(b => b.status === 'confirmed');
+  const busyDay = mostCommon(act, b => WEEKDAYS[dowOf(b.date)]);
+  const busyTime = mostCommon(act, b => b.time);
+  const pkg = mostCommon(act, b => b.packageName);
+
+  const tiles = [
+    ['TODAY', plural(todays.length, 'party', 'parties'), plural(kids(todays), 'child', 'children')],
+    ['NEXT 7 DAYS', plural(next7.length, 'party', 'parties'), next7.filter(b => b.status === 'pending').length + ' waiting for confirmation'],
+    ['THIS MONTH', plural(thisMonth.length, 'party', 'parties'), plural(kids(thisMonth), 'child', 'children')],
+    ['CONFIRMED REVENUE (MONTH)', money(monthConf.reduce((s,b) => s + priceNum(b.packagePrice), 0)), 'from ' + plural(monthConf.length, 'confirmed party', 'confirmed parties')],
+    ['BUSIEST DAY', busyDay ? busyDay.key : '—', busyTime ? 'most booked time: ' + fmt12(busyTime.key) : 'no data yet'],
+    ['TOP PACKAGE', pkg ? pkg.key : '—', pkg ? plural(pkg.n, 'booking', 'bookings') : 'no data yet']
+  ];
+  document.getElementById('statTiles').innerHTML = tiles.map(([l,v,sub]) =>
+    `<div class="card"><span>${escapeHtml(l)}</span><strong>${escapeHtml(v)}</strong><small>${escapeHtml(sub)}</small></div>`).join('');
+
+  // bars: 2 months back .. 3 months ahead
+  const y0 = +today.slice(0,4), m0 = +today.slice(5,7) - 1;
+  const bars = [];
+  for(let i = -2; i <= 3; i++){
+    const d = new Date(Date.UTC(y0, m0 + i, 1));
+    const key = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2,'0');
+    bars.push({ key, label:MONTHS[d.getUTCMonth()].slice(0,3), n:act.filter(b => b.date.slice(0,7) === key).length, now:i === 0 });
+  }
+  const max = Math.max(1, ...bars.map(x => x.n));
+  document.getElementById('monthBars').innerHTML = bars.map(x =>
+    `<div class="bar ${x.now?'now':''}"><b>${x.n}</b><i style="height:${Math.max(3, Math.round(x.n / max * 90))}px"></i><span>${x.label}</span></div>`).join('');
+}
+
+/* ---------- calendar ---------- */
+function renderCalendar(){
+  if(!calMonth){ const t = dubaiToday(); calMonth = { y:+t.slice(0,4), m:+t.slice(5,7) - 1 }; }
+  const { y, m } = calMonth;
+  document.getElementById('calTitle').textContent = MONTHS[m] + ' ' + y;
+  const today = dubaiToday();
+  const byDate = {};
+  bookings.filter(isActive).forEach(b => { (byDate[b.date] = byDate[b.date] || []).push(b); });
+
+  const heads = ['Sat','Sun','Mon','Tue','Wed','Thu','Fri'].map(d => `<div class="calhead">${d}</div>`).join('');
+  const offset = (new Date(Date.UTC(y, m, 1)).getUTCDay() + 1) % 7;   // week starts on Saturday
+  const days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+  let cells = '';
+  for(let i = 0; i < offset; i++) cells += '<div class="day empty"></div>';
+  for(let d = 1; d <= days; d++){
+    const iso = y + '-' + String(m + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const list = byDate[iso] || [];
+    const p = list.filter(b => b.status === 'pending').length;
+    const c = list.filter(b => b.status === 'confirmed').length;
+    const cls = ['day', iso === today ? 'today' : '', p ? 'has-p' : '', c ? 'has-c' : '', list.length >= bCap ? 'full' : '', iso === calSel ? 'sel' : ''].join(' ');
+    cells += `<button class="${cls}" onclick="selectDay('${iso}')"><span class="dn">${d}</span><span class="dots">${p ? '<i class="dp">' + p + '</i>' : ''}${c ? '<i class="dc">' + c + '</i>' : ''}</span></button>`;
+  }
+  document.getElementById('calGrid').innerHTML = heads + cells;
+
+  const box = document.getElementById('dayDetail');
+  if(!calSel){ box.innerHTML = '<div class="empty">Tap a day to see its bookings.</div>'; return; }
+  const dayList = bookings.filter(b => b.date === calSel).sort((a,b) => a.time.localeCompare(b.time));
+  const act = dayList.filter(isActive);
+  const kids = act.reduce((s,b) => s + (+b.children || 0), 0);
+  box.innerHTML = `<h3>${escapeHtml(niceDate(calSel))} — ${plural(act.length, 'party', 'parties')}, ${plural(kids, 'child', 'children')}</h3>` +
+    (dayList.length ? dayList.map(bookingRowHtml).join('') : '<div class="empty">No bookings on this day.</div>');
+}
+function selectDay(iso){ calSel = iso; renderCalendar(); }
+function shiftMonth(n){
+  if(!calMonth) renderCalendar();
+  const d = new Date(Date.UTC(calMonth.y, calMonth.m + n, 1));
+  calMonth = { y:d.getUTCFullYear(), m:d.getUTCMonth() };
+  renderCalendar();
+}
+document.getElementById('calPrev').onclick = () => shiftMonth(-1);
+document.getElementById('calNext').onclick = () => shiftMonth(1);
+document.getElementById('calToday').onclick = () => { calMonth = null; calSel = dubaiToday(); renderCalendar(); };
+
+/* ---------- customers (grouped by phone number) ---------- */
+let customers = [];
+let cQuery = '';
+function normPhone(p){
+  let d = waDigits(p);
+  if(d.startsWith('00')) d = d.slice(2);
+  if(d.startsWith('0')) d = '971' + d.slice(1);
+  return d;
+}
+function buildCustomers(){
+  const today = dubaiToday();
+  const map = new Map();
+  bookings.forEach(b => {
+    const k = normPhone(b.phone) || ('n:' + (b.name || '').toLowerCase());
+    if(!map.has(k)) map.set(k, { key:k, list:[] });
+    map.get(k).list.push(b);
+  });
+  customers = [...map.values()].map(c => {
+    c.list.sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time));
+    const act = c.list.filter(isActive);
+    c.name = c.list[0].name;
+    c.phone = c.list[0].phone;
+    c.count = act.length;
+    c.children = act.reduce((s,b) => s + (+b.children || 0), 0);
+    c.spent = c.list.filter(b => b.status === 'confirmed').reduce((s,b) => s + priceNum(b.packagePrice), 0);
+    const past = act.filter(b => b.date < today);
+    const next = act.filter(b => b.date >= today).sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+    c.last = past.length ? past[0].date : '';
+    c.next = next.length ? next[0] : null;
+    return c;
+  }).sort((a,b) => (b.list[0].date + b.list[0].time).localeCompare(a.list[0].date + a.list[0].time));
+}
+function renderCustomers(){
+  buildCustomers();
+  const q = cQuery.toLowerCase(), qd = waDigits(cQuery) ? normPhone(cQuery) : '';
+  const list = customers.filter(c => !q || c.name.toLowerCase().includes(q) || (qd && normPhone(c.phone).includes(qd)));
+  document.getElementById('customersList').innerHTML = list.length ? list.slice(0,200).map(c => {
+    const wa = 'https://wa.me/' + waDigits(c.phone) + '?text=' + encodeURIComponent('Hello ' + c.name + ', this is RUDHAT ALSAADAH 🎈');
+    const hist = c.list.map(b => `<li>${escapeHtml(b.date)} ${escapeHtml(fmt12(b.time))} · ${escapeHtml(b.status)}${b.packageName ? ' · ' + escapeHtml(b.packageName) : ''} · ${escapeHtml(b.children)} 👧 · ${escapeHtml(b.reference)}</li>`).join('');
+    return `
+      <div class="row cust-row">
+        <div class="info">
+          <div class="title">${escapeHtml(c.name)}${c.count >= 2 ? ' <span class="badge confirmed">returning</span>' : ''}</div>
+          <div class="desc">📱 <a href="tel:${escapeHtml(c.phone)}">${escapeHtml(c.phone)}</a> · 🎂 ${plural(c.count, 'booking', 'bookings')} · 👧 ${c.children} · 💰 ${escapeHtml(money(c.spent))} confirmed</div>
+          <div class="desc">${c.next ? '⏭ Next: ' + escapeHtml(c.next.date) + ' ' + escapeHtml(fmt12(c.next.time)) : ''}${c.next && c.last ? ' · ' : ''}${c.last ? '⏮ Last: ' + escapeHtml(c.last) : ''}</div>
+          <details><summary>History (${c.list.length})</summary><ul class="hist">${hist}</ul></details>
+        </div>
+        <div class="bactions"><a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">WhatsApp</a></div>
+      </div>`;
+  }).join('') : '<div class="empty">No customers yet.</div>';
+}
+document.getElementById('cSearch').addEventListener('input', e => { cQuery = e.target.value.trim(); renderCustomers(); });
+document.getElementById('bSearch').addEventListener('input', e => { bQuery = e.target.value.trim().toLowerCase(); renderBookings(); });
+
+/* ---------- CSV export ---------- */
+function csvCell(v){
+  let s = String(v == null ? '' : v);
+  if(/^[=+\-@\t\r]/.test(s) && !/^\+?[\d\s]+$/.test(s)) s = "'" + s;   // block spreadsheet formulas
+  return '"' + s.replace(/"/g,'""') + '"';
+}
+function downloadCsv(name, rows){
+  const blob = new Blob(['\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+}
+document.getElementById('csvBookings').onclick = () => {
+  const rows = [['Reference','Status','Date','Time','Name','Phone','Children','Package','Price','Message','Received']];
+  bookings.slice().sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time)).forEach(b =>
+    rows.push([b.reference, b.status, b.date, b.time, b.name, b.phone, b.children, b.packageName, b.packagePrice, b.message, b.createdAt]));
+  downloadCsv('rudhat-bookings-' + dubaiToday() + '.csv', rows);
+};
+document.getElementById('csvCustomers').onclick = () => {
+  const rows = [['Name','Phone','Bookings','Children','Confirmed total (AED)','Last visit','Next booking']];
+  customers.forEach(c => rows.push([c.name, c.phone, c.count, c.children, Math.round(c.spent), c.last, c.next ? c.next.date + ' ' + c.next.time : '']));
+  downloadCsv('rudhat-customers-' + dubaiToday() + '.csv', rows);
+};
 
 function setBookingFilter(k){ bFilter = k; renderBookings(); }
 
@@ -1046,12 +1418,228 @@ async function removeBooking(id){
 }
 
 /* =========================================================
+   PLAY CARDS (prepaid hours)
+========================================================= */
+let cards = [];
+let kQuery = '';
+const normCode = v => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const prettyCode = c => c ? c.slice(0,4) + '-' + c.slice(4) : '';
+const fmtMins = m => {
+  m = Math.max(0, Math.round(m));
+  const h = Math.floor(m / 60), r = m % 60;
+  if(!h && !r) return '0m';
+  return (h ? h + 'h' : '') + (h && r ? ' ' : '') + (r ? r + 'm' : '');
+};
+const cardLink = code => location.origin + '/card/' + code;
+const stateBadge = { active:['confirmed','active'], used_up:['pending','used up'], expired:['cancelled','expired'], cancelled:['cancelled','cancelled'] };
+const askHours = (text, def) => {
+  const v = prompt(text, def || '');
+  if(v === null) return null;
+  const n = parseFloat(String(v).replace(',', '.'));
+  return n > 0 ? n : NaN;
+};
+
+async function loadCards(){
+  try{
+    const r = await api('/api/admin/cards');
+    if(!r) return;
+    cards = r.cards;
+    renderCards();
+  }catch(e){
+    document.getElementById('cardsList').innerHTML = '<div class="empty">Could not load cards: ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function cardWaHref(c){
+  const text = 'Hello ' + c.name + ' 🎈\nYour RUDHAT play card is ready' + (c.packageTitle ? ' (' + c.packageTitle + ')' : '') + '.\n⏳ Balance: ' + fmtMins(c.remainingMinutes) + '\n🔗 Check it anytime: ' + cardLink(c.code) + '\nCode: ' + prettyCode(c.code);
+  return 'https://wa.me/' + waDigits(c.phone) + '?text=' + encodeURIComponent(text);
+}
+
+function renderCards(){
+  const q = kQuery.toLowerCase().trim(), qc = normCode(kQuery), qd = waDigits(kQuery) ? normPhone(kQuery) : '';
+  const list = cards.filter(c => !q ||
+    c.name.toLowerCase().includes(q) || (c.childName || '').toLowerCase().includes(q) ||
+    (qc.length >= 3 && c.code.includes(qc)) || (qd && c.phone && normPhone(c.phone).includes(qd)));
+  document.getElementById('cardsList').innerHTML = list.length ? list.map(c => {
+    const [bcls, blabel] = stateBadge[c.state] || ['pending', c.state];
+    const pct = Math.max(0, Math.min(100, Math.round(c.remainingMinutes / Math.max(1, c.totalMinutes) * 100)));
+    const meterCls = c.state !== 'active' ? 'dead' : (c.remainingMinutes <= 120 ? 'low' : '');
+    const id = escapeHtml(c.id);
+    const acts = [];
+    if(c.state === 'active'){
+      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',30)">− 30m</button>`);
+      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',60)">− 1h</button>`);
+      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',120)">− 2h</button>`);
+      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',0)">− …</button>`);
+    }
+    if(c.status !== 'cancelled') acts.push(`<button class="b-confirm" onclick="topupCard('${id}')">＋ Hours</button>`);
+    if(c.phone) acts.push(`<a class="b-wa" href="${escapeHtml(cardWaHref(c))}" target="_blank" rel="noopener">WhatsApp</a>`);
+    acts.push(`<button class="b-reopen" onclick="copyCardLink('${escapeHtml(c.code)}')">Copy link</button>`);
+    acts.push(`<a class="b-reopen" style="text-decoration:none;border-radius:8px;padding:8px 11px;font-weight:700;font-size:13px" href="${escapeHtml(cardLink(c.code))}" target="_blank" rel="noopener">Open</a>`);
+    acts.push(`<button class="b-reopen" onclick="setCardExpiry('${id}')">Expiry</button>`);
+    acts.push(c.status === 'cancelled'
+      ? `<button class="b-confirm" onclick="setCardStatus('${id}','active')">Reactivate</button>`
+      : `<button class="b-cancel" onclick="setCardStatus('${id}','cancelled')">Cancel card</button>`);
+    acts.push(`<button class="delete" onclick="removeCard('${id}')">Delete</button>`);
+    const hist = (c.ledger || []).map(l =>
+      `<li>${escapeHtml(new Date(l.at).toLocaleString())} · <b>${l.minutes > 0 ? '+' : '−'}${escapeHtml(fmtMins(Math.abs(l.minutes)))}</b> · ${escapeHtml(l.note || '')}</li>`).join('');
+    return `
+      <div class="row card-row">
+        <div class="info">
+          <div class="title">${escapeHtml(c.name)}${c.childName ? ' · ' + escapeHtml(c.childName) : ''} <span class="badge ${bcls}">${escapeHtml(blabel)}</span></div>
+          <div class="desc">🎟 <b class="mono">${escapeHtml(prettyCode(c.code))}</b>${c.packageTitle ? ' · ' + escapeHtml(c.packageTitle) : ''}${c.price ? ' · ' + escapeHtml(c.price) : ''}${c.phone ? ' · 📱 <a href="tel:' + escapeHtml(c.phone) + '">' + escapeHtml(c.phone) + '</a>' : ''}</div>
+          <div class="desc">⏳ <b>${escapeHtml(fmtMins(c.remainingMinutes))}</b> left of ${escapeHtml(fmtMins(c.totalMinutes))}${c.expiresAt ? ' · valid until ' + escapeHtml(c.expiresAt) : ' · no expiry'}</div>
+          <div class="meter ${meterCls}"><i style="width:${pct}%"></i></div>
+          <details><summary>History (${(c.ledger || []).length})</summary><ul class="hist">${hist}</ul></details>
+        </div>
+        <div class="bactions">${acts.join('')}</div>
+      </div>`;
+  }).join('') : '<div class="empty">' + (cards.length ? 'No card matches your search.' : 'No play cards yet. Tap “＋ New card”.') + '</div>';
+}
+
+async function cardAction(promise){
+  try{ await promise; await loadCards(); }catch(e){ alert(e.message); await loadCards(); }
+}
+function findCard(id){ return cards.find(c => c.id === id); }
+
+function deductCard(id, minutes){
+  const c = findCard(id); if(!c) return;
+  if(!minutes){
+    const h = askHours('Hours to deduct from ' + c.name + ' (e.g. 1.5):', '');
+    if(h === null) return;
+    if(!(h > 0)){ alert('Please enter a number of hours, for example 1.5'); return; }
+    minutes = Math.round(h * 60);
+  }
+  if(!confirm('Deduct ' + fmtMins(minutes) + ' from ' + c.name + '?\nBalance after: ' + fmtMins(Math.max(0, c.remainingMinutes - minutes)))) return;
+  cardAction(api('/api/admin/cards/' + encodeURIComponent(id) + '/use', { method:'POST', body:JSON.stringify({ minutes, note:'Play time' }) }));
+}
+function topupCard(id){
+  const c = findCard(id); if(!c) return;
+  const h = askHours('Hours to add to ' + c.name + ':', '');
+  if(h === null) return;
+  if(!(h > 0)){ alert('Please enter a number of hours, for example 10'); return; }
+  cardAction(api('/api/admin/cards/' + encodeURIComponent(id) + '/topup', { method:'POST', body:JSON.stringify({ hours:h, note:'Hours added' }) }));
+}
+function setCardStatus(id, status){
+  const c = findCard(id); if(!c) return;
+  if(status === 'cancelled' && !confirm('Cancel this card? The customer will no longer be able to use it.')) return;
+  cardAction(api('/api/admin/cards/' + encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ status }) }));
+}
+function setCardExpiry(id){
+  const c = findCard(id); if(!c) return;
+  const v = prompt('Valid until (YYYY-MM-DD). Leave empty for no expiry:', c.expiresAt || '');
+  if(v === null) return;
+  cardAction(api('/api/admin/cards/' + encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ expiresAt:v.trim() }) }));
+}
+function removeCard(id){
+  const c = findCard(id); if(!c) return;
+  if(!confirm('Delete the card of ' + c.name + ' permanently? This cannot be undone.')) return;
+  cardAction(api('/api/admin/cards/' + encodeURIComponent(id), { method:'DELETE' }));
+}
+async function copyCardLink(code){
+  const link = cardLink(code);
+  try{ await navigator.clipboard.writeText(link); alert('Link copied:\n' + link); }
+  catch(e){ prompt('Copy this link:', link); }
+}
+
+/* ----- new card form ----- */
+const kEl = id => document.getElementById(id);
+function fillPkgOptions(){
+  const opts = ['<option value="">Custom…</option>'];
+  (data.prices || []).forEach((p, i) => {
+    const m = /(\d+(?:\.\d+)?)\s*h/i.exec(p.title || '');
+    if(m) opts.push(`<option value="${i}" data-h="${m[1]}">${escapeHtml(p.title)}${p.price ? ' — ' + escapeHtml(p.price) : ''}</option>`);
+  });
+  kEl('kPkg').innerHTML = opts.join('');
+  if(opts.length > 1){ kEl('kPkg').selectedIndex = 1; kEl('kHours').value = kEl('kPkg').selectedOptions[0].dataset.h; }
+}
+kEl('kPkg').addEventListener('change', () => {
+  const o = kEl('kPkg').selectedOptions[0];
+  if(o && o.dataset.h) kEl('kHours').value = o.dataset.h;
+});
+kEl('newCardBtn').onclick = () => {
+  const f = kEl('cardForm');
+  f.hidden = !f.hidden;
+  if(!f.hidden){ fillPkgOptions(); kEl('kMsg').innerHTML = ''; kEl('kName').focus(); }
+};
+kEl('kClose').onclick = () => { kEl('cardForm').hidden = true; };
+kEl('kCreate').onclick = async () => {
+  const btn = kEl('kCreate'), msg = kEl('kMsg');
+  const sel = kEl('kPkg').selectedOptions[0];
+  const item = sel && sel.value !== '' ? (data.prices || [])[+sel.value] : null;
+  const body = {
+    name: kEl('kName').value.trim(),
+    phone: kEl('kPhone').value.trim(),
+    childName: kEl('kChild').value.trim(),
+    hours: Number(kEl('kHours').value),
+    expiresAt: kEl('kExp').value,
+    packageTitle: item ? item.title : 'Custom',
+    price: item ? (item.price || '') : ''
+  };
+  btn.disabled = true; msg.innerHTML = '';
+  try{
+    const c = await api('/api/admin/cards', { method:'POST', body:JSON.stringify(body) });
+    msg.innerHTML = '<span class="msg-ok">Created ✓ Code: <b class="mono">' + escapeHtml(prettyCode(c.code)) + '</b></span>';
+    ['kName','kPhone','kChild','kExp'].forEach(id => { kEl(id).value = ''; });
+    kQuery = c.code; kEl('kSearch').value = c.code;
+    await loadCards();
+  }catch(e){
+    msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
+  }
+  btn.disabled = false;
+};
+kEl('kSearch').addEventListener('input', e => { kQuery = e.target.value; renderCards(); });
+
+/* ----- scan the customer's QR code with the camera (Chrome / Android) ----- */
+let scanStream = null, scanTimer = null;
+function closeScan(){
+  clearInterval(scanTimer); scanTimer = null;
+  if(scanStream){ scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  kEl('scanVideo').srcObject = null;
+  kEl('scanBox').hidden = true;
+}
+function showCardByCode(raw){
+  const m = /\/card\/([A-Za-z0-9-]+)/.exec(raw);
+  const code = normCode(m ? m[1] : raw);
+  kQuery = code; kEl('kSearch').value = code;
+  renderCards();
+  kEl('cardsPanel').scrollIntoView({ behavior:'smooth' });
+}
+kEl('scanBtn').onclick = async () => {
+  if(!('BarcodeDetector' in window) || !(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){
+    const v = prompt('QR scanning is not supported in this browser.\nType the card code instead:');
+    if(v) showCardByCode(v);
+    return;
+  }
+  try{
+    const det = new BarcodeDetector({ formats:['qr_code'] });
+    scanStream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:'environment' } });
+    const v = kEl('scanVideo');
+    v.srcObject = scanStream;
+    await v.play();
+    kEl('scanBox').hidden = false;
+    scanTimer = setInterval(async () => {
+      try{
+        const found = await det.detect(v);
+        if(found.length){ const raw = found[0].rawValue; closeScan(); showCardByCode(raw); }
+      }catch(e){}
+    }, 350);
+  }catch(e){
+    closeScan();
+    alert('Could not open the camera. Allow camera access, or type the code in the search box.');
+  }
+};
+kEl('scanClose').onclick = closeScan;
+
+/* =========================================================
    SETTINGS (phone + opening hours)
 ========================================================= */
 const sFields = {
   displayPhone:'sPhone', whatsapp:'sWhatsapp',
   weekdayOpen:'sWOpen', weekdayClose:'sWClose',
-  fridayOpen:'sFOpen', fridayClose:'sFClose'
+  fridayOpen:'sFOpen', fridayClose:'sFClose',
+  instagram:'sIg', tiktok:'sTt', reviewUrl:'sReview', mapUrl:'sMap',
+  partyMinutes:'sPartyMin', maxParallel:'sParallel', maxPerDay:'sPerDay'
 };
 
 async function loadSettings(){
@@ -1059,6 +1647,8 @@ async function loadSettings(){
     const st = await api('/api/admin/settings');
     if(!st) return;
     Object.entries(sFields).forEach(([k,id]) => { document.getElementById(id).value = st[k] || ''; });
+    bCap = Number(st.maxPerDay) || 5;
+    renderBookings();
   }catch(e){
     document.getElementById('settingsMsg').innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
   }
@@ -1074,6 +1664,8 @@ document.getElementById('saveSettings').onclick = async () => {
   try{
     await api('/api/admin/settings', { method:'PUT', body:JSON.stringify(body) });
     msg.innerHTML = '<span class="msg-ok">Saved ✓ — the website is updated.</span>';
+    bCap = Number(body.maxPerDay) || bCap;
+    renderBookings();
   }catch(e){
     msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
   }
@@ -1083,7 +1675,18 @@ document.getElementById('saveSettings').onclick = async () => {
 /* =========================================================
    LOGOUT
 ========================================================= */
-document.getElementById('logout').onclick = () => {
+document.getElementById('logoutAll').onclick = async () => {
+  if(!confirm('Sign out every device, including this one?')) return;
+  try{
+    await fetch('/api/auth/logout-all', { method:'POST', headers:{ Authorization:'Bearer ' + token } });
+  }catch(e){}
+  sessionStorage.removeItem('adminToken');
+  window.location.href='/admin/';
+};
+document.getElementById('logout').onclick = async () => {
+  try{
+    await fetch('/api/auth/logout', { method:'POST', headers:{ Authorization:'Bearer ' + token } });
+  }catch(e){}
   sessionStorage.removeItem('adminToken');
   window.location.href='/admin/';
 };
@@ -1097,6 +1700,7 @@ modal.addEventListener('click', event => {
 load();
 loadBookings();
 loadSettings();
+loadCards();
 setInterval(loadBookings, 60000);
 </script>
 
