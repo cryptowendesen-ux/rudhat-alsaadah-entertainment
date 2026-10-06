@@ -1011,7 +1011,18 @@ async function notifyNewBooking(b) {
   });
 }
 
-app.post('/api/bookings', bookingLimit, async (req, res) => {
+// Bookings are processed one at a time, so two simultaneous requests cannot take the same slot.
+let bookingChain = Promise.resolve();
+function withBookingLock(fn) {
+  const run = bookingChain.then(fn, fn);
+  bookingChain = run.catch(() => {});
+  return run;
+}
+app.post('/api/bookings', bookingLimit, (req, res) =>
+  withBookingLock(() => createBooking(req, res))
+);
+
+async function createBooking(req, res) {
   try {
     const body = req.body || {};
 
@@ -1101,7 +1112,7 @@ app.post('/api/bookings', bookingLimit, async (req, res) => {
     console.error('Create booking error:', err);
     res.status(500).json({ error: 'Failed to save booking' });
   }
-});
+}
 
 /* =========================================================
    PUBLIC: AVAILABLE TIMES FOR A DATE
