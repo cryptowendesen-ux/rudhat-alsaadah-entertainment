@@ -4,14 +4,10 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex,nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link rel="manifest" href="/admin/manifest.json">
-
 <title>RUDHAT ADMIN LOGIN</title>
-
+<link rel="manifest" href="/admin/manifest.json"><meta name="theme-color" content="#18324a"><link rel="apple-touch-icon" href="/admin/icon-192.png">
 <style>
 *{box-sizing:border-box}
-
 body{
   margin:0;
   min-height:100vh;
@@ -22,7 +18,6 @@ body{
   background:linear-gradient(135deg,#0f172a,#1e3a8a);
   padding:20px;
 }
-
 .login-box{
   width:100%;
   max-width:420px;
@@ -31,25 +26,21 @@ body{
   padding:36px;
   box-shadow:0 25px 60px rgba(0,0,0,.25);
 }
-
 .logo{
   text-align:center;
   font-size:42px;
   margin-bottom:10px;
 }
-
 h1{
   text-align:center;
   margin:0 0 8px;
   color:#0f172a;
 }
-
 .subtitle{
   text-align:center;
   color:#64748b;
   margin:0 0 28px;
 }
-
 label{
   display:block;
   font-size:13px;
@@ -57,7 +48,6 @@ label{
   color:#334155;
   margin:16px 0 7px;
 }
-
 input{
   width:100%;
   padding:14px 15px;
@@ -66,12 +56,10 @@ input{
   font-size:16px;
   outline:none;
 }
-
 input:focus{
   border-color:#2563eb;
   box-shadow:0 0 0 3px rgba(37,99,235,.12);
 }
-
 button{
   width:100%;
   border:0;
@@ -84,12 +72,10 @@ button{
   font-weight:700;
   cursor:pointer;
 }
-
 button:disabled{
   opacity:.6;
   cursor:not-allowed;
 }
-
 #error{
   display:none;
   margin-top:15px;
@@ -99,7 +85,6 @@ button:disabled{
   color:#991b1b;
   font-size:14px;
 }
-
 .footer{
   text-align:center;
   color:#94a3b8;
@@ -113,17 +98,12 @@ button:disabled{
 
 <div class="login-box">
   <div class="logo">🎈</div>
-
   <h1>RUDHAT ADMIN</h1>
-
-  <p class="subtitle">
-    Sign in to manage your website
-  </p>
+  <p class="subtitle">Sign in to manage your website</p>
 
   <form id="loginForm">
 
     <label for="email">ADMIN EMAIL</label>
-
     <input
       id="email"
       type="email"
@@ -133,7 +113,6 @@ button:disabled{
     >
 
     <label for="password">PASSWORD</label>
-
     <input
       id="password"
       type="password"
@@ -147,7 +126,6 @@ button:disabled{
     </button>
 
     <div id="error"></div>
-
   </form>
 
   <div class="footer">
@@ -156,53 +134,45 @@ button:disabled{
 </div>
 
 <script>
-const form = document.getElementById('loginForm');
-const btn = document.getElementById('loginBtn');
-const error = document.getElementById('error');
+const form=document.getElementById('loginForm');
+const btn=document.getElementById('loginBtn');
+const error=document.getElementById('error');
 
-form.addEventListener('submit', async function(e){
-
+form.addEventListener('submit',async function(e){
   e.preventDefault();
 
-  error.style.display = 'none';
-
-  btn.disabled = true;
-  btn.textContent = 'Signing in...';
+  error.style.display='none';
+  btn.disabled=true;
+  btn.textContent='Signing in...';
 
   try{
-
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+    const response=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
       },
-      body: JSON.stringify({
-        email: document.getElementById('email').value.trim(),
-        password: document.getElementById('password').value
+      body:JSON.stringify({
+        email:document.getElementById('email').value.trim(),
+        password:document.getElementById('password').value
       })
     });
 
-    const data = await response.json();
+    const data=await response.json();
 
     if(!response.ok){
-      throw new Error(data.error || 'Login failed');
+      throw new Error(data.error||'Login failed');
     }
 
-    sessionStorage.setItem('adminToken', data.token);
+    sessionStorage.setItem('adminToken',data.token);
 
-    window.location.href = '/admin/dashboard.html';
+    window.location.href='/admin/dashboard.html';
 
   }catch(err){
-
-    error.textContent = err.message || 'Unable to sign in';
-
-    error.style.display = 'block';
-
-    btn.disabled = false;
-    btn.textContent = 'Sign In';
-
+    error.textContent=err.message||'Unable to sign in';
+    error.style.display='block';
+    btn.disabled=false;
+    btn.textContent='Sign In';
   }
-
 });
 </script>
 
