@@ -15,18 +15,18 @@
 <meta property="og:description" content="A happy place for little explorers in Al Majaz 3, Sharjah, UAE.">
 <meta property="og:url" content="https://rudhat-alsaadah-entertainment.onrender.com/">
 <meta property="og:site_name" content="RUDHAT ALSAADAH ENTERTAINMENT">
-<meta property="og:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2">
+<meta property="og:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.jpg?v=3">
 <meta property="og:image:width" content="1080">
 <meta property="og:image:height" content="559">
 <meta property="og:image:alt" content="RUDHAT ALSAADAH ENTERTAINMENT">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="RUDHAT ALSAADAH | Kids Entertainment">
 <meta name="twitter:description" content="Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.">
-<meta name="twitter:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2">
+<meta name="twitter:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.jpg?v=3">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎈</text></svg>">
 <link rel="canonical" href="https://rudhat-alsaadah-entertainment.onrender.com/">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.png?v=2","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"hasMap":"https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
+{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.jpg?v=3","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"hasMap":"https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
 </script>
 
 <style>
@@ -1458,6 +1458,13 @@ html[dir=rtl] .wa{right:auto;left:20px}
     active = ar;
     var h = document.documentElement;
     h.lang = ar ? 'ar' : 'en'; h.dir = ar ? 'rtl' : 'ltr';
+    /* keep the address in step with the language: / = English, /ar = Arabic (shareable links) */
+    try {
+      if (/^\/(ar\/?)?$/.test(location.pathname)) {
+        var want = ar ? '/ar' : '/';
+        if (location.pathname !== want) history.replaceState(null, '', want + location.search + location.hash);
+      }
+    } catch (e) {}
     btn.textContent = ar ? 'English' : 'العربية';
     btn.setAttribute('aria-label', ar ? 'Switch to English' : 'التبديل إلى العربية');
     if (ar) {
@@ -1473,7 +1480,7 @@ html[dir=rtl] .wa{right:auto;left:20px}
 
   var saved = null;
   try { saved = localStorage.getItem('lang'); } catch (e) {}
-  setLang(saved === 'ar');
+  setLang(window.__LANG__ ? window.__LANG__ === 'ar' : saved === 'ar');
 })();
 </script>
 
