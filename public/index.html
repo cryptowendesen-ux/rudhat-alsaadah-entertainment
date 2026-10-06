@@ -698,8 +698,20 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
   function renderServices(data) {
     var icons = ['🎨', '💃', '🧩', '🧠', '🛡️'];
+    /* the icon follows the service name, so reordering services in the admin never mixes them up */
+    var iconRules = [
+      [/art|colou?r|draw|paint/i, '🎨'],
+      [/zumba|danc|music/i, '💃'],
+      [/educat|learn|game|puzzle/i, '🧩'],
+      [/skill|develop|brain/i, '🧠'],
+      [/clean|safe|safety/i, '🛡️']
+    ];
     document.getElementById('servicesList').innerHTML = (data.services || []).map(function (s, i) {
-      return '<div class="feature"><div class="icon">' + icons[i % icons.length] + '</div><h3>' +
+      var ic = icons[i % icons.length];
+      for (var k = 0; k < iconRules.length; k++) {
+        if (iconRules[k][0].test(s.title || '')) { ic = iconRules[k][1]; break; }
+      }
+      return '<div class="feature"><div class="icon">' + ic + '</div><h3>' +
         esc(s.title) + '</h3><p>' + esc(s.description) + '</p></div>';
     }).join('');
   }
@@ -1398,6 +1410,7 @@ html[dir=rtl] .wa{right:auto;left:20px}
   };
   var RX = [
     [/\bAED\b/g, 'د.إ'], [/\bAM\b/g, 'ص'], [/\bPM\b/g, 'م'],
+    [/(\d)AM\b/g, '$1 ص'], [/(\d)PM\b/g, '$1 م'],
     [/Saturday–Thursday/g, 'السبت–الخميس'], [/\bFriday\b/g, 'الجمعة'],
     [/Per hour is/g, 'سعر الساعة'], [/Other options:/g, 'خيارات أخرى:']
   ];
