@@ -457,6 +457,23 @@ textarea{
 .scanbox[hidden]{display:none}
 .scanbox video{flex:1;min-height:0;width:100%;object-fit:cover}
 .scanbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;color:#fff;font-weight:700}
+
+/* Stage 5: staff, closed days, reminders, visitors */
+.whoami{color:#cbd5e1;font-size:13px}
+.remind{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.remind h3{margin:0 0 6px;font-size:15px}
+.remind .rrow{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-top:1px solid #fde4c8}
+.remind .rrow:first-of-type{border-top:0}
+.mini-btn{border:0;border-radius:8px;padding:8px 12px;font-weight:700;cursor:pointer;font-size:13px;background:#e2e8f0;color:#0f172a}
+.xrow{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid #e2e8f0}
+.xrow:first-child{border-top:0}
+.xbtns{display:flex;gap:6px;flex-wrap:wrap}
+.tbar{display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0}
+.tbar i{display:block;height:8px;border-radius:99px;background:#6366f1;min-width:2px}
+.tbar .d{width:52px;color:#64748b;flex:none}
+.tbar .n{width:34px;text-align:right;font-weight:700;flex:none}
+.tbars{max-height:340px;overflow:auto;margin-top:8px}
+.note-warn{color:#b45309;font-weight:700}
 </style>
 </head>
 
@@ -464,7 +481,7 @@ textarea{
 
 <header class="top">
   <div class="logo">🎈 RUDHAT ADMIN</div>
-  <button class="logout" id="logout">Logout</button>
+  <div style="display:flex;align-items:center;gap:12px"><span class="whoami" id="whoami"></span><button class="logout" id="logout">Logout</button></div>
 </header>
 
 <main class="wrap">
@@ -496,6 +513,7 @@ textarea{
         <button class="add" onclick="loadBookings()">↻ Refresh</button>
       </div>
     </div>
+    <div id="remindersBox"></div>
     <div class="tabs" id="viewTabs"></div>
 
     <div id="listView">
@@ -575,12 +593,55 @@ textarea{
       <div><label for="sPartyMin">PARTY LENGTH (minutes)</label><input id="sPartyMin" type="number" min="30" max="720" step="15" placeholder="180"></div>
       <div><label for="sParallel">PARTIES AT THE SAME TIME</label><input id="sParallel" type="number" min="1" max="20" placeholder="1"></div>
       <div><label for="sPerDay">MAX PARTIES PER DAY</label><input id="sPerDay" type="number" min="1" max="50" placeholder="5"></div>
+      <div><label for="sBanner">ANNOUNCEMENT BANNER (top of website, empty = none)</label><input id="sBanner" maxlength="200" placeholder="Eid Mubarak! Open 2 PM - 10 PM"></div>
+      <div><label for="sBannerAr">BANNER IN ARABIC (optional)</label><input id="sBannerAr" maxlength="200" dir="rtl"></div>
+      <div><label for="sBannerUntil">SHOW BANNER UNTIL (optional, hides itself after)</label><input id="sBannerUntil" type="date"></div>
     </div>
     <div class="actions" style="align-items:center">
       <button class="save" id="saveSettings" style="flex:none;padding:12px 22px">Save settings</button>
       <span id="settingsMsg"></span>
     </div>
     <div class="hint">Prices are edited in the <b>Prices</b> and <b>Birthday</b> sections below. They update everywhere on the website automatically (hero, FAQ, birthday section, WhatsApp messages). The item titled “Per Hour” is used as the hourly price. <b>Birthday packages:</b> add one item per package in the <b>Birthday</b> section — Title = package name, Price, and in Description write one included item per line. With 2 or more packages, customers choose a package when booking. <b>Booking rules:</b> a pending or confirmed booking holds its time; cancelled bookings free it.</div>
+  </section>
+
+  <section class="panel" id="closedPanel">
+    <div class="panelhead"><h2>&#128683; Closed Days</h2></div>
+    <div class="sgrid" id="closedForm">
+      <div><label for="cDate">DATE</label><input id="cDate" type="date"></div>
+      <div><label for="cReason">REASON (shown to customers, optional)</label><input id="cReason" maxlength="120" placeholder="Eid holiday"></div>
+      <div><label for="cReasonAr">REASON IN ARABIC (optional)</label><input id="cReasonAr" maxlength="120" dir="rtl"></div>
+    </div>
+    <div class="actions" id="closedActions" style="align-items:center">
+      <button class="save" id="addClosed" style="flex:none;padding:12px 22px">Close this day</button>
+      <span id="closedMsg"></span>
+    </div>
+    <div id="closedList"><div class="empty">Loading...</div></div>
+    <div class="hint">Customers cannot book a closed day and the website shows "Closed today". Bookings that already exist on that day are NOT cancelled automatically - contact those customers.</div>
+  </section>
+
+  <section class="panel" id="staffPanel" style="display:none">
+    <div class="panelhead"><h2>&#128101; Staff Accounts</h2></div>
+    <div class="sgrid">
+      <div><label for="stName">NAME</label><input id="stName" maxlength="60"></div>
+      <div><label for="stEmail">E-MAIL (used to sign in)</label><input id="stEmail" type="email" maxlength="120" autocomplete="off"></div>
+      <div><label for="stPass">PASSWORD (at least 10 characters)</label><input id="stPass" type="text" maxlength="100" autocomplete="off"></div>
+    </div>
+    <div class="actions" style="align-items:center">
+      <button class="save" id="addStaff" style="flex:none;padding:12px 22px">Add staff</button>
+      <span id="staffMsg"></span>
+    </div>
+    <div id="staffList"></div>
+    <div class="hint">Staff can see and confirm bookings and run play cards. They cannot change website content, settings, closed days, accounts or statistics, and cannot delete anything. Give each person their own account.</div>
+  </section>
+
+  <section class="panel" id="trafficPanel" style="display:none">
+    <div class="panelhead"><h2>&#128200; Website Visitors</h2>
+      <div class="headbtns"><select id="tfDays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select></div>
+    </div>
+    <div class="tiles" id="tfTiles"></div>
+    <h3 class="mini">Visits per day</h3>
+    <div class="tbars" id="tfBars"></div>
+    <div class="hint">Anonymous counters only: no cookies and no personal data. A visit is counted once per browser session. Taps are counted when someone presses a WhatsApp, call or map button, or opens the booking form.</div>
   </section>
 
   <section class="panel" id="securityPanel">
@@ -1189,13 +1250,15 @@ function bookingRowHtml(b){
         <div class="title">${escapeHtml(b.name)} <span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span>${b.notifyStatus === 'failed' ? '<span class="badge warn" title="' + escapeHtml(b.notifyError || '') + '">⚠ email not sent</span>' : ''}${b.holdExpired ? '<span class="badge muted" title="This pending request no longer blocks its time slot">⏳ slot released</span>' : ''}</div>
         <div class="desc">📅 ${escapeHtml(b.date)} · ⏰ ${escapeHtml(fmt12(b.time))} · 👧 ${escapeHtml(b.children)} children${b.packageName ? ' · 🎁 ' + escapeHtml(b.packageName) + (b.packagePrice ? ' (' + escapeHtml(b.packagePrice) + ')' : '') : ''}</div>
         <div class="desc">📱 <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a> · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}</div>
+        ${b.childName ? `<div class="desc">&#127880; ${escapeHtml(b.childName)}${b.childAge !== null && b.childAge !== undefined ? ' &middot; ' + escapeHtml(b.childAge) + ' yrs' : ''}${b.waiverAccepted ? ' &middot; &#9989; guardian declaration' : ''}</div>` : ''}
+        ${b.allergies ? `<div class="desc note-warn">&#9888; Allergies / medical: ${escapeHtml(b.allergies)}</div>` : ''}
         ${b.message ? `<div class="desc">💬 ${escapeHtml(b.message)}</div>` : ''}
       </div>
       <div class="bactions">
         ${acts.join('')}
         <a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${b.status === 'confirmed' ? '✅ Send confirmation' : 'WhatsApp'}</a>
         ${b.notifyStatus === 'failed' ? `<button class="b-reopen" onclick="resendBookingEmail('${escapeHtml(b.id)}')">✉ Resend email</button>` : ''}
-        <button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>
+        ${isOwner() ? `<button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>` : ''}
       </div>
     </div>`;
 }
@@ -1231,6 +1294,7 @@ function renderBookings(){
     : '<div class="empty">No bookings here.</div>';
 
   renderStats();
+  renderReminders();
   if(bView === 'calendar') renderCalendar();
   renderCustomers();
 }
@@ -1492,7 +1556,7 @@ function renderCards(){
     acts.push(c.status === 'cancelled'
       ? `<button class="b-confirm" onclick="setCardStatus('${id}','active')">Reactivate</button>`
       : `<button class="b-cancel" onclick="setCardStatus('${id}','cancelled')">Cancel card</button>`);
-    acts.push(`<button class="delete" onclick="removeCard('${id}')">Delete</button>`);
+    if(isOwner()) acts.push(`<button class="delete" onclick="removeCard('${id}')">Delete</button>`);
     const hist = (c.ledger || []).map(l =>
       `<li>${escapeHtml(new Date(l.at).toLocaleString())} · <b>${l.minutes > 0 ? '+' : '−'}${escapeHtml(fmtMins(Math.abs(l.minutes)))}</b> · ${escapeHtml(l.note || '')}</li>`).join('');
     return `
@@ -1651,7 +1715,8 @@ const sFields = {
   weekdayOpen:'sWOpen', weekdayClose:'sWClose',
   fridayOpen:'sFOpen', fridayClose:'sFClose',
   instagram:'sIg', tiktok:'sTt', reviewUrl:'sReview', mapUrl:'sMap',
-  partyMinutes:'sPartyMin', maxParallel:'sParallel', maxPerDay:'sPerDay'
+  partyMinutes:'sPartyMin', maxParallel:'sParallel', maxPerDay:'sPerDay',
+  bannerText:'sBanner', bannerTextAr:'sBannerAr', bannerUntil:'sBannerUntil'
 };
 
 async function loadSettings(){
@@ -1709,11 +1774,170 @@ modal.addEventListener('click', event => {
   }
 });
 
-load();
-loadBookings();
-loadSettings();
-loadCards();
-setInterval(loadBookings, 60000);
+/* =========================================================
+   ROLES: the owner sees everything, staff only bookings + play cards
+========================================================= */
+let role = 'owner';
+const isOwner = () => role === 'owner';
+const hideEl = id => { const e = document.getElementById(id); if(e) e.style.display = 'none'; };
+const showEl = id => { const e = document.getElementById(id); if(e) e.style.display = ''; };
+
+function applyRole(me){
+  role = (me && me.role) || 'owner';
+  document.getElementById('whoami').textContent = role === 'owner' ? 'Owner' : ((me && me.name) || 'Staff') + ' \u00B7 Staff';
+  if(role !== 'owner'){
+    ['statsPanel','customersPanel','settingsPanel','securityPanel','content','closedForm','closedActions','csvBookings'].forEach(hideEl);
+  }else{
+    showEl('staffPanel'); showEl('trafficPanel');
+  }
+  renderBookings();
+}
+
+/* =========================================================
+   REMINDERS: confirmed parties today / tomorrow, one tap on WhatsApp
+========================================================= */
+function renderReminders(){
+  const box = document.getElementById('remindersBox');
+  if(!box) return;
+  const today = dubaiToday(), tomorrow = addDays(today, 1);
+  const due = bookings.filter(b => b.status === 'confirmed' && (b.date === today || b.date === tomorrow) && !b.reminderSentAt);
+  if(!due.length){ box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="remind"><h3>&#128276; Reminders to send (' + due.length + ')</h3>' + due.map(b => {
+    const when = b.date === today ? 'today' : 'tomorrow';
+    const txt = 'Hello ' + b.name + ', a friendly reminder of your birthday party ' + when + ' at RUDHAT ALSAADAH, Al Majaz 3, Sharjah.\n' +
+      '\uD83D\uDCC5 ' + b.date + ' \u00B7 \u23F0 ' + fmt12(b.time) + '\nRef: ' + b.reference +
+      '\nIf anything changes, please message us here. We look forward to celebrating with you \uD83C\uDF88';
+    const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(txt);
+    return '<div class="rrow"><div><b>' + escapeHtml(b.name) + '</b> &middot; ' + escapeHtml(fmt12(b.time)) + ' &middot; ' + when + '</div>' +
+      '<div class="xbtns"><a class="b-wa" href="' + escapeHtml(wa) + '" target="_blank" rel="noopener">&#128172; Send reminder</a>' +
+      '<button class="mini-btn" onclick="markReminded(\'' + escapeHtml(b.id) + '\')">&#10003; Sent</button></div></div>';
+  }).join('') + '</div>';
+}
+async function markReminded(id){
+  try{ await api('/api/admin/bookings/' + encodeURIComponent(id) + '/reminded', { method:'POST', body:JSON.stringify({}) }); await loadBookings(); }
+  catch(e){ alert(e.message); }
+}
+
+/* =========================================================
+   CLOSED DAYS
+========================================================= */
+async function loadClosed(){
+  const box = document.getElementById('closedList');
+  try{
+    const list = await api('/api/admin/closed-dates');
+    if(!list) return;
+    box.innerHTML = list.length ? list.map(c =>
+      '<div class="xrow"><div><b>' + escapeHtml(c.date) + '</b>' + (c.reason ? ' &middot; ' + escapeHtml(c.reason) : '') + '</div>' +
+      (isOwner() ? '<button class="delete" onclick="removeClosed(\'' + escapeHtml(c.date) + '\')">Re-open</button>' : '') + '</div>'
+    ).join('') : '<div class="empty">No closed days planned.</div>';
+  }catch(e){ box.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
+}
+document.getElementById('addClosed').onclick = async () => {
+  const msg = document.getElementById('closedMsg');
+  const date = document.getElementById('cDate').value;
+  if(!date){ msg.innerHTML = '<span class="msg-err">Choose a date first.</span>'; return; }
+  try{
+    const r = await api('/api/admin/closed-dates', { method:'POST', body:JSON.stringify({
+      date, reason:document.getElementById('cReason').value.trim(), reasonAr:document.getElementById('cReasonAr').value.trim()
+    })});
+    msg.innerHTML = '<span class="msg-ok">Saved.</span>' + (r && r.existingBookings ? ' <span class="note-warn">' + r.existingBookings + ' booking(s) already exist on this day - contact those customers.</span>' : '');
+    ['cDate','cReason','cReasonAr'].forEach(id => { document.getElementById(id).value = ''; });
+    loadClosed();
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+async function removeClosed(date){
+  if(!confirm('Re-open ' + date + ' for bookings?')) return;
+  try{ await api('/api/admin/closed-dates/' + encodeURIComponent(date), { method:'DELETE' }); loadClosed(); }
+  catch(e){ alert(e.message); }
+}
+
+/* =========================================================
+   STAFF ACCOUNTS (owner only)
+========================================================= */
+async function loadStaff(){
+  const box = document.getElementById('staffList');
+  try{
+    const list = await api('/api/admin/staff');
+    if(!list) return;
+    box.innerHTML = list.length ? list.map(x =>
+      '<div class="xrow"><div><b>' + escapeHtml(x.name) + '</b> &middot; ' + escapeHtml(x.email) + ' ' +
+      '<span class="badge ' + (x.active ? 'confirmed' : 'cancelled') + '">' + (x.active ? 'active' : 'disabled') + '</span></div>' +
+      '<div class="xbtns"><button class="mini-btn" onclick="toggleStaff(\'' + escapeHtml(x.id) + '\',' + (!x.active) + ')">' + (x.active ? 'Disable' : 'Enable') + '</button>' +
+      '<button class="mini-btn" onclick="resetStaffPw(\'' + escapeHtml(x.id) + '\')">New password</button>' +
+      '<button class="delete" onclick="removeStaff(\'' + escapeHtml(x.id) + '\')">Delete</button></div></div>'
+    ).join('') : '<div class="empty">No staff accounts yet.</div>';
+  }catch(e){ box.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
+}
+document.getElementById('addStaff').onclick = async () => {
+  const msg = document.getElementById('staffMsg');
+  try{
+    await api('/api/admin/staff', { method:'POST', body:JSON.stringify({
+      name:document.getElementById('stName').value.trim(),
+      email:document.getElementById('stEmail').value.trim(),
+      password:document.getElementById('stPass').value
+    })});
+    msg.innerHTML = '<span class="msg-ok">Account created. Share the e-mail and password with that person.</span>';
+    ['stName','stEmail','stPass'].forEach(id => { document.getElementById(id).value = ''; });
+    loadStaff();
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+async function toggleStaff(id, active){
+  try{ await api('/api/admin/staff/' + encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ active }) }); loadStaff(); }
+  catch(e){ alert(e.message); }
+}
+async function resetStaffPw(id){
+  const pw = prompt('New password for this person (at least 10 characters). They will be signed out everywhere.');
+  if(!pw) return;
+  try{ await api('/api/admin/staff/' + encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ password:pw }) }); alert('Password changed.'); }
+  catch(e){ alert(e.message); }
+}
+async function removeStaff(id){
+  if(!confirm('Delete this staff account permanently?')) return;
+  try{ await api('/api/admin/staff/' + encodeURIComponent(id), { method:'DELETE' }); loadStaff(); }
+  catch(e){ alert(e.message); }
+}
+
+/* =========================================================
+   VISITOR STATISTICS (owner only)
+========================================================= */
+async function loadTraffic(){
+  try{
+    const days = document.getElementById('tfDays').value;
+    const r = await api('/api/admin/stats?days=' + encodeURIComponent(days));
+    if(!r) return;
+    const t = r.totals;
+    const conv = t.visit ? Math.round(t.requests / t.visit * 1000) / 10 + '%' : '--';
+    const tile = (l, v) => '<div class="card"><span>' + l + '</span><strong>' + v + '</strong></div>';
+    document.getElementById('tfTiles').innerHTML =
+      tile('VISITS', t.visit) + tile('WHATSAPP TAPS', t.wa) + tile('CALL TAPS', t.call) + tile('MAP TAPS', t.map) +
+      tile('BOOKING FORM OPENED', t.book) + tile('REQUESTS SENT', t.requests) + tile('VISIT TO REQUEST', conv);
+    const max = Math.max(1, ...r.list.map(d => d.visit));
+    document.getElementById('tfBars').innerHTML = r.list.slice().reverse().map(d =>
+      '<div class="tbar"><span class="d">' + escapeHtml(d.day.slice(5)) + '</span><i style="width:' + Math.round(d.visit / max * 100) + '%"></i><span class="n">' + d.visit + '</span></div>'
+    ).join('');
+  }catch(e){ document.getElementById('tfTiles').innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
+}
+document.getElementById('tfDays').onchange = loadTraffic;
+
+/* =========================================================
+   START
+========================================================= */
+(async function init(){
+  let me = { role:'owner', name:'' };
+  try{ me = (await api('/api/auth/me')) || me; }catch(e){}
+  applyRole(me);
+  if(isOwner()){
+    load(); loadTraffic(); loadStaff();
+  }else{
+    /* staff do not load the admin content; the public prices fill the play-card package list */
+    try{ const pub = await (await fetch('/api/content')).json(); data.prices = pub.prices || []; }catch(e){}
+  }
+  loadBookings();
+  loadSettings();
+  loadCards();
+  loadClosed();
+  setInterval(loadBookings, 60000);
+})();
 </script>
 
 </body>
