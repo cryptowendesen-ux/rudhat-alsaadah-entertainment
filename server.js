@@ -166,7 +166,15 @@ const bookingSchema = new mongoose.Schema(
     // Owner e-mail notification: pending -> sent | failed (retried automatically) | skipped (mail not configured)
     notifyStatus: { type: String, enum: ['pending', 'sent', 'failed', 'skipped'], default: 'pending' },
     notifyAttempts: { type: Number, default: 0 },
-    notifyError: { type: String, default: '', maxlength: 300 }
+    notifyError: { type: String, default: '', maxlength: 300 },
+    // Parent/guardian declaration collected on the booking form
+    childName: { type: String, default: '', maxlength: 100 },
+    childAge: { type: Number, min: 0, max: 17 },
+    allergies: { type: String, default: '', maxlength: 500 },
+    waiverAccepted: { type: Boolean, default: false },
+    waiverAt: { type: Date },
+    // Set when staff tapped "reminder sent" (WhatsApp reminder the day before)
+    reminderSentAt: { type: Date }
   },
   { timestamps: true }
 );
@@ -208,10 +216,46 @@ const adminSessionSchema = new mongoose.Schema({
   exp: { type: Date, required: true },
   ip: { type: String, default: '' },
   ua: { type: String, default: '' },
+  role: { type: String, default: 'owner' }, // 'owner' (full access) or 'staff' (bookings + play cards only)
+  staffId: { type: String, default: '' },
+  name: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 });
 adminSessionSchema.index({ exp: 1 }, { expireAfterSeconds: 0 }); // MongoDB removes expired sessions itself
 const AdminSession = mongoose.model('AdminSession', adminSessionSchema);
+
+/* ---- Staff accounts (the owner signs in with ADMIN_EMAIL / ADMIN_PASSWORD from the environment) ---- */
+const staffSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true, unique: true },
+    name: { type: String, required: true, maxlength: 60 },
+    email: { type: String, required: true, unique: true, lowercase: true, maxlength: 120 },
+    passHash: { type: String, required: true },
+    active: { type: Boolean, default: true }
+  },
+  { timestamps: true }
+);
+const Staff = mongoose.model('Staff', staffSchema);
+
+/* ---- Days the centre is closed (holidays, maintenance, private events) ---- */
+const closedDateSchema = new mongoose.Schema(
+  {
+    date: { type: String, required: true, unique: true }, // YYYY-MM-DD
+    reason: { type: String, default: '', maxlength: 120 },
+    reasonAr: { type: String, default: '', maxlength: 120 }
+  },
+  { timestamps: true }
+);
+const ClosedDate = mongoose.model('ClosedDate', closedDateSchema);
+
+/* ---- Anonymous daily counters (no cookies, no personal data): visits, WhatsApp taps, ... ---- */
+const statSchema = new mongoose.Schema({
+  day: { type: String, required: true }, // YYYY-MM-DD (Dubai)
+  event: { type: String, required: true },
+  n: { type: Number, default: 0 }
+});
+statSchema.index({ day: 1, event: 1 }, { unique: true });
+const Stat = mongoose.model('Stat', statSchema);
 
 const SETTINGS_DEFAULTS = {
   whatsapp: '971585187788',
@@ -226,7 +270,10 @@ const SETTINGS_DEFAULTS = {
   mapUrl: 'https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA',
   partyMinutes: 180,
   maxParallel: 1,
-  maxPerDay: 5
+  maxPerDay: 5,
+  bannerText: '',
+  bannerTextAr: '',
+  bannerUntil: ''
 };
 const settingsSchema = new mongoose.Schema(
   {
@@ -243,14 +290,17 @@ const settingsSchema = new mongoose.Schema(
     mapUrl: String,
     partyMinutes: Number,
     maxParallel: Number,
-    maxPerDay: Number
+    maxPerDay: Number,
+    bannerText: String,
+    bannerTextAr: String,
+    bannerUntil: String
   },
   { timestamps: true }
 );
 const Settings = mongoose.model('Settings', settingsSchema);
 
 // These may be emptied by the admin (e.g. remove the Instagram link); every other field falls back to its default when empty.
-const CLEARABLE_SETTINGS = ['instagram', 'tiktok', 'reviewUrl'];
+const CLEARABLE_SETTINGS = ['instagram', 'tiktok', 'reviewUrl', 'bannerText', 'bannerTextAr', 'bannerUntil'];
 async function getSettings() {
   const doc = await Settings.findOne({ key: 'main' }).lean();
   const out = { ...SETTINGS_DEFAULTS };
@@ -387,12 +437,40 @@ async function auth(req, res, next) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     req.adminJti = payload.jti;
+    req.adminRole = session.role || 'owner'; // sessions created before staff accounts existed belong to the owner
+    req.adminName = session.name || '';
+    req.adminStaffId = session.staffId || '';
     next();
   } catch (err) {
     console.error('Auth check error:', err);
     res.status(503).json({ error: 'Service temporarily unavailable' });
   }
 }
+
+// Owner-only actions (website content, settings, staff, statistics, deleting data)
+function requireOwner(req, res, next) {
+  if (req.adminRole !== 'owner') return res.status(403).json({ error: 'Only the owner can do this.' });
+  next();
+}
+
+// Staff passwords are stored as salted scrypt hashes, never in plain text
+function hashPassword(pw) {
+  const salt = crypto.randomBytes(16);
+  const hash = crypto.scryptSync(String(pw), salt, 64);
+  return 'scrypt$' + salt.toString('base64') + '$' + hash.toString('base64');
+}
+function verifyPassword(pw, stored) {
+  try {
+    const [alg, saltB64, hashB64] = String(stored).split('$');
+    if (alg !== 'scrypt') return false;
+    const expected = Buffer.from(hashB64, 'base64');
+    const actual = crypto.scryptSync(String(pw), Buffer.from(saltB64, 'base64'), expected.length);
+    return crypto.timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
+}
+const DUMMY_HASH = hashPassword(crypto.randomBytes(8).toString('hex')); // used so unknown e-mails take the same time
 
 /* =========================================================
    RESPONSE HELPERS
@@ -537,6 +615,13 @@ app.get('/api/content', async (req, res) => {
     });
 
     result.settings = await getSettings();
+    // The announcement banner switches itself off after its last day
+    if (result.settings.bannerUntil && result.settings.bannerUntil < todayInDubai()) {
+      result.settings.bannerText = '';
+      result.settings.bannerTextAr = '';
+    }
+    const closed = await ClosedDate.find({ date: { $gte: todayInDubai() } }).sort({ date: 1 }).limit(200).lean();
+    result.closedDates = closed.map((c) => ({ date: c.date, reason: c.reason || '', reasonAr: c.reasonAr || '' }));
     res.json(result);
   } catch (err) {
     console.error('Public content error:', err);
@@ -549,9 +634,22 @@ app.get('/api/content', async (req, res) => {
 ========================================================= */
 app.post('/api/auth/login', loginLimit, async (req, res) => {
   try {
-    const emailOk = safeEqual(req.body && req.body.email, process.env.ADMIN_EMAIL);
-    const passOk = safeEqual(req.body && req.body.password, process.env.ADMIN_PASSWORD);
-    if (!(emailOk && passOk)) {
+    const email = String((req.body && req.body.email) || '').trim().toLowerCase();
+    const password = String((req.body && req.body.password) || '');
+    const ownerOk =
+      safeEqual(email, String(process.env.ADMIN_EMAIL || '').trim().toLowerCase()) &&
+      safeEqual(password, process.env.ADMIN_PASSWORD);
+
+    let role = '';
+    let staff = null;
+    if (ownerOk) {
+      role = 'owner';
+    } else {
+      staff = await Staff.findOne({ email, active: true }).lean();
+      const okPw = verifyPassword(password, staff ? staff.passHash : DUMMY_HASH);
+      if (staff && okPw) role = 'staff';
+    }
+    if (!role) {
       console.warn('Failed admin sign-in from ' + req.ip);
       await sleep(600); // slows down guessing
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -563,14 +661,22 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       jti,
       exp: new Date(exp),
       ip: String(req.ip || '').slice(0, 60),
-      ua: String(req.headers['user-agent'] || '').slice(0, 200)
+      ua: String(req.headers['user-agent'] || '').slice(0, 200),
+      role,
+      staffId: staff ? staff.id : '',
+      name: staff ? staff.name : 'Owner'
     }).save();
 
-    res.json({ token: token({ email: req.body.email, jti, exp }) });
+    res.json({ token: token({ email, jti, exp }), role, name: staff ? staff.name : 'Owner' });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Sign-in failed. Please try again.' });
   }
+});
+
+// Who am I? (the dashboard hides what the person is not allowed to use)
+app.get('/api/auth/me', auth, (req, res) => {
+  res.json({ role: req.adminRole, name: req.adminName || (req.adminRole === 'owner' ? 'Owner' : '') });
 });
 
 // Sign out this device (the token stops working immediately)
@@ -585,7 +691,7 @@ app.post('/api/auth/logout', auth, async (req, res) => {
 });
 
 // Sign out every device (use it if a phone is lost or the password was shared)
-app.post('/api/auth/logout-all', auth, async (req, res) => {
+app.post('/api/auth/logout-all', auth, requireOwner, async (req, res) => {
   try {
     await AdminSession.deleteMany({});
     res.json({ ok: true });
@@ -598,7 +704,7 @@ app.post('/api/auth/logout-all', auth, async (req, res) => {
 /* =========================================================
    ADMIN CONTENT
 ========================================================= */
-app.get('/api/admin/content', auth, async (req, res) => {
+app.get('/api/admin/content', auth, requireOwner, async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: 1 }).lean();
     const result = { services: [], prices: [], gallery: [], birthday: [], hero: [], about: [], info: [] };
@@ -619,7 +725,7 @@ app.get('/api/admin/content', auth, async (req, res) => {
 /* =========================================================
    CREATE NORMAL ADMIN ITEM (SERVICES / PRICES / BIRTHDAY)
 ========================================================= */
-app.post('/api/admin/items', auth, async (req, res) => {
+app.post('/api/admin/items', auth, requireOwner, async (req, res) => {
   try {
     const { type, title, description = '', price = '', published = true, featured = false, titleAr = '', descriptionAr = '' } = req.body || {};
 
@@ -679,7 +785,7 @@ function uploadToCloudinary(buffer, folderName = 'gallery') {
 /* =========================================================
    GALLERY IMAGE UPLOAD
 ========================================================= */
-app.post('/api/admin/gallery/upload', auth, handleUpload, async (req, res) => {
+app.post('/api/admin/gallery/upload', auth, requireOwner, handleUpload, async (req, res) => {
   let uploadedPublicId = '';
 
   try {
@@ -756,7 +862,7 @@ app.post('/api/admin/gallery/upload', auth, handleUpload, async (req, res) => {
 /* =========================================================
    UPDATE ADMIN ITEM
 ========================================================= */
-app.put('/api/admin/items/:type/:id', auth, async (req, res) => {
+app.put('/api/admin/items/:type/:id', auth, requireOwner, async (req, res) => {
   try {
     const { type, id } = req.params;
     const item = await Item.findOne({ type, id });
@@ -789,7 +895,7 @@ app.put('/api/admin/items/:type/:id', auth, async (req, res) => {
 /* =========================================================
    DELETE ADMIN ITEM (STRICT CLOUDINARY CLEANUP)
 ========================================================= */
-app.delete('/api/admin/items/:type/:id', auth, async (req, res) => {
+app.delete('/api/admin/items/:type/:id', auth, requireOwner, async (req, res) => {
   try {
     const { type, id } = req.params;
     const item = await Item.findOne({ type, id });
@@ -951,6 +1057,11 @@ function bookingJson(b) {
     packageName: b.packageName || '',
     status: b.status,
     createdAt: b.createdAt,
+    childName: b.childName || '',
+    childAge: b.childAge === undefined || b.childAge === null ? null : b.childAge,
+    allergies: b.allergies || '',
+    waiverAccepted: !!b.waiverAccepted,
+    reminderSentAt: b.reminderSentAt || null,
     notifyStatus: b.notifyStatus || '',
     notifyError: b.notifyError || '',
     // a pending request older than the hold window no longer blocks its time slot
@@ -1039,6 +1150,8 @@ async function notifyNewBooking(b) {
     ['Date', b.date],
     ['Time', b.time],
     ['Children', b.children],
+    ['Birthday child', (b.childName || '-') + (b.childAge || b.childAge === 0 ? ' (' + b.childAge + ' yrs)' : '')],
+    ['Allergies / medical', b.allergies || 'None stated'],
     ['Package', ((b.packageName ? b.packageName + ' – ' : '') + (b.packagePrice || '')) || '-'],
     ['Message', b.message || '-']
   ];
@@ -1175,6 +1288,12 @@ async function createBooking(req, res) {
     if (!TIME_RE.test(time)) {
       return res.status(400).json({ error: 'Please choose a valid time.' });
     }
+    const closedDay = await ClosedDate.findOne({ date }).lean();
+    if (closedDay) {
+      return res.status(409).json({
+        error: 'We are closed on this date' + (closedDay.reason ? ' (' + closedDay.reason + ')' : '') + '. Please choose another day.'
+      });
+    }
     const st = await getSettings();
     const friday = isFridayDate(date);
     const open = friday ? st.fridayOpen : st.weekdayOpen;
@@ -1212,6 +1331,20 @@ async function createBooking(req, res) {
       return res.status(400).json({ error: 'Message is too long.' });
     }
 
+    // Birthday child + parent/guardian declaration
+    const childName = clip(String(body.childName || '').trim(), 100);
+    const ageRaw = body.childAge;
+    const childAge = ageRaw === undefined || ageRaw === null || String(ageRaw).trim() === '' ? null : Number(ageRaw);
+    const allergies = clip(String(body.allergies || '').trim(), 500);
+    const waiverAccepted = body.waiverAccepted === true || String(body.waiverAccepted).toLowerCase() === 'true';
+    if (process.env.WAIVER_REQUIRED !== 'false') {
+      if (childName.length < 1) return res.status(400).json({ error: "Please enter the birthday child's name." });
+      if (!waiverAccepted) return res.status(400).json({ error: 'Please confirm the parent / guardian declaration.' });
+    }
+    if (childAge !== null && (!Number.isInteger(childAge) || childAge < 0 || childAge > 17)) {
+      return res.status(400).json({ error: "The child's age must be between 0 and 17." });
+    }
+
     // Chosen package (when the site offers several); otherwise the first published one
     const pkgId = String(body.packageId || '').trim();
     let bday = null;
@@ -1231,6 +1364,11 @@ async function createBooking(req, res) {
       time,
       children,
       message,
+      childName,
+      childAge: childAge === null ? undefined : childAge,
+      allergies,
+      waiverAccepted,
+      waiverAt: waiverAccepted ? new Date() : undefined,
       packagePrice: bday ? bday.price : '',
       packageName: bday ? bday.title : ''
     });
@@ -1261,6 +1399,12 @@ app.get('/api/availability', async (req, res) => {
     }
     if (date > addDaysDubai(MAX_DAYS_AHEAD)) {
       return res.status(400).json({ error: 'Online bookings can be made up to ' + MAX_DAYS_AHEAD + ' days ahead.' });
+    }
+    const closedDay = await ClosedDate.findOne({ date }).lean();
+    if (closedDay) {
+      return res.set('Cache-Control', 'no-store').json({
+        date, closed: true, reason: closedDay.reason || '', reasonAr: closedDay.reasonAr || '', full: false, slots: []
+      });
     }
     const st = await getSettings();
     const existing = await Booking.find({ date, ...holdsSlot() }).select('time').lean();
@@ -1349,7 +1493,24 @@ app.post('/api/admin/bookings/:id/resend', auth, async (req, res) => {
   }
 });
 
-app.delete('/api/admin/bookings/:id', auth, async (req, res) => {
+// Staff tapped "reminder sent" after sending the day-before WhatsApp reminder
+app.post('/api/admin/bookings/:id/reminded', auth, async (req, res) => {
+  try {
+    const on = req.body && req.body.undo ? undefined : new Date();
+    const b = await Booking.findOneAndUpdate(
+      { id: req.params.id },
+      on ? { $set: { reminderSentAt: on } } : { $unset: { reminderSentAt: 1 } },
+      { new: true }
+    );
+    if (!b) return res.status(404).json({ error: 'Booking not found' });
+    res.json(bookingJson(b));
+  } catch (err) {
+    console.error('Reminder mark error:', err);
+    res.status(500).json({ error: 'Failed to update the reminder' });
+  }
+});
+
+app.delete('/api/admin/bookings/:id', auth, requireOwner, async (req, res) => {
   try {
     const r = await Booking.deleteOne({ id: req.params.id });
     if (!r.deletedCount) return res.status(404).json({ error: 'Booking not found' });
@@ -1589,7 +1750,7 @@ app.patch('/api/admin/cards/:id', auth, async (req, res) => {
   }
 });
 
-app.delete('/api/admin/cards/:id', auth, async (req, res) => {
+app.delete('/api/admin/cards/:id', auth, requireOwner, async (req, res) => {
   try {
     const r = await PlayCard.deleteOne({ id: req.params.id });
     if (!r.deletedCount) return res.status(404).json({ error: 'Card not found' });
@@ -1612,7 +1773,7 @@ app.get('/api/admin/settings', auth, async (req, res) => {
   }
 });
 
-app.put('/api/admin/settings', auth, async (req, res) => {
+app.put('/api/admin/settings', auth, requireOwner, async (req, res) => {
   try {
     const b = req.body || {};
     const update = {};
@@ -1640,6 +1801,16 @@ app.put('/api/admin/settings', auth, async (req, res) => {
         update[k] = v;
       }
     }
+    for (const k of ['bannerText', 'bannerTextAr']) {
+      if (b[k] !== undefined) update[k] = clip(String(b[k]).trim(), 200);
+    }
+    if (b.bannerUntil !== undefined) {
+      const u = String(b.bannerUntil).trim();
+      if (u && (!DATE_RE.test(u) || !isRealDate(u))) {
+        return res.status(400).json({ error: 'Banner end date is not valid.' });
+      }
+      update.bannerUntil = u;
+    }
     const NUM = { partyMinutes: [30, 720], maxParallel: [1, 20], maxPerDay: [1, 50] };
     for (const k of Object.keys(NUM)) {
       if (b[k] !== undefined && String(b[k]).trim() !== '') {
@@ -1664,6 +1835,177 @@ app.put('/api/admin/settings', auth, async (req, res) => {
   } catch (err) {
     console.error('Update settings error:', err);
     res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+/* =========================================================
+   ADMIN: CLOSED DATES
+========================================================= */
+app.get('/api/admin/closed-dates', auth, async (req, res) => {
+  try {
+    const rows = await ClosedDate.find({ date: { $gte: todayInDubai() } }).sort({ date: 1 }).limit(300).lean();
+    res.json(rows.map((c) => ({ date: c.date, reason: c.reason || '', reasonAr: c.reasonAr || '' })));
+  } catch (err) {
+    console.error('Closed dates list error:', err);
+    res.status(500).json({ error: 'Failed to load closed dates' });
+  }
+});
+
+app.post('/api/admin/closed-dates', auth, requireOwner, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const date = String(b.date || '').trim();
+    if (!DATE_RE.test(date) || !isRealDate(date)) return res.status(400).json({ error: 'Please choose a valid date.' });
+    if (date < todayInDubai()) return res.status(400).json({ error: 'The date cannot be in the past.' });
+    await ClosedDate.updateOne(
+      { date },
+      { $set: { reason: clip(String(b.reason || '').trim(), 120), reasonAr: clip(String(b.reasonAr || '').trim(), 120) } },
+      { upsert: true }
+    );
+    // Warn the owner about bookings that already exist on that day (they are NOT cancelled automatically)
+    const existing = await Booking.countDocuments({ date, status: { $ne: 'cancelled' } });
+    res.status(201).json({ ok: true, existingBookings: existing });
+  } catch (err) {
+    console.error('Closed date add error:', err);
+    res.status(500).json({ error: 'Failed to save the closed date' });
+  }
+});
+
+app.delete('/api/admin/closed-dates/:date', auth, requireOwner, async (req, res) => {
+  try {
+    await ClosedDate.deleteOne({ date: String(req.params.date) });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Closed date delete error:', err);
+    res.status(500).json({ error: 'Failed to remove the closed date' });
+  }
+});
+
+/* =========================================================
+   ADMIN: STAFF ACCOUNTS (owner only)
+========================================================= */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const staffJson = (x) => ({ id: x.id, name: x.name, email: x.email, active: !!x.active, createdAt: x.createdAt });
+
+app.get('/api/admin/staff', auth, requireOwner, async (req, res) => {
+  try {
+    const rows = await Staff.find({}).sort({ createdAt: 1 }).lean();
+    res.json(rows.map(staffJson));
+  } catch (err) {
+    console.error('Staff list error:', err);
+    res.status(500).json({ error: 'Failed to load staff' });
+  }
+});
+
+app.post('/api/admin/staff', auth, requireOwner, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const name = clip(String(b.name || '').trim(), 60);
+    const email = String(b.email || '').trim().toLowerCase();
+    const password = String(b.password || '');
+    if (name.length < 2) return res.status(400).json({ error: 'Please enter the staff name.' });
+    if (!EMAIL_RE.test(email) || email.length > 120) return res.status(400).json({ error: 'Please enter a valid e-mail.' });
+    if (email === String(process.env.ADMIN_EMAIL || '').trim().toLowerCase()) {
+      return res.status(400).json({ error: 'This e-mail belongs to the owner account.' });
+    }
+    if (password.length < 10 || password.length > 100) {
+      return res.status(400).json({ error: 'The password must be 10–100 characters.' });
+    }
+    if (await Staff.exists({ email })) return res.status(409).json({ error: 'A staff account with this e-mail already exists.' });
+    const created = await new Staff({ id: crypto.randomUUID(), name, email, passHash: hashPassword(password) }).save();
+    res.status(201).json(staffJson(created));
+  } catch (err) {
+    console.error('Staff create error:', err);
+    res.status(500).json({ error: 'Failed to create the staff account' });
+  }
+});
+
+app.patch('/api/admin/staff/:id', auth, requireOwner, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const set = {};
+    let kickOut = false;
+    if (b.active !== undefined) {
+      set.active = b.active === true || String(b.active) === 'true';
+      if (!set.active) kickOut = true;
+    }
+    if (b.name !== undefined) {
+      const name = clip(String(b.name).trim(), 60);
+      if (name.length < 2) return res.status(400).json({ error: 'Please enter the staff name.' });
+      set.name = name;
+    }
+    if (b.password !== undefined && String(b.password) !== '') {
+      const pw = String(b.password);
+      if (pw.length < 10 || pw.length > 100) return res.status(400).json({ error: 'The password must be 10–100 characters.' });
+      set.passHash = hashPassword(pw);
+      kickOut = true; // a new password signs the person out everywhere
+    }
+    const updated = await Staff.findOneAndUpdate({ id: req.params.id }, { $set: set }, { new: true });
+    if (!updated) return res.status(404).json({ error: 'Staff account not found' });
+    if (kickOut) await AdminSession.deleteMany({ staffId: updated.id });
+    res.json(staffJson(updated));
+  } catch (err) {
+    console.error('Staff update error:', err);
+    res.status(500).json({ error: 'Failed to update the staff account' });
+  }
+});
+
+app.delete('/api/admin/staff/:id', auth, requireOwner, async (req, res) => {
+  try {
+    const gone = await Staff.findOneAndDelete({ id: req.params.id });
+    if (!gone) return res.status(404).json({ error: 'Staff account not found' });
+    await AdminSession.deleteMany({ staffId: gone.id });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Staff delete error:', err);
+    res.status(500).json({ error: 'Failed to delete the staff account' });
+  }
+});
+
+/* =========================================================
+   VISITOR STATISTICS (anonymous counters, no cookies, no personal data)
+========================================================= */
+const TRACK_EVENTS = ['visit', 'wa', 'call', 'map', 'book'];
+const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|headless|lighthouse|pingdom|uptime/i;
+const trackLimit = rateLimit({ windowMs: 10 * 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false });
+
+app.post('/api/track', trackLimit, async (req, res) => {
+  try {
+    const ev = String((req.body && req.body.e) || '');
+    if (TRACK_EVENTS.includes(ev) && !BOT_UA.test(String(req.headers['user-agent'] || ''))) {
+      await Stat.updateOne({ day: todayInDubai(), event: ev }, { $inc: { n: 1 } }, { upsert: true });
+    }
+  } catch (err) {
+    console.error('Track error:', err.message);
+  }
+  res.status(204).end(); // never slows down or breaks the page
+});
+
+app.get('/api/admin/stats', auth, requireOwner, async (req, res) => {
+  try {
+    const days = Math.min(90, Math.max(7, parseInt(req.query.days, 10) || 30));
+    const from = addDaysDubai(-(days - 1));
+    const [stats, created] = await Promise.all([
+      Stat.find({ day: { $gte: from } }).lean(),
+      Booking.aggregate([
+        { $match: { createdAt: { $gte: new Date(Date.now() - (days + 1) * 86400000) } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'Asia/Dubai' } }, n: { $sum: 1 } } }
+      ])
+    ]);
+    const byDay = {};
+    for (let i = 0; i < days; i++) {
+      const d = addDaysDubai(-(days - 1) + i);
+      byDay[d] = { day: d, visit: 0, wa: 0, call: 0, map: 0, book: 0, requests: 0 };
+    }
+    stats.forEach((x) => { if (byDay[x.day]) byDay[x.day][x.event] = x.n; });
+    created.forEach((x) => { if (byDay[x._id]) byDay[x._id].requests = x.n; });
+    const list = Object.values(byDay);
+    const totals = { visit: 0, wa: 0, call: 0, map: 0, book: 0, requests: 0 };
+    list.forEach((d) => Object.keys(totals).forEach((k) => { totals[k] += d[k]; }));
+    res.set('Cache-Control', 'no-store').json({ days, list, totals });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to load statistics' });
   }
 });
 
