@@ -11,6 +11,12 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 - Booking time must be inside the opening hours set in the admin settings, at least a few hours ahead and within one year
 - Spam protection: honeypot, rate limits, a limit per phone number, pending requests release their slot after 24 hours, optional Cloudflare Turnstile captcha
 - Prepaid Play Cards with QR code (`/card`), time deduction and top-up in the admin
+- Closed days (holidays, maintenance): customers cannot book them and the site shows "Closed today"
+- Announcement banner at the top of the website (English + Arabic, optional end date)
+- Birthday booking collects the birthday child's name/age, optional allergy note and the parent/guardian declaration
+- Day-before WhatsApp reminders: the dashboard lists tomorrow's confirmed parties with a one-tap WhatsApp button
+- Staff accounts: the owner signs in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`; staff get their own sign-in and can only handle bookings and play cards
+- Anonymous visitor statistics (visits, WhatsApp / call / map taps, booking form opens) - no cookies, no personal data
 - Admin dashboard at `/admin/`: services, prices, gallery uploads, birthday package, bookings (pending / confirmed / cancelled) and settings (phone, WhatsApp, opening hours)
 - Gallery images are served optimised by Cloudinary (auto format, auto quality, max width 1400px)
 - SEO: sitemap, robots.txt, Open Graph, LocalBusiness JSON-LD built from the admin settings
@@ -40,6 +46,7 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 | `BOOKING_MIN_LEAD_HOURS` | no | Minimum hours before a booking starts (default 3) |
 | `BOOKING_MAX_DAYS_AHEAD` | no | How many days ahead customers can book (default 365) |
 | `MAX_ACTIVE_PER_PHONE` | no | Open upcoming requests per phone (default 3) |
+| `WAIVER_REQUIRED` | no | Set to `false` to make the child name and guardian declaration optional on the booking form (default: required) |
 | `PRICE_RANGE` | no | `priceRange` in the Google business data (default `AED 20+`) |
 
 If no email settings are present, bookings are still saved and a warning is written to the log.
