@@ -381,6 +381,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 </head>
 
 <body>
+<div class="site-banner" id="siteBanner" role="status" hidden><span id="siteBannerText"></span><button type="button" id="siteBannerClose" aria-label="Close">&times;</button></div>
 <div class="topbar"><div class="container topin"><span>✨ FUN • LEARN • GROW</span><a href="tel:+971585187788" data-tel>📞 <span data-bind="displayPhone">+971 58 518 7788</span></a></div></div>
 
 <nav class="main-nav">
@@ -605,13 +606,17 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
         <label>WhatsApp Number<input type="tel" id="bookingPhone" required inputmode="tel" maxlength="25" pattern="^\+?[0-9\s\-\(\)]{9,25}$" title="Enter 9–15 digits, e.g. +971 50 123 4567 or 050 123 4567" placeholder="+971 5X XXX XXXX" autocomplete="tel"></label>
         <label>Preferred Date<input type="date" id="bookingDate" required></label>
         <label>Number of Children<input type="number" id="bookingChildren" min="1" max="100" required placeholder="e.g. 10"></label>
+        <label>Birthday Child's Name<input type="text" id="bookingChildName" required maxlength="100" placeholder="Child's name" autocomplete="off"></label>
+        <label>Child's Age<input type="number" id="bookingChildAge" min="0" max="17" inputmode="numeric" placeholder="e.g. 6"></label>
         <div class="full-field slot-field">
           <span class="slot-label">Preferred Time</span>
           <div class="slots" id="slotBox" aria-live="polite"><p class="slot-hint">Choose a date to see available times.</p></div>
           <input type="time" id="bookingTime" hidden>
         </div>
         <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="bookingWebsite" tabindex="-1" autocomplete="off"></label></div>
+        <label class="full-field">Allergies or medical notes (optional)<textarea id="bookingAllergies" rows="2" maxlength="500" placeholder="e.g. peanut allergy"></textarea></label>
         <label class="full-field">Additional Message<textarea id="bookingMessage" rows="3" placeholder="Anything else you'd like us to know?"></textarea></label>
+        <label class="full-field check"><input type="checkbox" id="bookingWaiver" required><span>I am the parent or legal guardian. I will supervise my child, I have shared any allergy or medical need above, and I accept the centre's safety rules.</span></label>
       </div>
       <div id="turnstileBox" style="margin-top:14px"></div>
       <p class="form-error" id="bookingError" role="alert" hidden></p>
@@ -945,6 +950,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   }
 
   function renderAll(data) {
+    window.RudhatSettings = data.settings || {};
+    window.RudhatClosed = data.closedDates || [];
     if (data.settings && data.settings.whatsapp) PHONE = String(data.settings.whatsapp);
     registerAr(data);
     renderInfo(data);
@@ -1130,6 +1137,13 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       .then(function (res) {
         if (my !== slotReq) return;
         if (!res.ok) { setHint(res.j.error || 'Could not load times. Type your preferred time below.'); return; }
+        if (res.j.closed) {
+          var arLang = document.documentElement.lang === 'ar';
+          var why = arLang ? (res.j.reasonAr || res.j.reason) : res.j.reason;
+          slotBox.innerHTML = '<p class="slot-hint">' + esc('We are closed on this date. Please choose another day.') + '</p>' +
+            (why ? '<p class="slot-hint">' + esc(why) + '</p>' : '');
+          return;
+        }
         var slots = res.j.slots || [];
         if (!slots.some(function (s) { return s.available; })) {
           setHint(res.j.full ? 'Sorry, we are fully booked on this day. Please choose another date.' : 'No available times on this date. Please choose another day.');
@@ -1235,6 +1249,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       '📅 Date: ' + p.date,
       '⏰ Time: ' + p.time,
       '👧 Children: ' + p.children,
+      '🎈 Birthday child: ' + (p.childName || '-') + (p.childAge !== '' && p.childAge != null ? ' (' + p.childAge + ')' : ''),
+      '⚠️ Allergies: ' + (p.allergies || 'None stated'),
       '💰 Package: ' + (function () {
         var pk = PACKAGES.filter(function (x) { return x.id === p.packageId; })[0];
         return pk ? pkgLabel(pk) : (BIRTHDAY_PRICE || 'Birthday package');
@@ -1272,6 +1288,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       date: v('bookingDate'),
       time: v('bookingTime'),
       children: Number(v('bookingChildren')),
+      childName: v('bookingChildName'),
+      childAge: v('bookingChildAge'),
+      allergies: v('bookingAllergies'),
+      waiverAccepted: document.getElementById('bookingWaiver').checked,
       packageId: document.getElementById('pkgField').hidden ? '' : document.getElementById('bookingPackage').value,
       message: v('bookingMessage'),
       website: v('bookingWebsite') /* honeypot: must stay empty */
@@ -1451,7 +1471,13 @@ html[dir=rtl] .wa{right:auto;left:20px}
     'No available times on this date. Please choose another day.': 'لا توجد أوقات متاحة في هذا التاريخ. يرجى اختيار يوم آخر.',
     'Sorry, we are fully booked on this day. Please choose another date.': 'عذراً، لا توجد أماكن متاحة في هذا اليوم. يرجى اختيار تاريخ آخر.',
     'Could not load times. Type your preferred time below.': 'تعذّر تحميل الأوقات. اكتب الوقت المفضل أدناه.',
-    'Please choose a time.': 'يرجى اختيار وقت.'
+    'Please choose a time.': 'يرجى اختيار وقت.',
+    "Birthday Child's Name": 'اسم صاحب العيد',
+    "Child's Age": 'عمر الطفل',
+    'Allergies or medical notes (optional)': 'الحساسية أو الملاحظات الطبية (اختياري)',
+    "I am the parent or legal guardian. I will supervise my child, I have shared any allergy or medical need above, and I accept the centre's safety rules.": 'أنا ولي الأمر أو الوصي القانوني. سأشرف على طفلي، وقد ذكرت أعلاه أي حساسية أو حاجة طبية، وأوافق على قواعد السلامة في المركز.',
+    'We are closed on this date. Please choose another day.': 'نحن مغلقون في هذا التاريخ. يرجى اختيار يوم آخر.',
+    'Please enter the birthday child\'s name.': 'يرجى إدخال اسم صاحب العيد.'
   };
   var RX = [
     [/\bAED\b/g, 'د.إ'], [/\bAM\b/g, 'ص'], [/\bPM\b/g, 'م'],
@@ -1459,7 +1485,7 @@ html[dir=rtl] .wa{right:auto;left:20px}
     [/Saturday–Thursday/g, 'السبت–الخميس'], [/\bFriday\b/g, 'الجمعة'],
     [/Per hour is/g, 'سعر الساعة'], [/Other options:/g, 'خيارات أخرى:']
   ];
-  var PH = { bookingName: 'اسمك', bookingChildren: 'مثال: 10', bookingMessage: 'أي شيء آخر تود إخبارنا به؟' };
+  var PH = { bookingName: 'اسمك', bookingChildren: 'مثال: 10', bookingMessage: 'أي شيء آخر تود إخبارنا به؟', bookingChildName: 'اسم الطفل', bookingChildAge: 'مثال: 6', bookingAllergies: 'مثال: حساسية الفول السوداني' };
   var orig = new WeakMap(), touched = [], phOrig = {}, active = false, pending = false;
   var titleEn = document.title;
 
@@ -1572,6 +1598,11 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
 @media(max-width:700px){.steps{grid-template-columns:1fr}}
 @media(max-width:600px){.lang-btn{padding:8px 12px;font-size:13px}}
 @media(prefers-reduced-motion:reduce){.b1,.b2,.b3,.open-badge i{animation:none!important}}
+.site-banner{background:var(--pink);color:#fff;text-align:center;padding:10px 46px;font-weight:900;font-size:14px;position:relative}
+.site-banner[hidden]{display:none}
+.site-banner button{position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);border:0;background:rgba(255,255,255,.22);color:#fff;width:28px;height:28px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer}
+.birthday-form label.check{flex-direction:row;align-items:flex-start;gap:10px;font-weight:700;line-height:1.45}
+.birthday-form label.check input{width:22px;height:22px;flex:none;margin-top:1px;padding:0;accent-color:var(--pink)}
 </style>
 <script>
 (function () {
@@ -1615,10 +1646,18 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     var host = $('.eyebrow'); if (!host) return;
     var el = $('.open-badge');
     if (!el) { el = document.createElement('span'); el.className = 'open-badge'; el.innerHTML = '<i></i><em></em>'; host.insertAdjacentElement('afterend', el); }
-    var o = {}; new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Dubai', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false })
+    var o = {}; new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Dubai', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: 'numeric', minute: 'numeric', hour12: false })
       .formatToParts(new Date()).forEach(function (p) { o[p.type] = p.value; });
     var day = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[o.weekday];
     var now = (+o.hour % 24) * 60 + +o.minute;
+    var todayStr = o.year + '-' + o.month + '-' + o.day;
+    var cl = (window.RudhatClosed || []).filter(function (c) { return c.date === todayStr; })[0];
+    if (cl) {
+      el.classList.add('closed');
+      var why = isAr() ? (cl.reasonAr || cl.reason) : cl.reason;
+      el.lastChild.textContent = T('Closed today', 'مغلق اليوم') + (why ? ' · ' + why : '');
+      return;
+    }
     var st = calcOpen(day, now, hoursOf('[data-bind=weekdayHours]', [540, 1260]), hoursOf('[data-bind=fridayHours]', [840, 1320]));
     el.classList.toggle('closed', !st.open);
     if (st.open) {
@@ -1662,7 +1701,39 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     if (!a) { a = document.createElement('a'); a.className = 'skip'; a.href = '#top'; document.body.insertBefore(a, document.body.firstChild); }
     a.textContent = T('Skip to content', 'انتقل إلى المحتوى');
   }
-  function renderAll() { skip(); badge(); steps(); priceNote(); faq(); }
+  /* ---- Announcement banner (text + optional Arabic text come from the admin Settings) ---- */
+  function banner() {
+    var b = $('#siteBanner'); if (!b) return;
+    var st = window.RudhatSettings || {};
+    var t = (isAr() && st.bannerTextAr) ? st.bannerTextAr : (st.bannerText || '');
+    var closed = ''; try { closed = sessionStorage.getItem('bannerClosed') || ''; } catch (e) {}
+    if (!t || closed === (st.bannerText || '')) { b.hidden = true; return; }
+    $('#siteBannerText').textContent = t;
+    b.hidden = false;
+  }
+  var bc = $('#siteBannerClose');
+  if (bc) bc.addEventListener('click', function () {
+    try { sessionStorage.setItem('bannerClosed', (window.RudhatSettings || {}).bannerText || ''); } catch (e) {}
+    $('#siteBanner').hidden = true;
+  });
+
+  /* ---- Anonymous visit / tap counters (no cookies, no personal data) ---- */
+  function track(e) {
+    try {
+      fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e: e }), keepalive: true }).catch(function () {});
+    } catch (x) {}
+  }
+  try { if (!sessionStorage.getItem('rv')) { sessionStorage.setItem('rv', '1'); track('visit'); } } catch (x) { track('visit'); }
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a,button') : null;
+    if (!a) return;
+    if (a.matches('[data-wa], .wa, a[href^="https://wa.me"]')) track('wa');
+    else if (a.matches('a[href^="tel:"]')) track('call');
+    else if (a.matches('[data-map]')) track('map');
+    else if (a.id === 'openBirthdayModal' || a.matches('[data-pkg]')) track('book');
+  }, true);
+
+  function renderAll() { skip(); badge(); banner(); steps(); priceNote(); faq(); }
 
   /* ---- Prices: friendly fallback cards if the server cannot be reached (the main script retries quietly) ---- */
   var pl = $('#pricesList');
