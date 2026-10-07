@@ -613,6 +613,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
         <div class="hp-field" aria-hidden="true"><label>Website<input type="text" id="bookingWebsite" tabindex="-1" autocomplete="off"></label></div>
         <label class="full-field">Additional Message<textarea id="bookingMessage" rows="3" placeholder="Anything else you'd like us to know?"></textarea></label>
       </div>
+      <div id="turnstileBox" style="margin-top:14px"></div>
       <p class="form-error" id="bookingError" role="alert" hidden></p>
       <button type="submit" class="booking-submit">🎂 Send Booking Request</button>
       <p class="booking-note">Birthday package: <strong id="pkgNoteVal">AED 300</strong></p>
@@ -1083,6 +1084,33 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   var submitBtn = form.querySelector('.booking-submit');
   var submitLabel = submitBtn.textContent;
 
+  /* ===== Security check (Cloudflare Turnstile) — loaded only when the owner switched it on,
+     and only when the visitor starts filling in the form ===== */
+  var captcha = { enabled: false, siteKey: '', widgetId: null, started: false };
+  function startCaptcha() {
+    if (captcha.started) return;
+    captcha.started = true;
+    fetch('/api/captcha-config')
+      .then(function (r) { return r.json(); })
+      .then(function (cfg) {
+        if (!cfg || !cfg.enabled || !cfg.siteKey) return;
+        captcha.enabled = true;
+        captcha.siteKey = cfg.siteKey;
+        window.__onTurnstileLoad = function () {
+          try {
+            captcha.widgetId = window.turnstile.render('#turnstileBox', { sitekey: captcha.siteKey, theme: 'light' });
+          } catch (e) { /* widget failed to draw: submit will explain */ }
+        };
+        var sc = document.createElement('script');
+        sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__onTurnstileLoad';
+        sc.async = true;
+        sc.defer = true;
+        document.head.appendChild(sc);
+      })
+      .catch(function () { /* config unavailable: form still works without the check */ });
+  }
+  form.addEventListener('focusin', startCaptcha);
+
   /* ---- Available times for the chosen date (from /api/availability) ---- */
   var timeInput = document.getElementById('bookingTime');
   var slotBox = document.getElementById('slotBox');
@@ -1249,6 +1277,19 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       website: v('bookingWebsite') /* honeypot: must stay empty */
     };
 
+    if (captcha.enabled) {
+      var tsToken = '';
+      try { tsToken = captcha.widgetId !== null ? window.turnstile.getResponse(captcha.widgetId) : ''; } catch (e) { tsToken = ''; }
+      if (!tsToken) {
+        errBox.textContent = captcha.widgetId === null
+          ? 'The security check is still loading. Please wait a moment and try again, or contact us on WhatsApp.'
+          : 'Please complete the security check above.';
+        errBox.hidden = false;
+        return;
+      }
+      payload.turnstileToken = tsToken;
+    }
+
     errBox.hidden = true;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending…';
@@ -1280,6 +1321,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       .then(function () {
         submitBtn.disabled = false;
         submitBtn.textContent = submitLabel;
+        /* a Turnstile token works only once */
+        if (captcha.enabled && captcha.widgetId !== null) {
+          try { window.turnstile.reset(captcha.widgetId); } catch (e) {}
+        }
       });
   });
 
