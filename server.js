@@ -46,6 +46,27 @@ if (process.env.ADMIN_PASSWORD === SECRET) {
 }
 
 /* =========================================================
+   SETTINGS FROM ENVIRONMENT (all optional)
+========================================================= */
+const envNum = (name, def, min, max) => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return def;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
+};
+// A pending request keeps its time slot only this long; after that the slot is free again.
+const PENDING_HOLD_HOURS = envNum('PENDING_HOLD_HOURS', 24, 1, 720);
+// Online bookings must start at least this many hours from now (0 = no minimum).
+const MIN_LEAD_HOURS = envNum('BOOKING_MIN_LEAD_HOURS', 3, 0, 168);
+const MAX_DAYS_AHEAD = envNum('BOOKING_MAX_DAYS_AHEAD', 365, 1, 730);
+// Upcoming (pending/confirmed) requests one phone number may have at the same time.
+const MAX_ACTIVE_PER_PHONE = envNum('MAX_ACTIVE_PER_PHONE', 3, 1, 50);
+// Cloudflare Turnstile (free captcha). Both values are needed to switch it on.
+const TURNSTILE_SITE_KEY = process.env.TURNSTILE_SITE_KEY || '';
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET || '';
+const turnstileOn = !!(TURNSTILE_SITE_KEY && TURNSTILE_SECRET);
+
+/* =========================================================
    CLOUDINARY CONFIG
 ========================================================= */
 cloudinary.config({
@@ -141,11 +162,17 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       enum: ['pending', 'confirmed', 'cancelled'],
       default: 'pending'
-    }
+    },
+    // Owner e-mail notification: pending -> sent | failed (retried automatically) | skipped (mail not configured)
+    notifyStatus: { type: String, enum: ['pending', 'sent', 'failed', 'skipped'], default: 'pending' },
+    notifyAttempts: { type: Number, default: 0 },
+    notifyError: { type: String, default: '', maxlength: 300 }
   },
   { timestamps: true }
 );
 bookingSchema.index({ status: 1, createdAt: -1 });
+bookingSchema.index({ date: 1, status: 1 });
+bookingSchema.index({ phone: 1, date: 1 });
 const Booking = mongoose.model('Booking', bookingSchema);
 
 /* ---- Play cards: prepaid hour packages (balance kept in minutes) ---- */
@@ -222,12 +249,15 @@ const settingsSchema = new mongoose.Schema(
 );
 const Settings = mongoose.model('Settings', settingsSchema);
 
+// These may be emptied by the admin (e.g. remove the Instagram link); every other field falls back to its default when empty.
+const CLEARABLE_SETTINGS = ['instagram', 'tiktok', 'reviewUrl'];
 async function getSettings() {
   const doc = await Settings.findOne({ key: 'main' }).lean();
   const out = { ...SETTINGS_DEFAULTS };
   if (doc) {
     Object.keys(SETTINGS_DEFAULTS).forEach((k) => {
-      if (doc[k]) out[k] = doc[k];
+      const v = doc[k];
+      if (CLEARABLE_SETTINGS.includes(k) ? v !== undefined && v !== null : v) out[k] = v;
     });
   }
   return out;
@@ -430,16 +460,17 @@ app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 // Content-Security-Policy: the site loads scripts/styles from itself (inline blocks included),
 // fonts from Google Fonts and photos from Cloudinary. Everything else is blocked.
+const CF_HOST = turnstileOn ? ' https://challenges.cloudflare.com' : '';
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline'" + CF_HOST,
   "script-src-attr 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "media-src 'self' blob:",
-  "connect-src 'self'",
-  "frame-src 'none'",
+  "connect-src 'self'" + CF_HOST,
+  'frame-src ' + (turnstileOn ? 'https://challenges.cloudflare.com' : "'none'"),
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -476,8 +507,19 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 /* =========================================================
    HEALTH CHECK
 ========================================================= */
+const dbUp = () => mongoose.connection.readyState === 1;
+// Liveness: the server process is running (use this for the hosting health check).
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, service: 'rudhat-alsaadah-api' });
+  res.json({ ok: true, service: 'rudhat-alsaadah-api', db: dbUp() ? 'up' : 'down' });
+});
+// Readiness: the database is connected too (503 when it is not).
+app.get('/api/ready', (req, res) => {
+  const up = dbUp();
+  res.status(up ? 200 : 503).set('Cache-Control', 'no-store').json({ ok: up, db: up ? 'up' : 'down' });
+});
+// Tells the booking form whether to show the security check.
+app.get('/api/captcha-config', (req, res) => {
+  res.set('Cache-Control', 'no-store').json({ enabled: turnstileOn, siteKey: turnstileOn ? TURNSTILE_SITE_KEY : '' });
 });
 
 /* =========================================================
@@ -847,7 +889,30 @@ function dayWindow(date, st) {
   if (wrapped) close += 1440;
   return { open, close, wrapped };
 }
-// existing = bookings of that date that are not cancelled (pending + confirmed both hold the slot)
+// UAE is UTC+4 all year (no daylight saving).
+const DUBAI_OFFSET_MS = 4 * 60 * 60 * 1000;
+function addDaysDubai(n) {
+  return new Date(Date.now() + DUBAI_OFFSET_MS + n * 86400000).toISOString().slice(0, 10);
+}
+// Bookings that currently hold a time slot: confirmed ones, and pending ones that are still inside the hold window.
+function holdsSlot() {
+  const cutoff = new Date(Date.now() - PENDING_HOLD_HOURS * 3600 * 1000);
+  return { $or: [{ status: 'confirmed' }, { status: 'pending', createdAt: { $gt: cutoff } }] };
+}
+function overlapCount(date, time, st, others) {
+  const { open, wrapped } = dayWindow(date, st);
+  const dur = Number(st.partyMinutes) || 180;
+  let start = toMin(time);
+  if (wrapped && start < open) start += 1440;
+  let n = 0;
+  for (const b of others) {
+    let bs = toMin(b.time);
+    if (wrapped && bs < open) bs += 1440;
+    if (bs < start + dur && start < bs + dur) n++;
+  }
+  return n;
+}
+// existing = bookings of that date that hold a slot (see holdsSlot)
 function checkSlot(date, time, st, existing) {
   const { open, close, wrapped } = dayWindow(date, st);
   const dur = Number(st.partyMinutes) || 180;
@@ -856,23 +921,18 @@ function checkSlot(date, time, st, existing) {
   let start = toMin(time);
   if (wrapped && start < open) start += 1440; // after-midnight part belongs to the same opening day
   if (start < open || start + dur > close) return { ok: false, reason: 'outside', close };
-  if (date === todayInDubai() && start < 1440 && start < toMin(nowDubaiHM())) {
-    return { ok: false, reason: 'passed' };
-  }
+  // Too soon (or already past): compare in Dubai wall-clock minutes, so it also works for after-midnight slots.
+  const nowMin = Math.floor((Date.now() + DUBAI_OFFSET_MS) / 60000);
+  const slotMin = Date.parse(date + 'T00:00:00Z') / 60000 + start;
+  if (slotMin < nowMin + MIN_LEAD_HOURS * 60) return { ok: false, reason: 'passed' };
   if (existing.length >= perDay) return { ok: false, reason: 'full' };
-  let overlap = 0;
-  for (const b of existing) {
-    let bs = toMin(b.time);
-    if (wrapped && bs < open) bs += 1440;
-    if (bs < start + dur && start < bs + dur) overlap++;
-  }
-  if (overlap >= parallel) return { ok: false, reason: 'busy' };
+  if (overlapCount(date, time, st, existing) >= parallel) return { ok: false, reason: 'busy' };
   return { ok: true };
 }
 function slotMessage(chk) {
   return {
     outside: 'The party must finish before closing time (' + to12h(fromMin(chk.close || 0)) + '). Please choose an earlier start time.',
-    passed: 'That time has already passed today. Please choose a later time.',
+    passed: 'That time is too soon to book online. Please choose a later time, or contact us on WhatsApp.',
     full: 'Sorry, we are fully booked on this day. Please choose another date.',
     busy: 'That time is no longer available. Please choose another time.'
   }[chk.reason];
@@ -890,7 +950,11 @@ function bookingJson(b) {
     packagePrice: b.packagePrice || '',
     packageName: b.packageName || '',
     status: b.status,
-    createdAt: b.createdAt
+    createdAt: b.createdAt,
+    notifyStatus: b.notifyStatus || '',
+    notifyError: b.notifyError || '',
+    // a pending request older than the hold window no longer blocks its time slot
+    holdExpired: b.status === 'pending' && new Date(b.createdAt).getTime() < Date.now() - PENDING_HOLD_HOURS * 3600 * 1000
   };
 }
 
@@ -965,10 +1029,6 @@ async function sendMail({ subject, html, text }) {
 }
 
 async function notifyNewBooking(b) {
-  if (!mailConfigured()) {
-    console.warn('Email notification skipped: set RESEND_API_KEY or GMAIL_USER + GMAIL_APP_PASSWORD.');
-    return;
-  }
   const ref = b.id.slice(0, 8).toUpperCase();
   console.log('Booking email: sending for ' + ref + ' (' + mailStatus() + ')');
   const waLink = 'https://wa.me/' + b.phone.replace(/\D/g, '');
@@ -1011,14 +1071,72 @@ async function notifyNewBooking(b) {
   });
 }
 
+// Sends the owner e-mail and records the result on the booking (sent / failed / skipped).
+async function sendBookingEmail(b) {
+  if (!mailConfigured()) {
+    console.warn('Email notification skipped: set RESEND_API_KEY or GMAIL_USER + GMAIL_APP_PASSWORD.');
+    await Booking.updateOne({ id: b.id }, { $set: { notifyStatus: 'skipped' } }).catch(() => {});
+    return;
+  }
+  try {
+    await notifyNewBooking(b);
+    await Booking.updateOne({ id: b.id }, { $set: { notifyStatus: 'sent', notifyError: '' }, $inc: { notifyAttempts: 1 } });
+  } catch (e) {
+    console.error('Booking email failed (' + b.id.slice(0, 8).toUpperCase() + '):', e.message);
+    await Booking.updateOne(
+      { id: b.id },
+      { $set: { notifyStatus: 'failed', notifyError: String(e.message).slice(0, 300) }, $inc: { notifyAttempts: 1 } }
+    ).catch(() => {});
+  }
+}
+
+// Every 5 minutes: retry e-mails that failed (or were never finished), at most 5 times, for 48 hours.
+const MAX_NOTIFY_ATTEMPTS = 5;
+async function retryFailedEmails() {
+  if (!dbUp() || !mailConfigured()) return;
+  const rows = await Booking.find({
+    notifyAttempts: { $lt: MAX_NOTIFY_ATTEMPTS },
+    createdAt: { $gt: new Date(Date.now() - 48 * 3600 * 1000) },
+    $or: [
+      { notifyStatus: 'failed' },
+      { notifyStatus: 'pending', createdAt: { $lt: new Date(Date.now() - 10 * 60 * 1000) } }
+    ]
+  }).limit(5);
+  for (const b of rows) await sendBookingEmail(b);
+}
+
+// Cloudflare Turnstile check (only when TURNSTILE_SITE_KEY + TURNSTILE_SECRET are set).
+// Runs BEFORE the booking lock so a slow check never delays other customers.
+async function verifyTurnstile(req, res, next) {
+  if (!turnstileOn) return next();
+  const tok = String((req.body && req.body.turnstileToken) || '').slice(0, 2048);
+  if (!tok) return res.status(400).json({ error: 'Please complete the security check and try again.' });
+  try {
+    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: TURNSTILE_SECRET, response: tok, remoteip: req.ip }),
+      signal: AbortSignal.timeout(5000)
+    });
+    const d = await r.json();
+    if (!d.success) return res.status(400).json({ error: 'Security check failed. Please try again.' });
+  } catch (e) {
+    // Cloudflare unreachable: do not block real customers (rate limits and the honeypot still apply).
+    console.error('Turnstile check unavailable, allowing request:', e.message);
+  }
+  next();
+}
+
 // Bookings are processed one at a time, so two simultaneous requests cannot take the same slot.
+// NOTE: this lock lives inside one Node process. Run ONE instance of the service (the default on Render);
+// with several instances, add a database-level reservation first.
 let bookingChain = Promise.resolve();
 function withBookingLock(fn) {
   const run = bookingChain.then(fn, fn);
   bookingChain = run.catch(() => {});
   return run;
 }
-app.post('/api/bookings', bookingLimit, (req, res) =>
+app.post('/api/bookings', bookingLimit, verifyTurnstile, (req, res) =>
   withBookingLock(() => createBooking(req, res))
 );
 
@@ -1051,6 +1169,9 @@ async function createBooking(req, res) {
     if (date < todayInDubai()) {
       return res.status(400).json({ error: 'The date cannot be in the past.' });
     }
+    if (date > addDaysDubai(MAX_DAYS_AHEAD)) {
+      return res.status(400).json({ error: 'Online bookings can be made up to ' + MAX_DAYS_AHEAD + ' days ahead.' });
+    }
     if (!TIME_RE.test(time)) {
       return res.status(400).json({ error: 'Please choose a valid time.' });
     }
@@ -1066,7 +1187,18 @@ async function createBooking(req, res) {
       });
     }
     // Availability: not in the past, party fits before closing, not double-booked, daily limit
-    const existing = await Booking.find({ date, status: { $ne: 'cancelled' } }).select('time').lean();
+    // Same phone number: limit open upcoming requests (stops one person filling the calendar)
+    const openForPhone = await Booking.countDocuments({
+      phone: phoneNorm,
+      date: { $gte: todayInDubai() },
+      ...holdsSlot()
+    });
+    if (openForPhone >= MAX_ACTIVE_PER_PHONE) {
+      return res.status(429).json({
+        error: 'You already have several open booking requests. Please contact us on WhatsApp to change or add a booking.'
+      });
+    }
+    const existing = await Booking.find({ date, ...holdsSlot() }).select('time').lean();
     const chk = checkSlot(date, time, st, existing);
     if (!chk.ok) {
       return res
@@ -1104,8 +1236,8 @@ async function createBooking(req, res) {
     });
     await booking.save();
 
-    // Fire-and-forget: a mail failure must never fail the customer's booking.
-    notifyNewBooking(booking).catch((e) => console.error('Booking email failed:', e.message));
+    // Fire-and-forget: a mail failure must never fail the customer's booking (status is stored and retried).
+    sendBookingEmail(booking).catch((e) => console.error('Booking email error:', e.message));
 
     res.status(201).json({ ok: true, reference: booking.id.slice(0, 8).toUpperCase() });
   } catch (err) {
@@ -1127,8 +1259,11 @@ app.get('/api/availability', async (req, res) => {
     if (date < todayInDubai()) {
       return res.status(400).json({ error: 'The date cannot be in the past.' });
     }
+    if (date > addDaysDubai(MAX_DAYS_AHEAD)) {
+      return res.status(400).json({ error: 'Online bookings can be made up to ' + MAX_DAYS_AHEAD + ' days ahead.' });
+    }
     const st = await getSettings();
-    const existing = await Booking.find({ date, status: { $ne: 'cancelled' } }).select('time').lean();
+    const existing = await Booking.find({ date, ...holdsSlot() }).select('time').lean();
     const { open, close } = dayWindow(date, st);
     const dur = Number(st.partyMinutes) || 180;
     const slots = [];
@@ -1181,16 +1316,36 @@ app.patch('/api/admin/bookings/:id', auth, async (req, res) => {
     if (!BOOKING_STATUSES.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
-    const booking = await Booking.findOneAndUpdate(
-      { id: req.params.id },
-      { status },
-      { new: true }
-    );
-    if (!booking) return res.status(404).json({ error: 'Booking not found' });
-    res.json(bookingJson(booking));
+    const prev = await Booking.findOne({ id: req.params.id });
+    if (!prev) return res.status(404).json({ error: 'Booking not found' });
+    if (status === 'confirmed' && prev.status !== 'confirmed') {
+      // A cancelled or expired request is being confirmed: make sure nobody else took the time meanwhile.
+      const stNow = await getSettings();
+      const others = await Booking.find({ date: prev.date, id: { $ne: prev.id }, ...holdsSlot() }).select('time').lean();
+      if (overlapCount(prev.date, prev.time, stNow, others) >= (Number(stNow.maxParallel) || 1)) {
+        return res.status(409).json({ error: 'Another booking now holds this time. Choose a different time with the customer first.' });
+      }
+    }
+    prev.status = status;
+    await prev.save();
+    res.json(bookingJson(prev));
   } catch (err) {
     console.error('Update booking error:', err);
     res.status(500).json({ error: 'Failed to update booking' });
+  }
+});
+
+app.post('/api/admin/bookings/:id/resend', auth, async (req, res) => {
+  try {
+    if (!mailConfigured()) return res.status(400).json({ error: 'E-mail is not configured on the server.' });
+    const b = await Booking.findOne({ id: req.params.id });
+    if (!b) return res.status(404).json({ error: 'Booking not found' });
+    await sendBookingEmail(b);
+    const fresh = await Booking.findOne({ id: b.id }).lean();
+    res.json(bookingJson(fresh));
+  } catch (err) {
+    console.error('Resend booking email error:', err);
+    res.status(500).json({ error: 'Failed to resend the e-mail' });
   }
 });
 
@@ -1228,9 +1383,17 @@ function cardState(c) {
   if (cardRemaining(c) <= 0) return 'used_up';
   return 'active';
 }
+// The public card page only shows these standard labels; staff notes stay private to the admin.
+const PUBLIC_LEDGER_NOTES = new Set(['Card created', 'Play time', 'Hours added']);
 function cardJson(c, forAdmin) {
   const ledger = (c.ledger || [])
-    .map((l) => ({ at: l.at, minutes: l.minutes, note: l.note || '' }))
+    .map((l) => ({
+      at: l.at,
+      minutes: l.minutes,
+      note: forAdmin
+        ? l.note || ''
+        : PUBLIC_LEDGER_NOTES.has(l.note) ? l.note : l.minutes > 0 ? 'Hours added' : 'Play time'
+    }))
     .reverse()
     .slice(0, forAdmin ? 200 : 15);
   const out = {
@@ -1528,6 +1691,7 @@ function buildJsonLd(st) {
       addressLocality: 'Sharjah',
       addressCountry: 'AE'
     },
+    priceRange: process.env.PRICE_RANGE || 'AED 20+',
     hasMap: st.mapUrl || 'https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA',
     openingHoursSpecification: [
       {
@@ -1573,7 +1737,6 @@ const gzCache = new Map(); // lang -> { html, gz }
 function pageHtml(lang, st) {
   let html = withJsonLd(indexTemplate, buildJsonLd(st));
   if (SITE_URL !== DEFAULT_BASE) html = html.split(DEFAULT_BASE).join(SITE_URL);
-  html = html.split('og-image.png?v=2').join('og-image.jpg?v=3');
   const url = SITE_URL + (lang === 'ar' ? '/ar' : '/');
   const alt =
     '<link rel="alternate" hreflang="en" href="' + SITE_URL + '/">\n' +
@@ -1649,6 +1812,10 @@ app.get('/sitemap.xml', (req, res) => {
 });
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// The clean addresses are /card and /privacy; the raw files redirect there (no duplicate pages for Google).
+app.get('/card.html', (req, res) => res.redirect(301, '/card'));
+app.get('/privacy.html', (req, res) => res.redirect(301, '/privacy'));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
@@ -1661,7 +1828,19 @@ app.get('*', (req, res) => {
     .sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
+// Always answer with JSON on /api (e.g. a malformed request body), never an HTML error page.
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const status = err.status || err.statusCode || 500;
+  if (status >= 500) console.error('Unhandled error:', err);
+  const msg = status === 413 ? 'Request too large' : status < 500 ? 'Invalid request' : 'Server error';
+  if (req.path.startsWith('/api')) return res.status(status).json({ error: msg });
+  res.status(status).type('text/plain').send(msg);
+});
+
 app.listen(PORT, () => {
   console.log(`Rudhat running on port ${PORT}`);
   console.log('Email notifications: ' + mailStatus());
+  console.log('Booking security check (Turnstile): ' + (turnstileOn ? 'ON' : 'OFF'));
+  setInterval(() => retryFailedEmails().catch((e) => console.error('Email retry error:', e.message)), 5 * 60 * 1000).unref();
 });
