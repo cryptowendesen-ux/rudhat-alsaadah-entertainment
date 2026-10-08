@@ -474,6 +474,36 @@ textarea{
 .tbar .n{width:34px;text-align:right;font-weight:700;flex:none}
 .tbars{max-height:340px;overflow:auto;margin-top:8px}
 .note-warn{color:#b45309;font-weight:700}
+/* ===== UX improvements ===== */
+.cards{grid-template-columns:repeat(2,1fr)!important}
+.cards .card:nth-child(n+3){display:none}
+.cards .card.tap{cursor:pointer}
+#attnBox{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+.attn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;font-size:14px;background:#e0f2fe;color:#075985;text-align:left}
+.attn.warn{background:#fef3c7;color:#92400e}.attn.bad{background:#ffedd5;color:#9a3412}.attn.ok{background:#dcfce7;color:#166534}
+.search{position:sticky;top:0;z-index:5;background:#fff;font-size:16px}
+.dayhead{font-weight:800;font-size:13px;color:#475569;text-transform:uppercase;letter-spacing:.05em;margin:20px 0 2px;padding-bottom:4px;border-bottom:2px solid #e2e8f0}
+.booking-row .title{font-size:19px}
+.bwhen{font-size:16px;font-weight:800;color:#0f172a;margin:2px 0 4px}
+.bwhen.rel{color:#2563eb}.booking-row.past{opacity:.6}
+.booking-row .desc{color:#334155;font-size:14px;line-height:1.5}
+.booking-row .desc.note-warn{background:#fef2f2;color:#b91c1c;border-radius:8px;padding:6px 8px;font-weight:700}
+.bactions{width:100%;align-items:stretch}
+.bactions button,.b-wa,.b-call,.bmore summary{min-height:44px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.b-call{background:#e0f2fe;color:#075985;text-decoration:none;border-radius:8px;padding:8px 14px;font-weight:700}
+.b-wa{flex:1}
+.bmore summary{list-style:none;cursor:pointer;background:#f1f5f9;border-radius:8px;padding:8px 16px;font-weight:800;font-size:18px}
+.bmore summary::-webkit-details-marker{display:none}
+.bmore[open]{flex-basis:100%}
+.bmenu{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding:10px;background:#f8fafc;border-radius:10px}
+.bmenu .meta{flex-basis:100%;font-size:12px;color:#64748b}
+.bmenu .delete{margin-left:auto}
+.panel.collapsible>.panelhead h2{cursor:pointer;flex:1;user-select:none}
+.panel.collapsible>.panelhead h2::after{content:"▾";float:right;color:#64748b;margin-left:8px}
+.panel.collapsed>.panelhead h2::after{content:"▸"}
+.panel.collapsed>:not(.panelhead){display:none!important}
+.panel.collapsed>.panelhead{margin-bottom:0}
+.panel.collapsed .panelhead .add{display:none}
 </style>
 </head>
 
@@ -488,11 +518,12 @@ textarea{
 
   <h1>Business Dashboard</h1>
   <div class="sub">
-    Manage your RUDHAT ALSAADAH website content.
+    Today at a glance, then bookings, cards and settings.
   </div>
 
+  <div id="attnBox"></div>
   <section class="cards">
-    <div class="card"><span>PENDING</span><strong id="pendingCount">0</strong></div>
+    <div class="card tap" onclick="showPending()"><span>PENDING</span><strong id="pendingCount">0</strong></div>
     <div class="card"><span>CONFIRMED</span><strong id="confirmedCount">0</strong></div>
     <div class="card"><span>CANCELLED</span><strong id="cancelledCount">0</strong></div>
     <div class="card"><span>ALL BOOKINGS</span><strong id="totalCount">0</strong></div>
@@ -1263,32 +1294,74 @@ let calMonth = null;      // { y, m } (m: 0-11)
 let calSel = null;        // 'YYYY-MM-DD'
 
 /* ---------- one booking row (used by the list and the calendar day) ---------- */
+function relDay(iso){
+  const t = dubaiToday();
+  return iso === t ? 'Today' : iso === addDays(t,1) ? 'Tomorrow' : '';
+}
 function bookingRowHtml(b){
   const waText = b.status === 'confirmed'
     ? 'Hello ' + b.name + ', your birthday booking at RUDHAT ALSAADAH is confirmed ✅\n📅 ' + b.date + ' · ⏰ ' + fmt12(b.time) + ' · 👧 ' + b.children + ' children\nRef: ' + b.reference + '\nWe look forward to celebrating with you 🎂'
     : 'Hello ' + b.name + ', this is RUDHAT ALSAADAH regarding your birthday booking (Ref: ' + b.reference + ') on ' + b.date + ' at ' + fmt12(b.time) + '.';
   const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(waText);
-  const acts = [];
-  if(b.status !== 'confirmed') acts.push(`<button class="b-confirm" onclick="setBookingStatus('${escapeHtml(b.id)}','confirmed')">✔ Confirm</button>`);
-  if(b.status !== 'cancelled') acts.push(`<button class="b-cancel" onclick="setBookingStatus('${escapeHtml(b.id)}','cancelled')">✖ Cancel</button>`);
-  if(b.status !== 'pending') acts.push(`<button class="b-reopen" onclick="setBookingStatus('${escapeHtml(b.id)}','pending')">↺ Pending</button>`);
+  const id = escapeHtml(b.id);
+  const rel = relDay(b.date);
+  const past = b.date < dubaiToday();
+  const n = +b.children || 0;
+  const primary = [];
+  if(b.status === 'pending') primary.push(`<button class="b-confirm" onclick="setBookingStatus('${id}','confirmed')">✔ Confirm</button>`);
+  if(b.status === 'cancelled') primary.push(`<button class="b-reopen" onclick="setBookingStatus('${id}','pending')">↺ Reopen</button>`);
+  primary.push(`<a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${b.status === 'confirmed' ? '✅ Send confirmation' : '💬 WhatsApp'}</a>`);
+  primary.push(`<a class="b-call" href="tel:${escapeHtml(b.phone)}">📞 Call</a>`);
+  const menu = [];
+  if(b.status !== 'cancelled') menu.push(`<button class="b-cancel" onclick="setBookingStatus('${id}','cancelled')">✖ Cancel booking</button>`);
+  if(b.status === 'confirmed') menu.push(`<button class="b-reopen" onclick="setBookingStatus('${id}','pending')">↺ Move back to Pending</button>`);
+  if(b.notifyStatus === 'failed') menu.push(`<button class="b-reopen" onclick="resendBookingEmail('${id}')">✉ Resend email</button>`);
+  if(isOwner()) menu.push(`<button class="delete" onclick="removeBooking('${id}')">🗑 Delete</button>`);
   return `
-    <div class="row booking-row">
+    <div class="row booking-row${past ? ' past' : ''}">
       <div class="info">
+        <div class="bwhen${rel ? ' rel' : ''}">${rel ? rel + ' · ' : ''}${escapeHtml(niceDate(b.date))} · ${escapeHtml(fmt12(b.time))}</div>
         <div class="title">${escapeHtml(b.name)} <span class="badge ${escapeHtml(b.status)}">${escapeHtml(b.status)}</span>${b.notifyStatus === 'failed' ? '<span class="badge warn" title="' + escapeHtml(b.notifyError || '') + '">⚠ email not sent</span>' : ''}${b.holdExpired ? '<span class="badge muted" title="This pending request no longer blocks its time slot">⏳ slot released</span>' : ''}</div>
-        <div class="desc">📅 ${escapeHtml(b.date)} · ⏰ ${escapeHtml(fmt12(b.time))} · 👧 ${escapeHtml(b.children)} children${b.packageName ? ' · 🎁 ' + escapeHtml(b.packageName) + (b.packagePrice ? ' (' + escapeHtml(b.packagePrice) + ')' : '') : ''}</div>
-        <div class="desc">📱 <a href="tel:${escapeHtml(b.phone)}">${escapeHtml(b.phone)}</a> · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}</div>
-        ${b.childName ? `<div class="desc">&#127880; ${escapeHtml(b.childName)}${b.childAge !== null && b.childAge !== undefined ? ' &middot; ' + escapeHtml(b.childAge) + ' yrs' : ''}${b.waiverAccepted ? ' &middot; &#9989; guardian declaration' : ''}</div>` : ''}
+        <div class="desc">👧 ${n} ${n === 1 ? 'child' : 'children'}${b.packageName ? ' · 🎁 ' + escapeHtml(b.packageName) + (b.packagePrice ? ' (' + escapeHtml(b.packagePrice) + ')' : '') : ''}</div>
+        ${b.childName ? `<div class="desc">&#127880; ${escapeHtml(b.childName)}${b.childAge !== null && b.childAge !== undefined ? ' &middot; ' + escapeHtml(b.childAge) + ' yrs' : ''}</div>` : ''}
         ${b.allergies ? `<div class="desc note-warn">&#9888; Allergies / medical: ${escapeHtml(b.allergies)}</div>` : ''}
         ${b.message ? `<div class="desc">💬 ${escapeHtml(b.message)}</div>` : ''}
       </div>
       <div class="bactions">
-        ${acts.join('')}
-        <a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${b.status === 'confirmed' ? '✅ Send confirmation' : 'WhatsApp'}</a>
-        ${b.notifyStatus === 'failed' ? `<button class="b-reopen" onclick="resendBookingEmail('${escapeHtml(b.id)}')">✉ Resend email</button>` : ''}
-        ${isOwner() ? `<button class="delete" onclick="removeBooking('${escapeHtml(b.id)}')">Delete</button>` : ''}
+        ${primary.join('')}
+        <details class="bmore"><summary aria-label="More actions">⋯</summary>
+          <div class="bmenu">${menu.join('')}<div class="meta">📱 ${escapeHtml(b.phone)} · Ref ${escapeHtml(b.reference)} · received ${escapeHtml(new Date(b.createdAt).toLocaleString())}${b.waiverAccepted ? ' · ✅ guardian declaration' : ''}</div></div>
+        </details>
       </div>
     </div>`;
+}
+
+function groupedBookingsHtml(list){
+  const t = dubaiToday(), t1 = addDays(t,1), wk = addDays(t,6);
+  const key = b => b.date + ' ' + b.time;
+  const up = list.filter(b => b.date >= t).sort((a,b) => key(a).localeCompare(key(b)));
+  const old = list.filter(b => b.date < t).sort((a,b) => key(b).localeCompare(key(a)));
+  const groups = [['Today', up.filter(b => b.date === t)], ['Tomorrow', up.filter(b => b.date === t1)],
+    ['This week', up.filter(b => b.date > t1 && b.date <= wk)], ['Later', up.filter(b => b.date > wk)], ['Past', old]];
+  return groups.filter(g => g[1].length).map(g => `<div class="dayhead">${g[0]} (${g[1].length})</div>` + g[1].map(bookingRowHtml).join('')).join('');
+}
+
+function showPending(){
+  bView = 'list'; bFilter = 'pending'; renderBookings();
+  document.getElementById('bookingsPanel').scrollIntoView({behavior:'smooth'});
+}
+function renderAttention(){
+  const t = dubaiToday(), t1 = addDays(t,1);
+  const pend = bookings.filter(b => b.status === 'pending').length;
+  const td = bookings.filter(b => isActive(b) && b.date === t).length;
+  const tm = bookings.filter(b => isActive(b) && b.date === t1).length;
+  const bad = bookings.filter(b => b.notifyStatus === 'failed').length;
+  const o = [];
+  if(pend) o.push(`<button class="attn warn" onclick="showPending()">⏳ ${pend} pending to review →</button>`);
+  if(td || tm) o.push(`<button class="attn" onclick="setBookingFilter('confirmed');showPending()">🎉 Today ${td} · Tomorrow ${tm}</button>`);
+  if(bad) o.push(`<span class="attn bad">⚠ ${bad} email${bad > 1 ? 's' : ''} not sent</span>`);
+  if(!o.length) o.push('<span class="attn ok">✅ All clear — nothing needs attention</span>');
+  document.getElementById('attnBox').innerHTML = o.join('');
 }
 
 function renderBookings(){
@@ -1318,10 +1391,11 @@ function renderBookings(){
     (b.name || '').toLowerCase().includes(q) || (b.reference || '').toLowerCase().includes(q) ||
     (b.date || '').includes(q) || (qd && normPhone(b.phone).includes(qd))));
   document.getElementById('bookingsList').innerHTML = list.length
-    ? list.map(bookingRowHtml).join('')
+    ? groupedBookingsHtml(list)
     : '<div class="empty">No bookings here.</div>';
 
   renderStats();
+  renderAttention();
   renderReminders();
   if(bView === 'calendar') renderCalendar();
   renderCustomers();
@@ -1514,7 +1588,7 @@ async function resendBookingEmail(id){
 }
 
 async function removeBooking(id){
-  if(!confirm('Delete this booking permanently?')) return;
+  if(!confirm('Delete the booking of ' + ((bookings.find(x => x.id === id) || {}).name || 'this customer') + ' permanently?')) return;
   try{
     await api('/api/admin/bookings/' + encodeURIComponent(id), { method:'DELETE' });
     await loadBookings();
@@ -2044,6 +2118,28 @@ document.getElementById('backupBtn').onclick = async () => {
   loadCards();
   loadClosed();
   setInterval(loadBookings, 60000);
+})();
+
+/* ---------- collapsible sections (state remembered) ---------- */
+(function(){
+  const OPEN_BY_DEFAULT = ['bookingsPanel','cardsPanel'];
+  function setup(panel){
+    if(panel.dataset.coll) return;
+    const h = panel.querySelector(':scope > .panelhead h2');
+    if(!h) return;
+    panel.dataset.coll = '1';
+    const key = 'panel:' + (panel.id || h.textContent.trim());
+    let saved = null; try{ saved = localStorage.getItem(key); }catch(e){}
+    const open = saved ? saved === 'open' : OPEN_BY_DEFAULT.includes(panel.id);
+    panel.classList.add('collapsible'); if(!open) panel.classList.add('collapsed');
+    h.addEventListener('click', () => {
+      const c = panel.classList.toggle('collapsed');
+      try{ localStorage.setItem(key, c ? 'closed' : 'open'); }catch(e){}
+    });
+  }
+  const run = () => document.querySelectorAll('main.wrap section.panel').forEach(setup);
+  run();
+  new MutationObserver(run).observe(document.querySelector('main.wrap'), {childList:true, subtree:true});
 })();
 </script>
 
