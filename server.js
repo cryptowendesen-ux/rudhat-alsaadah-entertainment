@@ -257,6 +257,38 @@ const statSchema = new mongoose.Schema({
 statSchema.index({ day: 1, event: 1 }, { unique: true });
 const Stat = mongoose.model('Stat', statSchema);
 
+/* ---- Activity log (who did what); entries are deleted automatically after 180 days ---- */
+const auditSchema = new mongoose.Schema({
+  at: { type: Date, default: Date.now },
+  actor: { type: String, default: '' },
+  role: { type: String, default: '' },
+  action: { type: String, default: '' },
+  target: { type: String, default: '' },
+  detail: { type: String, default: '' },
+  ip: { type: String, default: '' },
+  ok: { type: Boolean, default: true }
+});
+auditSchema.index({ at: 1 }, { expireAfterSeconds: 180 * 86400 });
+const AuditLog = mongoose.model('AuditLog', auditSchema);
+
+/* ---- Owner two-step verification (TOTP, works with Google Authenticator / Authy / Microsoft Authenticator) ---- */
+const ownerAuthSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  secretEnc: { type: String, default: '' },
+  enabled: { type: Boolean, default: false },
+  lastStep: { type: Number, default: 0 }
+});
+const OwnerAuth = mongoose.model('OwnerAuth', ownerAuthSchema);
+
+/* ---- Short lock per booking day: stops two server instances taking the same time slot ---- */
+const bookingLockSchema = new mongoose.Schema({
+  _id: { type: String },
+  token: { type: String },
+  expiresAt: { type: Date }
+});
+bookingLockSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+const BookingLock = mongoose.model('BookingLock', bookingLockSchema);
+
 const SETTINGS_DEFAULTS = {
   whatsapp: '971585187788',
   displayPhone: '+971 58 518 7788',
@@ -472,6 +504,71 @@ function verifyPassword(pw, stored) {
 }
 const DUMMY_HASH = hashPassword(crypto.randomBytes(8).toString('hex')); // used so unknown e-mails take the same time
 
+/* ---- Two-step verification helpers (RFC 6238 TOTP, SHA-1, 6 digits, 30 s) ---- */
+const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+function b32enc(buf) {
+  let bits = 0, val = 0, out = '';
+  for (const byte of buf) {
+    val = (val << 8) | byte; bits += 8;
+    while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits > 0) out += B32[(val << (5 - bits)) & 31];
+  return out;
+}
+function b32dec(str) {
+  let bits = 0, val = 0;
+  const out = [];
+  for (const ch of String(str).toUpperCase()) {
+    const i = B32.indexOf(ch);
+    if (i < 0) continue;
+    val = (val << 5) | i; bits += 5;
+    if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; }
+  }
+  return Buffer.from(out);
+}
+function hotp(secretBuf, counter) {
+  const buf = Buffer.alloc(8);
+  buf.writeBigUInt64BE(BigInt(counter));
+  const h = crypto.createHmac('sha1', secretBuf).update(buf).digest();
+  const o = h[19] & 15;
+  const num = ((h[o] & 0x7f) << 24) | (h[o + 1] << 16) | (h[o + 2] << 8) | h[o + 3];
+  return String(num % 1000000).padStart(6, '0');
+}
+// Returns the matched 30-second step (> 0) or 0. A code can be used once (steps <= lastStep are refused).
+function totpCheck(secretB32, code, lastStep) {
+  const c = String(code || '').replace(/\s/g, '');
+  if (!/^\d{6}$/.test(c)) return 0;
+  const sec = b32dec(secretB32);
+  const now = Math.floor(Date.now() / 30000);
+  for (let w = -1; w <= 1; w++) {
+    const step = now + w;
+    if (step <= lastStep) continue;
+    if (safeEqual(hotp(sec, step), c)) return step;
+  }
+  return 0;
+}
+// The TOTP secret is stored encrypted (AES-256-GCM) with a key derived from JWT_SECRET
+const totpKey = () => crypto.createHash('sha256').update('rudhat-totp:' + process.env.JWT_SECRET).digest();
+function encSecret(plain) {
+  const iv = crypto.randomBytes(12);
+  const c = crypto.createCipheriv('aes-256-gcm', totpKey(), iv);
+  const enc = Buffer.concat([c.update(plain, 'utf8'), c.final()]);
+  return [iv, c.getAuthTag(), enc].map((b) => b.toString('base64')).join('.');
+}
+function decSecret(stored) {
+  const [iv, tag, enc] = String(stored).split('.').map((x) => Buffer.from(x, 'base64'));
+  const d = crypto.createDecipheriv('aes-256-gcm', totpKey(), iv);
+  d.setAuthTag(tag);
+  return Buffer.concat([d.update(enc), d.final()]).toString('utf8');
+}
+// Five wrong codes block code entry for 15 minutes (the password alone is never enough)
+const totpFails = [];
+function totpLocked() {
+  const cut = Date.now() - 15 * 60 * 1000;
+  while (totpFails.length && totpFails[0] < cut) totpFails.shift();
+  return totpFails.length >= 5;
+}
+
 /* =========================================================
    RESPONSE HELPERS
 ========================================================= */
@@ -539,10 +636,12 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // Content-Security-Policy: the site loads scripts/styles from itself (inline blocks included),
 // fonts from Google Fonts and photos from Cloudinary. Everything else is blocked.
 const CF_HOST = turnstileOn ? ' https://challenges.cloudflare.com' : '';
-const CSP = [
+const cspFor = (scriptHashes, attrInline) => [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'" + CF_HOST,
-  "script-src-attr 'unsafe-inline'",
+  // inline <script> blocks run only if their SHA-256 hash is listed here (computed from the exact page we send)
+  "script-src 'self'" + (scriptHashes.length ? ' ' + scriptHashes.join(' ') : '') + CF_HOST,
+  // inline event attributes (onclick=...) are off everywhere except the admin dashboard
+  attrInline ? "script-src-attr 'unsafe-inline'" : "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https://res.cloudinary.com",
@@ -555,6 +654,35 @@ const CSP = [
   "frame-ancestors 'none'",
   'upgrade-insecure-requests'
 ].join('; ');
+const CSP = cspFor([], false); // default for API answers and files without inline scripts
+
+function inlineScriptHashes(html) {
+  const out = [];
+  const re = /<script(?![^>]*\bsrc\s*=)([^>]*)>([\s\S]*?)<\/script>/gi;
+  let m;
+  while ((m = re.exec(html))) {
+    if (/type\s*=\s*["']?application\/ld\+json/i.test(m[1])) continue; // data block, never executed
+    const text = m[2].replace(/\r\n?/g, '\n'); // browsers normalise line breaks before hashing
+    if (!text.trim()) continue;
+    out.push("'sha256-" + crypto.createHash('sha256').update(text, 'utf8').digest('base64') + "'");
+  }
+  return out;
+}
+const pageCsp = (html, attrInline) => cspFor(inlineScriptHashes(html), !!attrInline);
+const htmlFileCache = new Map();
+const homeCsp = new Map();
+function sendHtmlFile(res, rel, opts = {}) {
+  let c = htmlFileCache.get(rel);
+  if (!c) {
+    const html = fs.readFileSync(path.join(__dirname, 'public', rel), 'utf8');
+    c = { html, csp: pageCsp(html, opts.attrInline) };
+    htmlFileCache.set(rel, c);
+  }
+  if (opts.status) res.status(opts.status);
+  if (opts.headers) res.set(opts.headers);
+  res.set('Content-Security-Policy', c.csp);
+  res.type('html').send(c.html);
+}
 app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy', CSP);
   // camera is only needed by the admin QR scanner (same origin); everything else is off
@@ -567,9 +695,65 @@ const noStoreNoIndex = (req, res, next) => {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   next();
 };
+const AUDIT_LABELS = {
+  'POST /api/admin/items': 'Created website item',
+  'PUT /api/admin/items/:type/:id': 'Edited website item',
+  'DELETE /api/admin/items/:type/:id': 'Deleted website item',
+  'POST /api/admin/gallery/upload': 'Uploaded a photo',
+  'PATCH /api/admin/bookings/:id': 'Changed booking status',
+  'POST /api/admin/bookings/:id/resend': 'Re-sent booking e-mail',
+  'POST /api/admin/bookings/:id/reminded': 'Marked reminder as sent',
+  'DELETE /api/admin/bookings/:id': 'Deleted a booking',
+  'POST /api/admin/cards': 'Created a play card',
+  'POST /api/admin/cards/:id/use': 'Used card hours',
+  'POST /api/admin/cards/:id/topup': 'Topped up a card',
+  'PATCH /api/admin/cards/:id': 'Edited a play card',
+  'DELETE /api/admin/cards/:id': 'Deleted a play card',
+  'PUT /api/admin/settings': 'Changed settings',
+  'POST /api/admin/closed-dates': 'Closed a day',
+  'DELETE /api/admin/closed-dates/:date': 'Re-opened a day',
+  'POST /api/admin/staff': 'Created a staff account',
+  'PATCH /api/admin/staff/:id': 'Changed a staff account',
+  'DELETE /api/admin/staff/:id': 'Deleted a staff account',
+  'POST /api/admin/2fa/enable': 'Turned on two-step verification',
+  'POST /api/admin/2fa/disable': 'Turned off two-step verification',
+  'POST /api/auth/logout': 'Signed out',
+  'POST /api/auth/logout-all': 'Signed out all devices'
+};
+const AUDIT_BODY_KEYS = ['status', 'minutes', 'hours', 'note', 'active', 'type', 'title', 'date', 'reason', 'name', 'email', 'holder'];
+function writeAudit(entry) {
+  AuditLog.create(entry).catch((err) => console.error('Audit write failed:', err.message));
+}
+// Records every successful change made in the admin area (never passwords or tokens)
+function auditMiddleware(req, res, next) {
+  if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') return next();
+  res.on('finish', () => {
+    try {
+      if (res.statusCode >= 400 || !req.adminRole) return;
+      const key = req.method + ' ' + (req.route ? req.route.path : req.path);
+      const body = req.body && typeof req.body === 'object' ? req.body : {};
+      const detail = AUDIT_BODY_KEYS.filter((k) => body[k] !== undefined && typeof body[k] !== 'object')
+        .map((k) => k + '=' + String(body[k]).slice(0, 60)).join('; ');
+      writeAudit({
+        actor: req.adminName || 'Owner',
+        role: req.adminRole,
+        action: AUDIT_LABELS[key] || key,
+        target: String(req.params.id || req.params.date || '').slice(0, 60),
+        detail,
+        ip: String(req.ip || '').slice(0, 60)
+      });
+    } catch (e) {
+      console.error('Audit middleware error:', e.message);
+    }
+  });
+  next();
+}
+
 app.use('/admin', noStoreNoIndex);
 app.use('/api/admin', noStoreNoIndex);
 app.use('/api/auth', noStoreNoIndex);
+app.use('/api/admin', auditMiddleware);
+app.use('/api/auth', auditMiddleware);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
@@ -649,8 +833,28 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       const okPw = verifyPassword(password, staff ? staff.passHash : DUMMY_HASH);
       if (staff && okPw) role = 'staff';
     }
+    // Owner two-step verification (switch off in an emergency with DISABLE_OWNER_2FA=true in Render)
+    if (role === 'owner' && process.env.DISABLE_OWNER_2FA !== 'true') {
+      const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
+      if (oa) {
+        const code = String((req.body && req.body.code) || '').trim();
+        if (!code) return res.json({ needCode: true });
+        if (totpLocked()) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
+        let step = 0;
+        try { step = totpCheck(decSecret(oa.secretEnc), code, oa.lastStep || 0); }
+        catch (e) { console.error('2FA decrypt error (did JWT_SECRET change?):', e.message); }
+        if (!step) {
+          totpFails.push(Date.now());
+          writeAudit({ actor: 'Owner', role: 'owner', action: 'Wrong 2-step code', ip: String(req.ip || '').slice(0, 60), ok: false });
+          await sleep(600);
+          return res.status(401).json({ error: 'Invalid code' });
+        }
+        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step } });
+      }
+    }
     if (!role) {
       console.warn('Failed admin sign-in from ' + req.ip);
+      writeAudit({ actor: email.slice(0, 60), role: '', action: 'Failed sign-in', ip: String(req.ip || '').slice(0, 60), ok: false });
       await sleep(600); // slows down guessing
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -667,6 +871,7 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       name: staff ? staff.name : 'Owner'
     }).save();
 
+    writeAudit({ actor: staff ? staff.name : 'Owner', role, action: 'Signed in', ip: String(req.ip || '').slice(0, 60) });
     res.json({ token: token({ email, jti, exp }), role, name: staff ? staff.name : 'Owner' });
   } catch (err) {
     console.error('Login error:', err);
@@ -1235,6 +1440,10 @@ async function verifyTurnstile(req, res, next) {
     if (!d.success) return res.status(400).json({ error: 'Security check failed. Please try again.' });
   } catch (e) {
     // Cloudflare unreachable: do not block real customers (rate limits and the honeypot still apply).
+    if (process.env.TURNSTILE_FAIL_CLOSED === 'true') {
+      console.error('Turnstile check unavailable, blocking request:', e.message);
+      return res.status(503).json({ error: 'The security check is temporarily unavailable. Please contact us on WhatsApp.' });
+    }
     console.error('Turnstile check unavailable, allowing request:', e.message);
   }
   next();
@@ -1253,7 +1462,43 @@ app.post('/api/bookings', bookingLimit, verifyTurnstile, (req, res) =>
   withBookingLock(() => createBooking(req, res))
 );
 
+// Distributed lock for one booking day (works even if the service runs on several instances)
+async function withDateLock(date, fn) {
+  const id = 'day:' + date;
+  const tokenId = crypto.randomUUID();
+  const deadline = Date.now() + 8000;
+  for (;;) {
+    try {
+      await BookingLock.create({ _id: id, token: tokenId, expiresAt: new Date(Date.now() + 15000) });
+      break;
+    } catch (e) {
+      if (!e || e.code !== 11000) throw e;
+      await BookingLock.deleteOne({ _id: id, expiresAt: { $lt: new Date() } }); // a crashed holder never blocks for long
+      if (Date.now() > deadline) throw new Error('lock-busy');
+      await sleep(60 + Math.floor(Math.random() * 80));
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    await BookingLock.deleteOne({ _id: id, token: tokenId }).catch(() => {});
+  }
+}
+
 async function createBooking(req, res) {
+  const d = String((req.body && req.body.date) || '').trim();
+  if (!DATE_RE.test(d)) return createBookingInner(req, res);
+  try {
+    return await withDateLock(d, () => createBookingInner(req, res));
+  } catch (e) {
+    if (e && e.message === 'lock-busy') {
+      return res.status(503).json({ error: 'The booking system is busy. Please try again in a moment.' });
+    }
+    throw e;
+  }
+}
+
+async function createBookingInner(req, res) {
   try {
     const body = req.body || {};
 
@@ -1462,16 +1707,27 @@ app.patch('/api/admin/bookings/:id', auth, async (req, res) => {
     }
     const prev = await Booking.findOne({ id: req.params.id });
     if (!prev) return res.status(404).json({ error: 'Booking not found' });
-    if (status === 'confirmed' && prev.status !== 'confirmed') {
-      // A cancelled or expired request is being confirmed: make sure nobody else took the time meanwhile.
-      const stNow = await getSettings();
-      const others = await Booking.find({ date: prev.date, id: { $ne: prev.id }, ...holdsSlot() }).select('time').lean();
-      if (overlapCount(prev.date, prev.time, stNow, others) >= (Number(stNow.maxParallel) || 1)) {
-        return res.status(409).json({ error: 'Another booking now holds this time. Choose a different time with the customer first.' });
+    const apply = async () => {
+      if (status === 'confirmed' && prev.status !== 'confirmed') {
+        // A cancelled or expired request is being confirmed: make sure nobody else took the time meanwhile.
+        const stNow = await getSettings();
+        const others = await Booking.find({ date: prev.date, id: { $ne: prev.id }, ...holdsSlot() }).select('time').lean();
+        if (overlapCount(prev.date, prev.time, stNow, others) >= (Number(stNow.maxParallel) || 1)) return 'conflict';
       }
+      prev.status = status;
+      await prev.save();
+      return 'ok';
+    };
+    let outcome;
+    try {
+      outcome = status === 'confirmed' ? await withDateLock(prev.date, apply) : await apply();
+    } catch (e) {
+      if (e && e.message === 'lock-busy') return res.status(503).json({ error: 'The booking system is busy. Please try again.' });
+      throw e;
     }
-    prev.status = status;
-    await prev.save();
+    if (outcome === 'conflict') {
+      return res.status(409).json({ error: 'Another booking now holds this time. Choose a different time with the customer first.' });
+    }
     res.json(bookingJson(prev));
   } catch (err) {
     console.error('Update booking error:', err);
@@ -1603,12 +1859,10 @@ app.get('/api/cards/:code', cardViewLimit, async (req, res) => {
 });
 
 function sendCardPage(req, res) {
-  res
-    .set({ 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-cache' })
-    .sendFile(path.join(__dirname, 'public', 'card.html'));
+  sendHtmlFile(res, 'card.html', { headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-cache' } });
 }
 app.get(['/card', '/card/:code'], sendCardPage);
-app.get('/privacy', (req, res) => res.sendFile(path.join(__dirname, 'public', 'privacy.html')));
+app.get('/privacy', (req, res) => sendHtmlFile(res, 'privacy.html'));
 
 app.get('/api/admin/cards', auth, async (req, res) => {
   try {
@@ -2010,6 +2264,100 @@ app.get('/api/admin/stats', auth, requireOwner, async (req, res) => {
 });
 
 /* =========================================================
+   ADMIN: TWO-STEP VERIFICATION (owner only)
+========================================================= */
+app.get('/api/admin/2fa', auth, requireOwner, async (req, res) => {
+  const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
+  res.json({ enabled: !!(oa && oa.enabled), emergencyOff: process.env.DISABLE_OWNER_2FA === 'true' });
+});
+
+app.post('/api/admin/2fa/setup', auth, requireOwner, async (req, res) => {
+  try {
+    const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
+    if (oa && oa.enabled) return res.status(400).json({ error: 'Two-step verification is already on.' });
+    const secret = b32enc(crypto.randomBytes(20));
+    await OwnerAuth.updateOne({ key: 'owner' }, { $set: { secretEnc: encSecret(secret), enabled: false, lastStep: 0 } }, { upsert: true });
+    const label = encodeURIComponent('Rudhat Admin:' + String(process.env.ADMIN_EMAIL || 'owner'));
+    res.json({ secret, otpauth: 'otpauth://totp/' + label + '?secret=' + secret + '&issuer=Rudhat%20Admin&digits=6&period=30' });
+  } catch (err) {
+    console.error('2FA setup error:', err);
+    res.status(500).json({ error: 'Could not start the setup.' });
+  }
+});
+
+app.post('/api/admin/2fa/enable', auth, requireOwner, async (req, res) => {
+  try {
+    const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
+    if (!oa || !oa.secretEnc) return res.status(400).json({ error: 'Start the setup first.' });
+    if (oa.enabled) return res.status(400).json({ error: 'Two-step verification is already on.' });
+    const step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, 0);
+    if (!step) return res.status(400).json({ error: 'That code is not correct. Check the app and try again.' });
+    await OwnerAuth.updateOne({ key: 'owner' }, { $set: { enabled: true, lastStep: step } });
+    res.json({ enabled: true });
+  } catch (err) {
+    console.error('2FA enable error:', err);
+    res.status(500).json({ error: 'Could not turn on two-step verification.' });
+  }
+});
+
+app.post('/api/admin/2fa/disable', auth, requireOwner, async (req, res) => {
+  try {
+    const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
+    if (!oa) return res.status(400).json({ error: 'Two-step verification is not on.' });
+    if (totpLocked()) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
+    const step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, oa.lastStep || 0);
+    if (!step) { totpFails.push(Date.now()); return res.status(400).json({ error: 'That code is not correct.' }); }
+    await OwnerAuth.deleteOne({ key: 'owner' });
+    res.json({ enabled: false });
+  } catch (err) {
+    console.error('2FA disable error:', err);
+    res.status(500).json({ error: 'Could not turn off two-step verification.' });
+  }
+});
+
+/* =========================================================
+   ADMIN: ACTIVITY LOG + BACKUP (owner only)
+========================================================= */
+app.get('/api/admin/audit', auth, requireOwner, async (req, res) => {
+  try {
+    const limit = Math.min(300, Math.max(20, parseInt(req.query.limit, 10) || 100));
+    const filter = req.query.failed === '1' ? { ok: false } : {};
+    const rows = await AuditLog.find(filter).sort({ at: -1 }).limit(limit).lean();
+    res.json(rows.map((r) => ({
+      at: r.at, actor: r.actor, role: r.role, action: r.action, target: r.target, detail: r.detail, ip: r.ip, ok: r.ok !== false
+    })));
+  } catch (err) {
+    console.error('Audit list error:', err);
+    res.status(500).json({ error: 'Failed to load the activity log' });
+  }
+});
+
+// One JSON file with everything important (staff password hashes and sessions are left out)
+app.get('/api/admin/backup', auth, requireOwner, async (req, res) => {
+  try {
+    const [items, bookings, cards, settings, closedDates, staff] = await Promise.all([
+      Item.find({}).lean(),
+      Booking.find({}).lean(),
+      PlayCard.find({}).lean(),
+      Settings.find({}).lean(),
+      ClosedDate.find({}).lean(),
+      Staff.find({}).select('-passHash').lean()
+    ]);
+    writeAudit({ actor: req.adminName || 'Owner', role: 'owner', action: 'Downloaded a backup', ip: String(req.ip || '').slice(0, 60) });
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.set({
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="rudhat-backup-' + stamp + '.json"',
+      'Cache-Control': 'no-store'
+    });
+    res.send(JSON.stringify({ exportedAt: new Date().toISOString(), items, bookings, cards, settings, closedDates, staff }, null, 1));
+  } catch (err) {
+    console.error('Backup error:', err);
+    res.status(500).json({ error: 'Failed to create the backup' });
+  }
+});
+
+/* =========================================================
    SERVE FRONTEND
    index.html is a template: the JSON-LD block (what Google reads)
    is generated from the same settings the admin edits.
@@ -2112,6 +2460,9 @@ async function sendHome(lang, req, res) {
   }
   const html = pageHtml(lang, st);
   res.type('html').set({ 'Cache-Control': 'no-cache', Vary: 'Accept-Encoding' });
+  let hc = homeCsp.get(lang);
+  if (!hc || hc.html !== html) { hc = { html, csp: pageCsp(html, false) }; homeCsp.set(lang, hc); }
+  res.set('Content-Security-Policy', hc.csp);
   if (/\bgzip\b/.test(req.headers['accept-encoding'] || '')) {
     let c = gzCache.get(lang);
     if (!c || c.html !== html) {
@@ -2154,6 +2505,10 @@ app.get('/sitemap.xml', (req, res) => {
 });
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// Admin pages: the dashboard needs inline event attributes (onclick), the login page does not
+app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => sendHtmlFile(res, 'admin/index.html'));
+app.get('/admin/dashboard.html', (req, res) => sendHtmlFile(res, 'admin/dashboard.html', { attrInline: true }));
+
 // The clean addresses are /card and /privacy; the raw files redirect there (no duplicate pages for Google).
 app.get('/card.html', (req, res) => res.redirect(301, '/card'));
 app.get('/privacy.html', (req, res) => res.redirect(301, '/privacy'));
@@ -2164,10 +2519,7 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 // Unknown address: a real 404 (not the home page with status 200)
 app.get('*', (req, res) => {
-  res
-    .status(404)
-    .set({ 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-cache' })
-    .sendFile(path.join(__dirname, 'public', '404.html'));
+  sendHtmlFile(res, '404.html', { status: 404, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-cache' } });
 });
 
 // Always answer with JSON on /api (e.g. a malformed request body), never an HTML error page.
