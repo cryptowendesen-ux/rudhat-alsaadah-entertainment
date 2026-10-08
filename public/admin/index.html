@@ -121,6 +121,11 @@ button:disabled{
       autocomplete="current-password"
     >
 
+    <div id="codeBox" style="display:none">
+      <label for="code">2-STEP CODE (from your authenticator app)</label>
+      <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">
+    </div>
+
     <button id="loginBtn" type="submit">
       Sign In
     </button>
@@ -153,7 +158,8 @@ form.addEventListener('submit',async function(e){
       },
       body:JSON.stringify({
         email:document.getElementById('email').value.trim(),
-        password:document.getElementById('password').value
+        password:document.getElementById('password').value,
+        code:document.getElementById('code').value.trim()
       })
     });
 
@@ -161,6 +167,16 @@ form.addEventListener('submit',async function(e){
 
     if(!response.ok){
       throw new Error(data.error||'Login failed');
+    }
+
+    if(data.needCode){
+      document.getElementById('codeBox').style.display='block';
+      document.getElementById('code').focus();
+      error.textContent='Enter the 6-digit code from your authenticator app.';
+      error.style.display='block';
+      btn.disabled=false;
+      btn.textContent='Verify';
+      return;
     }
 
     sessionStorage.setItem('adminToken',data.token);

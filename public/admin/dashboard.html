@@ -649,6 +649,34 @@ textarea{
     <div class="hint" style="margin:0 0 12px">Sessions last 8 hours. If a phone was lost, or someone else knew your password, sign out every device and then change <b>ADMIN_PASSWORD</b> in Render.</div>
     <button class="delete" id="logoutAll" type="button">Sign out all devices</button>
     <span id="secMsg" style="margin-left:10px"></span>
+
+    <div style="margin-top:18px;border-top:1px solid #e2e8f0;padding-top:14px">
+      <b>Two-step verification</b> <span id="tfaState" class="badge"></span>
+      <div class="hint" style="margin:6px 0 10px">Asks for a 6-digit code from an app (Google Authenticator, Authy or Microsoft Authenticator) every time the owner signs in. If you ever lose the phone: set <b>DISABLE_OWNER_2FA=true</b> in Render, sign in, then set it up again.</div>
+      <div id="tfaSetup" style="display:none;margin:0 0 10px">
+        <div class="hint" style="margin:0 0 8px">In the app choose <b>Enter a setup key</b>, account name <b>Rudhat Admin</b>, key: <b id="tfaKey" style="user-select:all;word-break:break-all"></b><br><a id="tfaLink" href="#" style="color:#4f46e5">Open in the authenticator app (on this phone)</a><br>Then type the 6-digit code it shows:</div>
+        <input id="tfaCode" inputmode="numeric" maxlength="8" placeholder="123456" style="max-width:160px;margin-right:8px">
+        <button class="save" id="tfaConfirm" type="button" style="flex:none;padding:10px 18px">Turn on</button>
+      </div>
+      <button class="save" id="tfaStart" type="button" style="flex:none;padding:10px 18px;display:none">Set up</button>
+      <button class="delete" id="tfaOff" type="button" style="display:none">Turn off</button>
+      <span id="tfaMsg" style="margin-left:10px"></span>
+    </div>
+
+    <div style="margin-top:18px;border-top:1px solid #e2e8f0;padding-top:14px">
+      <b>Backup</b>
+      <div class="hint" style="margin:6px 0 10px">Downloads one file with all bookings, play cards, website items, settings, closed days and staff names. Keep it somewhere safe: it contains customer details.</div>
+      <button class="save" id="backupBtn" type="button" style="flex:none;padding:10px 18px">Download backup</button>
+      <span id="backupMsg" style="margin-left:10px"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="auditPanel" style="display:none">
+    <div class="panelhead"><h2>&#128221; Activity Log</h2>
+      <div class="headbtns"><select id="auditFilter"><option value="">All activity</option><option value="1">Failed sign-ins only</option></select> <button class="mini-btn" id="auditRefresh" type="button">Refresh</button></div>
+    </div>
+    <div id="auditList"><div class="empty">Loading...</div></div>
+    <div class="hint">Shows who did what during the last 180 days. Passwords are never recorded.</div>
   </section>
 
   <div id="content"></div>
@@ -1788,7 +1816,7 @@ function applyRole(me){
   if(role !== 'owner'){
     ['statsPanel','customersPanel','settingsPanel','securityPanel','content','closedForm','closedActions','csvBookings'].forEach(hideEl);
   }else{
-    showEl('staffPanel'); showEl('trafficPanel');
+    showEl('staffPanel'); showEl('trafficPanel'); showEl('auditPanel');
   }
   renderBookings();
 }
@@ -1920,6 +1948,85 @@ async function loadTraffic(){
 document.getElementById('tfDays').onchange = loadTraffic;
 
 /* =========================================================
+   ACTIVITY LOG, TWO-STEP VERIFICATION, BACKUP (owner only)
+========================================================= */
+async function loadAudit(){
+  const box = document.getElementById('auditList');
+  try{
+    const rows = await api('/api/admin/audit?limit=100' + (document.getElementById('auditFilter').value ? '&failed=1' : ''));
+    if(!rows) return;
+    const when = d => new Date(d).toLocaleString('en-GB', { timeZone:'Asia/Dubai', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    box.innerHTML = rows.length ? rows.map(r =>
+      '<div class="xrow"><div><b' + (r.ok ? '' : ' class="note-warn"') + '>' + escapeHtml(r.action) + '</b>' +
+      (r.target ? ' <span style="color:#64748b">' + escapeHtml(r.target.slice(0, 8)) + '</span>' : '') + '<br>' +
+      '<span style="color:#64748b;font-size:12px">' + escapeHtml(r.actor) + (r.role ? ' (' + escapeHtml(r.role) + ')' : '') +
+      (r.detail ? ' &middot; ' + escapeHtml(r.detail) : '') + (r.ip ? ' &middot; ' + escapeHtml(r.ip) : '') + '</span></div>' +
+      '<div style="color:#64748b;font-size:12px;white-space:nowrap">' + escapeHtml(when(r.at)) + '</div></div>'
+    ).join('') : '<div class="empty">No activity yet.</div>';
+  }catch(e){ box.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
+}
+document.getElementById('auditRefresh').onclick = loadAudit;
+document.getElementById('auditFilter').onchange = loadAudit;
+
+async function loadTfa(){
+  try{
+    const r = await api('/api/admin/2fa');
+    if(!r) return;
+    const st = document.getElementById('tfaState');
+    st.textContent = r.enabled ? 'ON' : 'OFF';
+    st.className = 'badge ' + (r.enabled ? 'confirmed' : 'cancelled');
+    document.getElementById('tfaStart').style.display = r.enabled ? 'none' : '';
+    document.getElementById('tfaOff').style.display = r.enabled ? '' : 'none';
+    if(r.enabled) document.getElementById('tfaSetup').style.display = 'none';
+  }catch(e){}
+}
+document.getElementById('tfaStart').onclick = async () => {
+  const msg = document.getElementById('tfaMsg');
+  try{
+    const r = await api('/api/admin/2fa/setup', { method:'POST', body:JSON.stringify({}) });
+    document.getElementById('tfaKey').textContent = r.secret.replace(/(.{4})/g, '$1 ').trim();
+    document.getElementById('tfaLink').href = r.otpauth;
+    document.getElementById('tfaSetup').style.display = '';
+    msg.textContent = '';
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+document.getElementById('tfaConfirm').onclick = async () => {
+  const msg = document.getElementById('tfaMsg');
+  try{
+    await api('/api/admin/2fa/enable', { method:'POST', body:JSON.stringify({ code:document.getElementById('tfaCode').value.trim() }) });
+    document.getElementById('tfaCode').value = '';
+    msg.innerHTML = '<span class="msg-ok">Two-step verification is ON. You will be asked for a code at the next sign-in.</span>';
+    loadTfa(); loadAudit();
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+document.getElementById('tfaOff').onclick = async () => {
+  const code = prompt('Enter the current 6-digit code from your authenticator app to turn it off:');
+  if(!code) return;
+  const msg = document.getElementById('tfaMsg');
+  try{
+    await api('/api/admin/2fa/disable', { method:'POST', body:JSON.stringify({ code:code.trim() }) });
+    msg.innerHTML = '<span class="msg-ok">Two-step verification is OFF.</span>';
+    loadTfa(); loadAudit();
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+document.getElementById('backupBtn').onclick = async () => {
+  const msg = document.getElementById('backupMsg');
+  msg.textContent = 'Preparing...';
+  try{
+    const r = await fetch('/api/admin/backup', { headers:{ Authorization:'Bearer ' + sessionStorage.getItem('adminToken') } });
+    if(!r.ok) throw new Error('Backup failed (' + r.status + ')');
+    const blob = await r.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'rudhat-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    msg.innerHTML = '<span class="msg-ok">Downloaded.</span>';
+    loadAudit();
+  }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
+};
+
+/* =========================================================
    START
 ========================================================= */
 (async function init(){
@@ -1927,7 +2034,7 @@ document.getElementById('tfDays').onchange = loadTraffic;
   try{ me = (await api('/api/auth/me')) || me; }catch(e){}
   applyRole(me);
   if(isOwner()){
-    load(); loadTraffic(); loadStaff();
+    load(); loadTraffic(); loadStaff(); loadAudit(); loadTfa();
   }else{
     /* staff do not load the admin content; the public prices fill the play-card package list */
     try{ const pub = await (await fetch('/api/content')).json(); data.prices = pub.prices || []; }catch(e){}
