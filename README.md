@@ -16,6 +16,8 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 - Birthday booking collects the birthday child's name/age, optional allergy note and the parent/guardian declaration
 - Day-before WhatsApp reminders: the dashboard lists tomorrow's confirmed parties with a one-tap WhatsApp button
 - Staff accounts: the owner signs in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`; staff get their own sign-in and can only handle bookings and play cards
+- Owner two-step verification (authenticator app), activity log (who did what, kept 180 days) and a one-click JSON backup download
+- Strict Content-Security-Policy: inline scripts only run if their hash is allowed, so injected scripts are blocked
 - Anonymous visitor statistics (visits, WhatsApp / call / map taps, booking form opens) - no cookies, no personal data
 - Admin dashboard at `/admin/`: services, prices, gallery uploads, birthday package, bookings (pending / confirmed / cancelled) and settings (phone, WhatsApp, opening hours)
 - Gallery images are served optimised by Cloudinary (auto format, auto quality, max width 1400px)
@@ -46,6 +48,8 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 | `BOOKING_MIN_LEAD_HOURS` | no | Minimum hours before a booking starts (default 3) |
 | `BOOKING_MAX_DAYS_AHEAD` | no | How many days ahead customers can book (default 365) |
 | `MAX_ACTIVE_PER_PHONE` | no | Open upcoming requests per phone (default 3) |
+| `DISABLE_OWNER_2FA` | no | Emergency only: set to `true` to skip the owner's 2-step code (e.g. phone lost), sign in, set it up again, then remove it |
+| `TURNSTILE_FAIL_CLOSED` | no | `true` = block bookings if Cloudflare cannot be reached (default: let them through) |
 | `WAIVER_REQUIRED` | no | Set to `false` to make the child name and guardian declaration optional on the booking form (default: required) |
 | `PRICE_RANGE` | no | `priceRange` in the Google business data (default `AED 20+`) |
 
@@ -60,5 +64,6 @@ If no email settings are present, bookings are still saved and a warning is writ
 Push to GitHub; Render builds from the `Dockerfile` (Node 22). Add the environment variables above in Render, then open the service URL.
 
 - Set the Render health check path to `/api/health` (server is alive). `/api/ready` also checks the database and returns 503 when it is down.
-- Run **one instance** of the service. The booking lock works inside a single process; with several instances two customers could take the same slot.
+- Bookings are protected by a short database lock per day, so two customers cannot take the same slot even if the service runs on several instances.
+- Download a backup from the dashboard (Security > Backup) regularly, and make sure MongoDB Atlas backups are on.
 - Free plan: the service sleeps when idle, so the first visit after a pause is slow.
