@@ -63,7 +63,18 @@ If no email settings are present, bookings are still saved and a warning is writ
 ## Deploy (Render)
 Push to GitHub; Render builds from the `Dockerfile` (Node 22). Add the environment variables above in Render, then open the service URL.
 
-- Set the Render health check path to `/api/health` (server is alive). `/api/ready` also checks the database and returns 503 when it is down.
+- Set the Render health check path to **`/api/ready`**. It returns 503 while the database is not connected, so the host can restart a broken instance. (`/api/health` only says the process is alive.) The server also keeps retrying the first database connection by itself (1 s, 2 s, 4 s ... up to 30 s) and shuts down cleanly on deploys (SIGTERM).
+- Turn **Turnstile** on (`TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET`). Without it a bot can fill the calendar with fake pending bookings. The server logs a warning at start-up while it is off, and accepts at most 5 booking requests per connection per day.
+- Moving a booking back to *pending* or *confirmed* now re-checks closed days and double-booking, and a re-opened pending booking holds its time for a fresh 24 hours.
 - Bookings are protected by a short database lock per day, so two customers cannot take the same slot even if the service runs on several instances.
 - Download a backup from the dashboard (Security > Backup) regularly, and make sure MongoDB Atlas backups are on.
 - Free plan: the service sleeps when idle, so the first visit after a pause is slow.
+
+## Tests
+`npm test` runs the unit tests for the booking maths (opening hours incl. after-midnight closing, overlaps, phone numbers, dates) in `test/logic.test.js`. The pure helpers live in `lib/logic.js`. Run the tests before every deploy that touches booking rules.
+
+## Backup
+Settings > Backup. With two-step verification on, a fresh code is required for every download (a code just used to sign in cannot be reused - wait for the next one). Children's names, ages and allergy notes are left out unless you tick *Include children's details*; every download is written to the activity log.
+
+## Staying signed in
+The admin login has a *Keep me signed in on this device* box. Ticked: the sign-in survives closing the browser for `ADMIN_REMEMBER_DAYS` days (default 14). Not ticked: it ends when the tab is closed (8 hours at most). Only tick it on your own phone or computer. *Sign out everywhere* in the dashboard ends every sign-in at once.
