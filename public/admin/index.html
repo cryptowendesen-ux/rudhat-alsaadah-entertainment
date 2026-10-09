@@ -126,6 +126,11 @@ button:disabled{
       <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">
     </div>
 
+    <label style="display:flex;gap:8px;align-items:center;margin:14px 0 4px;font-size:14px;cursor:pointer">
+      <input id="remember" type="checkbox" style="width:auto;margin:0">
+      Keep me signed in on this device
+    </label>
+
     <button id="loginBtn" type="submit">
       Sign In
     </button>
@@ -159,7 +164,8 @@ form.addEventListener('submit',async function(e){
       body:JSON.stringify({
         email:document.getElementById('email').value.trim(),
         password:document.getElementById('password').value,
-        code:document.getElementById('code').value.trim()
+        code:document.getElementById('code').value.trim(),
+        remember:document.getElementById('remember').checked
       })
     });
 
@@ -179,7 +185,10 @@ form.addEventListener('submit',async function(e){
       return;
     }
 
-    sessionStorage.setItem('adminToken',data.token);
+    // Ticked: the sign-in survives closing the browser (until it expires or you sign out). Not ticked: until the tab is closed.
+    try{ localStorage.removeItem('adminToken'); sessionStorage.removeItem('adminToken'); }catch(e){}
+    if(document.getElementById('remember').checked){ localStorage.setItem('adminToken',data.token); }
+    else{ sessionStorage.setItem('adminToken',data.token); }
 
     window.location.href='/admin/dashboard.html';
 
