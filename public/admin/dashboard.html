@@ -523,7 +523,7 @@ textarea{
 
   <div id="attnBox"></div>
   <section class="cards">
-    <div class="card tap" onclick="showPending()"><span>PENDING</span><strong id="pendingCount">0</strong></div>
+    <div class="card tap" data-click="showPending()"><span>PENDING</span><strong id="pendingCount">0</strong></div>
     <div class="card"><span>CONFIRMED</span><strong id="confirmedCount">0</strong></div>
     <div class="card"><span>CANCELLED</span><strong id="cancelledCount">0</strong></div>
     <div class="card"><span>ALL BOOKINGS</span><strong id="totalCount">0</strong></div>
@@ -541,7 +541,7 @@ textarea{
       <h2>📅 Birthday Bookings</h2>
       <div class="headbtns">
         <button class="add" id="csvBookings">⬇ CSV</button>
-        <button class="add" onclick="loadBookings()">↻ Refresh</button>
+        <button class="add" data-click="loadBookings()">↻ Refresh</button>
       </div>
     </div>
     <div id="remindersBox"></div>
@@ -655,7 +655,7 @@ textarea{
     <div class="sgrid">
       <div><label for="stName">NAME</label><input id="stName" maxlength="60"></div>
       <div><label for="stEmail">E-MAIL (used to sign in)</label><input id="stEmail" type="email" maxlength="120" autocomplete="off"></div>
-      <div><label for="stPass">PASSWORD (at least 10 characters)</label><input id="stPass" type="text" maxlength="100" autocomplete="off"></div>
+      <div><label for="stPass">PASSWORD (at least 10 characters)</label><input id="stPass" type="password" maxlength="100" autocomplete="new-password"></div>
     </div>
     <div class="actions" style="align-items:center">
       <button class="save" id="addStaff" style="flex:none;padding:12px 22px">Add staff</button>
@@ -696,7 +696,11 @@ textarea{
 
     <div style="margin-top:18px;border-top:1px solid #e2e8f0;padding-top:14px">
       <b>Backup</b>
-      <div class="hint" style="margin:6px 0 10px">Downloads one file with all bookings, play cards, website items, settings, closed days and staff names. Keep it somewhere safe: it contains customer details.</div>
+      <div class="hint" style="margin:6px 0 10px">Downloads one file with all bookings, play cards, website items, settings, closed days and staff names. Keep it somewhere safe: it contains customer details. With two-step verification on, enter a fresh code from your app first.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px">
+        <input id="backupCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="Two-step code" style="width:140px">
+        <label style="display:flex;gap:6px;align-items:center"><input id="backupChild" type="checkbox"> Include children's details (names, ages, allergies)</label>
+      </div>
       <button class="save" id="backupBtn" type="button" style="flex:none;padding:10px 18px">Download backup</button>
       <span id="backupMsg" style="margin-left:10px"></span>
     </div>
@@ -800,7 +804,9 @@ textarea{
 </div>
 
 <script>
-const token = sessionStorage.getItem('adminToken');
+function getToken(){ try{ return localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken'); }catch(e){ return null; } }
+function clearToken(){ try{ localStorage.removeItem('adminToken'); }catch(e){} try{ sessionStorage.removeItem('adminToken'); }catch(e){} }
+const token = getToken();
 
 if(!token){
   window.location.href='/admin/';
@@ -866,7 +872,7 @@ async function api(url, options={}){
   const res = await fetch(url, options);
 
   if(res.status === 401){
-    sessionStorage.removeItem('adminToken');
+    clearToken();
     window.location.href='/admin/';
     return;
   }
@@ -913,7 +919,7 @@ function render(){
         <h2>${name}</h2>
         <button
           class="add"
-          onclick="openAdd('${type}')"
+          data-click="openAdd('${type}')"
         >
           ＋ ${isImg(type) ? ((type !== 'gallery' && data[type].length) ? 'Change Photo' : 'Add Photo') : 'Add'}
         </button>
@@ -940,8 +946,8 @@ function render(){
                   <div class="title">${escapeHtml(item.title)}</div>
                   <div class="desc">${escapeHtml(item.description || '')}</div>
                 </div>
-                <button class="edit" onclick="openEdit('${type}','${item.id}')">Edit</button>
-                <button class="delete" onclick="removeItem('${type}','${item.id}')">Delete</button>
+                <button class="edit" data-click="openEdit('${type}','${item.id}')">Edit</button>
+                <button class="delete" data-click="removeItem('${type}','${item.id}')">Delete</button>
               </div>
             `;
           }
@@ -953,8 +959,8 @@ function render(){
                 <div class="desc">${escapeHtml(item.description || '')}</div>
               </div>
               <div class="price">${escapeHtml(item.price || '')}</div>
-              <button class="edit" onclick="openEdit('${type}','${item.id}')">Edit</button>
-              <button class="delete" onclick="removeItem('${type}','${item.id}')">Delete</button>
+              <button class="edit" data-click="openEdit('${type}','${item.id}')">Edit</button>
+              <button class="delete" data-click="removeItem('${type}','${item.id}')">Delete</button>
             </div>
           `;
         }).join('')
@@ -1308,15 +1314,15 @@ function bookingRowHtml(b){
   const past = b.date < dubaiToday();
   const n = +b.children || 0;
   const primary = [];
-  if(b.status === 'pending') primary.push(`<button class="b-confirm" onclick="setBookingStatus('${id}','confirmed')">✔ Confirm</button>`);
-  if(b.status === 'cancelled') primary.push(`<button class="b-reopen" onclick="setBookingStatus('${id}','pending')">↺ Reopen</button>`);
+  if(b.status === 'pending') primary.push(`<button class="b-confirm" data-click="setBookingStatus('${id}','confirmed')">✔ Confirm</button>`);
+  if(b.status === 'cancelled') primary.push(`<button class="b-reopen" data-click="setBookingStatus('${id}','pending')">↺ Reopen</button>`);
   primary.push(`<a class="b-wa" href="${escapeHtml(wa)}" target="_blank" rel="noopener">${b.status === 'confirmed' ? '✅ Send confirmation' : '💬 WhatsApp'}</a>`);
   primary.push(`<a class="b-call" href="tel:${escapeHtml(b.phone)}">📞 Call</a>`);
   const menu = [];
-  if(b.status !== 'cancelled') menu.push(`<button class="b-cancel" onclick="setBookingStatus('${id}','cancelled')">✖ Cancel booking</button>`);
-  if(b.status === 'confirmed') menu.push(`<button class="b-reopen" onclick="setBookingStatus('${id}','pending')">↺ Move back to Pending</button>`);
-  if(b.notifyStatus === 'failed') menu.push(`<button class="b-reopen" onclick="resendBookingEmail('${id}')">✉ Resend email</button>`);
-  if(isOwner()) menu.push(`<button class="delete" onclick="removeBooking('${id}')">🗑 Delete</button>`);
+  if(b.status !== 'cancelled') menu.push(`<button class="b-cancel" data-click="setBookingStatus('${id}','cancelled')">✖ Cancel booking</button>`);
+  if(b.status === 'confirmed') menu.push(`<button class="b-reopen" data-click="setBookingStatus('${id}','pending')">↺ Move back to Pending</button>`);
+  if(b.notifyStatus === 'failed') menu.push(`<button class="b-reopen" data-click="resendBookingEmail('${id}')">✉ Resend email</button>`);
+  if(isOwner()) menu.push(`<button class="delete" data-click="removeBooking('${id}')">🗑 Delete</button>`);
   return `
     <div class="row booking-row${past ? ' past' : ''}">
       <div class="info">
@@ -1357,8 +1363,8 @@ function renderAttention(){
   const tm = bookings.filter(b => isActive(b) && b.date === t1).length;
   const bad = bookings.filter(b => b.notifyStatus === 'failed').length;
   const o = [];
-  if(pend) o.push(`<button class="attn warn" onclick="showPending()">⏳ ${pend} pending to review →</button>`);
-  if(td || tm) o.push(`<button class="attn" onclick="setBookingFilter('confirmed');showPending()">🎉 Today ${td} · Tomorrow ${tm}</button>`);
+  if(pend) o.push(`<button class="attn warn" data-click="showPending()">⏳ ${pend} pending to review →</button>`);
+  if(td || tm) o.push(`<button class="attn" data-click="setBookingFilter('confirmed');showPending()">🎉 Today ${td} · Tomorrow ${tm}</button>`);
   if(bad) o.push(`<span class="attn bad">⚠ ${bad} email${bad > 1 ? 's' : ''} not sent</span>`);
   if(!o.length) o.push('<span class="attn ok">✅ All clear — nothing needs attention</span>');
   document.getElementById('attnBox').innerHTML = o.join('');
@@ -1372,7 +1378,7 @@ function renderBookings(){
   document.title = (bCounts.pending ? '(' + bCounts.pending + ') ' : '') + 'RUDHAT ADMIN DASHBOARD';
 
   document.getElementById('viewTabs').innerHTML = [['list','📋 List'],['calendar','🗓 Calendar']].map(([k,label]) =>
-    `<button class="tab ${bView===k?'on':''}" onclick="setView('${k}')">${label}</button>`).join('');
+    `<button class="tab ${bView===k?'on':''}" data-click="setView('${k}')">${label}</button>`).join('');
   document.getElementById('listView').hidden = bView !== 'list';
   document.getElementById('calendarView').hidden = bView !== 'calendar';
 
@@ -1383,7 +1389,7 @@ function renderBookings(){
     ['all','All',bCounts.total]
   ];
   document.getElementById('bookingTabs').innerHTML = tabs.map(([k,label,n]) =>
-    `<button class="tab ${bFilter===k?'on':''}" onclick="setBookingFilter('${k}')">${label} (${n})</button>`
+    `<button class="tab ${bFilter===k?'on':''}" data-click="setBookingFilter('${k}')">${label} (${n})</button>`
   ).join('');
 
   const q = bQuery, qd = waDigits(bQuery) ? normPhone(bQuery) : '';
@@ -1462,7 +1468,7 @@ function renderCalendar(){
     const p = list.filter(b => b.status === 'pending').length;
     const c = list.filter(b => b.status === 'confirmed').length;
     const cls = ['day', iso === today ? 'today' : '', p ? 'has-p' : '', c ? 'has-c' : '', list.length >= bCap ? 'full' : '', iso === calSel ? 'sel' : ''].join(' ');
-    cells += `<button class="${cls}" onclick="selectDay('${iso}')"><span class="dn">${d}</span><span class="dots">${p ? '<i class="dp">' + p + '</i>' : ''}${c ? '<i class="dc">' + c + '</i>' : ''}</span></button>`;
+    cells += `<button class="${cls}" data-click="selectDay('${iso}')"><span class="dn">${d}</span><span class="dots">${p ? '<i class="dp">' + p + '</i>' : ''}${c ? '<i class="dc">' + c + '</i>' : ''}</span></button>`;
   }
   document.getElementById('calGrid').innerHTML = heads + cells;
 
@@ -1645,20 +1651,20 @@ function renderCards(){
     const id = escapeHtml(c.id);
     const acts = [];
     if(c.state === 'active'){
-      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',30)">− 30m</button>`);
-      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',60)">− 1h</button>`);
-      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',120)">− 2h</button>`);
-      acts.push(`<button class="b-cancel" onclick="deductCard('${id}',0)">− …</button>`);
+      acts.push(`<button class="b-cancel" data-click="deductCard('${id}',30)">− 30m</button>`);
+      acts.push(`<button class="b-cancel" data-click="deductCard('${id}',60)">− 1h</button>`);
+      acts.push(`<button class="b-cancel" data-click="deductCard('${id}',120)">− 2h</button>`);
+      acts.push(`<button class="b-cancel" data-click="deductCard('${id}',0)">− …</button>`);
     }
-    if(c.status !== 'cancelled') acts.push(`<button class="b-confirm" onclick="topupCard('${id}')">＋ Hours</button>`);
+    if(c.status !== 'cancelled') acts.push(`<button class="b-confirm" data-click="topupCard('${id}')">＋ Hours</button>`);
     if(c.phone) acts.push(`<a class="b-wa" href="${escapeHtml(cardWaHref(c))}" target="_blank" rel="noopener">WhatsApp</a>`);
-    acts.push(`<button class="b-reopen" onclick="copyCardLink('${escapeHtml(c.code)}')">Copy link</button>`);
+    acts.push(`<button class="b-reopen" data-click="copyCardLink('${escapeHtml(c.code)}')">Copy link</button>`);
     acts.push(`<a class="b-reopen" style="text-decoration:none;border-radius:8px;padding:8px 11px;font-weight:700;font-size:13px" href="${escapeHtml(cardLink(c.code))}" target="_blank" rel="noopener">Open</a>`);
-    acts.push(`<button class="b-reopen" onclick="setCardExpiry('${id}')">Expiry</button>`);
+    acts.push(`<button class="b-reopen" data-click="setCardExpiry('${id}')">Expiry</button>`);
     acts.push(c.status === 'cancelled'
-      ? `<button class="b-confirm" onclick="setCardStatus('${id}','active')">Reactivate</button>`
-      : `<button class="b-cancel" onclick="setCardStatus('${id}','cancelled')">Cancel card</button>`);
-    if(isOwner()) acts.push(`<button class="delete" onclick="removeCard('${id}')">Delete</button>`);
+      ? `<button class="b-confirm" data-click="setCardStatus('${id}','active')">Reactivate</button>`
+      : `<button class="b-cancel" data-click="setCardStatus('${id}','cancelled')">Cancel card</button>`);
+    if(isOwner()) acts.push(`<button class="delete" data-click="removeCard('${id}')">Delete</button>`);
     const hist = (c.ledger || []).map(l =>
       `<li>${escapeHtml(new Date(l.at).toLocaleString())} · <b>${l.minutes > 0 ? '+' : '−'}${escapeHtml(fmtMins(Math.abs(l.minutes)))}</b> · ${escapeHtml(l.note || '')}</li>`).join('');
     return `
@@ -1859,14 +1865,14 @@ document.getElementById('logoutAll').onclick = async () => {
   try{
     await fetch('/api/auth/logout-all', { method:'POST', headers:{ Authorization:'Bearer ' + token } });
   }catch(e){}
-  sessionStorage.removeItem('adminToken');
+  clearToken();
   window.location.href='/admin/';
 };
 document.getElementById('logout').onclick = async () => {
   try{
     await fetch('/api/auth/logout', { method:'POST', headers:{ Authorization:'Bearer ' + token } });
   }catch(e){}
-  sessionStorage.removeItem('adminToken');
+  clearToken();
   window.location.href='/admin/';
 };
 
@@ -1912,7 +1918,7 @@ function renderReminders(){
     const wa = 'https://wa.me/' + waDigits(b.phone) + '?text=' + encodeURIComponent(txt);
     return '<div class="rrow"><div><b>' + escapeHtml(b.name) + '</b> &middot; ' + escapeHtml(fmt12(b.time)) + ' &middot; ' + when + '</div>' +
       '<div class="xbtns"><a class="b-wa" href="' + escapeHtml(wa) + '" target="_blank" rel="noopener">&#128172; Send reminder</a>' +
-      '<button class="mini-btn" onclick="markReminded(\'' + escapeHtml(b.id) + '\')">&#10003; Sent</button></div></div>';
+      '<button class="mini-btn" data-click="markReminded(\'' + escapeHtml(b.id) + '\')">&#10003; Sent</button></div></div>';
   }).join('') + '</div>';
 }
 async function markReminded(id){
@@ -1930,7 +1936,7 @@ async function loadClosed(){
     if(!list) return;
     box.innerHTML = list.length ? list.map(c =>
       '<div class="xrow"><div><b>' + escapeHtml(c.date) + '</b>' + (c.reason ? ' &middot; ' + escapeHtml(c.reason) : '') + '</div>' +
-      (isOwner() ? '<button class="delete" onclick="removeClosed(\'' + escapeHtml(c.date) + '\')">Re-open</button>' : '') + '</div>'
+      (isOwner() ? '<button class="delete" data-click="removeClosed(\'' + escapeHtml(c.date) + '\')">Re-open</button>' : '') + '</div>'
     ).join('') : '<div class="empty">No closed days planned.</div>';
   }catch(e){ box.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
 }
@@ -1964,9 +1970,9 @@ async function loadStaff(){
     box.innerHTML = list.length ? list.map(x =>
       '<div class="xrow"><div><b>' + escapeHtml(x.name) + '</b> &middot; ' + escapeHtml(x.email) + ' ' +
       '<span class="badge ' + (x.active ? 'confirmed' : 'cancelled') + '">' + (x.active ? 'active' : 'disabled') + '</span></div>' +
-      '<div class="xbtns"><button class="mini-btn" onclick="toggleStaff(\'' + escapeHtml(x.id) + '\',' + (!x.active) + ')">' + (x.active ? 'Disable' : 'Enable') + '</button>' +
-      '<button class="mini-btn" onclick="resetStaffPw(\'' + escapeHtml(x.id) + '\')">New password</button>' +
-      '<button class="delete" onclick="removeStaff(\'' + escapeHtml(x.id) + '\')">Delete</button></div></div>'
+      '<div class="xbtns"><button class="mini-btn" data-click="toggleStaff(\'' + escapeHtml(x.id) + '\',' + (!x.active) + ')">' + (x.active ? 'Disable' : 'Enable') + '</button>' +
+      '<button class="mini-btn" data-click="resetStaffPw(\'' + escapeHtml(x.id) + '\')">New password</button>' +
+      '<button class="delete" data-click="removeStaff(\'' + escapeHtml(x.id) + '\')">Delete</button></div></div>'
     ).join('') : '<div class="empty">No staff accounts yet.</div>';
   }catch(e){ box.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>'; }
 }
@@ -2087,8 +2093,17 @@ document.getElementById('backupBtn').onclick = async () => {
   const msg = document.getElementById('backupMsg');
   msg.textContent = 'Preparing...';
   try{
-    const r = await fetch('/api/admin/backup', { headers:{ Authorization:'Bearer ' + sessionStorage.getItem('adminToken') } });
-    if(!r.ok) throw new Error('Backup failed (' + r.status + ')');
+    const r = await fetch('/api/admin/backup', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + getToken() },
+      body: JSON.stringify({ code: document.getElementById('backupCode').value.trim(), includeChildren: document.getElementById('backupChild').checked })
+    });
+    if(!r.ok){
+      let m = 'Backup failed (' + r.status + ')';
+      try{ const j = await r.json(); if(j && j.error) m = j.error; }catch(e){}
+      throw new Error(m);
+    }
+    document.getElementById('backupCode').value = '';
     const blob = await r.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -2140,6 +2155,60 @@ document.getElementById('backupBtn').onclick = async () => {
   const run = () => document.querySelectorAll('main.wrap section.panel').forEach(setup);
   run();
   new MutationObserver(run).observe(document.querySelector('main.wrap'), {childList:true, subtree:true});
+})();
+
+/* Click handling without inline onclick="..." so the page can run under a strict Content-Security-Policy.
+   Every [data-click] holds calls such as  setBookingStatus('id','confirmed');showPending()
+   Only the listed functions of this page can be called, and only with plain text, number or true/false arguments. */
+(function () {
+  var ALLOWED = ['showPending', 'loadBookings', 'openAdd', 'openEdit', 'removeItem', 'setBookingStatus', 'resendBookingEmail', 'removeBooking', 'setBookingFilter', 'setView', 'selectDay', 'deductCard', 'topupCard', 'copyCardLink', 'setCardExpiry', 'setCardStatus', 'removeCard', 'markReminded', 'removeClosed', 'toggleStaff', 'resetStaffPw', 'removeStaff'];
+  var callRe = /\s*([A-Za-z_$][\w$]*)\s*\(/y;
+  var closeRe = /\s*\)/y;
+  var argRe = /\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|(-?\d+(?:\.\d+)?)|(true|false))\s*/y;
+  var semiRe = /\s*;?\s*/y;
+  function unesc(t) { return t.replace(/\\(.)/g, '$1'); }
+  function parse(src) {
+    var calls = [], i = 0, m;
+    while (i < src.length) {
+      callRe.lastIndex = i;
+      m = callRe.exec(src);
+      if (!m) return null;
+      var name = m[1], args = [];
+      i = callRe.lastIndex;
+      closeRe.lastIndex = i;
+      if (closeRe.test(src)) {
+        i = closeRe.lastIndex;
+      } else {
+        for (;;) {
+          argRe.lastIndex = i;
+          m = argRe.exec(src);
+          if (!m) return null;
+          args.push(m[1] !== undefined ? unesc(m[1]) : m[2] !== undefined ? unesc(m[2]) : m[3] !== undefined ? Number(m[3]) : m[4] === 'true');
+          i = argRe.lastIndex;
+          if (src[i] === ',') { i++; continue; }
+          if (src[i] === ')') { i++; break; }
+          return null;
+        }
+      }
+      calls.push([name, args]);
+      semiRe.lastIndex = i;
+      semiRe.exec(src);
+      i = semiRe.lastIndex;
+    }
+    return calls;
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-click]') : null;
+    while (el) { // walk upwards like a normal click bubbles
+      var calls = parse(el.getAttribute('data-click') || '');
+      if (calls) {
+        calls.forEach(function (c) {
+          if (ALLOWED.indexOf(c[0]) !== -1 && typeof window[c[0]] === 'function') window[c[0]].apply(null, c[1]);
+        });
+      }
+      el = el.parentElement ? el.parentElement.closest('[data-click]') : null;
+    }
+  });
 })();
 </script>
 
