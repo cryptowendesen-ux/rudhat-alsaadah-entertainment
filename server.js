@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
+const { toMin, fromMin, isRealDate, isFridayDate, withinHours, normalizePhone, dayWindow, overlapCount } = require('./lib/logic'); // pure helpers, unit-tested (npm test)
 require('dotenv').config();
 
 const app = express();
@@ -174,7 +175,9 @@ const bookingSchema = new mongoose.Schema(
     waiverAccepted: { type: Boolean, default: false },
     waiverAt: { type: Date },
     // Set when staff tapped "reminder sent" (WhatsApp reminder the day before)
-    reminderSentAt: { type: Date }
+    reminderSentAt: { type: Date },
+    // Set when staff move a booking back to "pending": the 24 h hold starts again from this moment
+    reopenedAt: { type: Date }
   },
   { timestamps: true }
 );
@@ -216,7 +219,7 @@ const adminSessionSchema = new mongoose.Schema({
   exp: { type: Date, required: true },
   ip: { type: String, default: '' },
   ua: { type: String, default: '' },
-  role: { type: String, default: 'owner' }, // 'owner' (full access) or 'staff' (bookings + play cards only)
+  role: { type: String, default: 'staff' }, // 'owner' (full access) or 'staff' (bookings + play cards only)
   staffId: { type: String, default: '' },
   name: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
@@ -276,7 +279,8 @@ const ownerAuthSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true },
   secretEnc: { type: String, default: '' },
   enabled: { type: Boolean, default: false },
-  lastStep: { type: Number, default: 0 }
+  lastStep: { type: Number, default: 0 },
+  fails: { type: [Number], default: [] } // times (ms) of recent wrong codes
 });
 const OwnerAuth = mongoose.model('OwnerAuth', ownerAuthSchema);
 
@@ -395,28 +399,40 @@ const defaults = {
 /* =========================================================
    CONNECT TO MONGODB
 ========================================================= */
-mongoose
-  .connect(MONGODB_URI)
-  .then(async () => {
-    console.log('Connected to MongoDB Atlas successfully.');
-    const count = await Item.countDocuments();
-    if (count === 0) {
-      const initialItems = [
-        ...defaults.services,
-        ...defaults.prices,
-        ...defaults.gallery,
-        ...defaults.birthday
-      ];
-      await Item.insertMany(initialItems);
-      console.log('Default content seeded to MongoDB database.');
+async function seedDatabase() {
+  const count = await Item.countDocuments();
+  if (count === 0) {
+    const initialItems = [
+      ...defaults.services,
+      ...defaults.prices,
+      ...defaults.gallery,
+      ...defaults.birthday
+    ];
+    await Item.insertMany(initialItems);
+    console.log('Default content seeded to MongoDB database.');
+  }
+  await Settings.updateOne({ key: 'main' }, { $setOnInsert: SETTINGS_DEFAULTS }, { upsert: true });
+}
+
+// The first connection is retried with a growing pause (1s, 2s, 4s ... max 30s) until it works,
+// so a database that is briefly unreachable at start-up does not leave the site broken until a manual restart.
+// After that, the driver reconnects by itself. /api/ready shows the real state.
+let shuttingDown = false;
+async function connectDb() {
+  for (let attempt = 1; !shuttingDown; attempt++) {
+    try {
+      await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 10000, bufferTimeoutMS: 5000 });
+      console.log('Connected to MongoDB Atlas successfully.');
+      await seedDatabase();
+      return;
+    } catch (err) {
+      const wait = Math.min(30000, 1000 * 2 ** Math.min(attempt, 5));
+      console.error('MongoDB connection failed (attempt ' + attempt + '): ' + err.message + ' - retrying in ' + wait / 1000 + 's');
+      await new Promise((r) => setTimeout(r, wait));
     }
-    await Settings.updateOne(
-      { key: 'main' },
-      { $setOnInsert: SETTINGS_DEFAULTS },
-      { upsert: true }
-    );
-  })
-  .catch((err) => console.error('MongoDB Connection Error:', err));
+  }
+}
+connectDb();
 
 /* =========================================================
    AUTHENTICATION HELPERS
@@ -469,7 +485,7 @@ async function auth(req, res, next) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     req.adminJti = payload.jti;
-    req.adminRole = session.role || 'owner'; // sessions created before staff accounts existed belong to the owner
+    req.adminRole = session.role || 'staff'; // a session without a role gets the lowest access (sign in again to get owner access)
     req.adminName = session.name || '';
     req.adminStaffId = session.staffId || '';
     next();
@@ -486,23 +502,26 @@ function requireOwner(req, res, next) {
 }
 
 // Staff passwords are stored as salted scrypt hashes, never in plain text
-function hashPassword(pw) {
+const scryptAsync = (pw, salt, len) =>
+  new Promise((resolve, reject) => crypto.scrypt(String(pw), salt, len, (err, key) => (err ? reject(err) : resolve(key))));
+// (asynchronous on purpose: the synchronous version freezes the whole server for ~50-100 ms per login attempt)
+async function hashPassword(pw) {
   const salt = crypto.randomBytes(16);
-  const hash = crypto.scryptSync(String(pw), salt, 64);
+  const hash = await scryptAsync(pw, salt, 64);
   return 'scrypt$' + salt.toString('base64') + '$' + hash.toString('base64');
 }
-function verifyPassword(pw, stored) {
+async function verifyPassword(pw, stored) {
   try {
     const [alg, saltB64, hashB64] = String(stored).split('$');
     if (alg !== 'scrypt') return false;
     const expected = Buffer.from(hashB64, 'base64');
-    const actual = crypto.scryptSync(String(pw), Buffer.from(saltB64, 'base64'), expected.length);
+    const actual = await scryptAsync(pw, Buffer.from(saltB64, 'base64'), expected.length);
     return crypto.timingSafeEqual(actual, expected);
   } catch {
     return false;
   }
 }
-const DUMMY_HASH = hashPassword(crypto.randomBytes(8).toString('hex')); // used so unknown e-mails take the same time
+const DUMMY_HASH_P = hashPassword(crypto.randomBytes(8).toString('hex')); // used so unknown e-mails take the same time
 
 /* ---- Two-step verification helpers (RFC 6238 TOTP, SHA-1, 6 digits, 30 s) ---- */
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -561,13 +580,14 @@ function decSecret(stored) {
   d.setAuthTag(tag);
   return Buffer.concat([d.update(enc), d.final()]).toString('utf8');
 }
-// Five wrong codes block code entry for 15 minutes (the password alone is never enough)
-const totpFails = [];
-function totpLocked() {
+// Five wrong codes block code entry for 15 minutes (the password alone is never enough).
+// Stored in the database so a restart does not reset it and several server instances share it.
+const totpIsLocked = (oa) => {
   const cut = Date.now() - 15 * 60 * 1000;
-  while (totpFails.length && totpFails[0] < cut) totpFails.shift();
-  return totpFails.length >= 5;
-}
+  return ((oa && oa.fails) || []).filter((t) => t > cut).length >= 5;
+};
+const totpFail = () =>
+  OwnerAuth.updateOne({ key: 'owner' }, { $push: { fails: { $each: [Date.now()], $slice: -10 } } }).catch(() => {});
 
 /* =========================================================
    RESPONSE HELPERS
@@ -829,9 +849,13 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
     if (ownerOk) {
       role = 'owner';
     } else {
-      staff = await Staff.findOne({ email, active: true }).lean();
-      const okPw = verifyPassword(password, staff ? staff.passHash : DUMMY_HASH);
-      if (staff && okPw) role = 'staff';
+      // The owner's e-mail never belongs to a staff account, so a wrong owner password skips the (slow) staff check.
+      const ownerEmail = safeEqual(email, String(process.env.ADMIN_EMAIL || '').trim().toLowerCase());
+      if (!ownerEmail) {
+        staff = await Staff.findOne({ email, active: true }).lean();
+        const okPw = await verifyPassword(password, staff ? staff.passHash : await DUMMY_HASH_P);
+        if (staff && okPw) role = 'staff';
+      }
     }
     // Owner two-step verification (switch off in an emergency with DISABLE_OWNER_2FA=true in Render)
     if (role === 'owner' && process.env.DISABLE_OWNER_2FA !== 'true') {
@@ -839,17 +863,17 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       if (oa) {
         const code = String((req.body && req.body.code) || '').trim();
         if (!code) return res.json({ needCode: true });
-        if (totpLocked()) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
+        if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
         let step = 0;
         try { step = totpCheck(decSecret(oa.secretEnc), code, oa.lastStep || 0); }
         catch (e) { console.error('2FA decrypt error (did JWT_SECRET change?):', e.message); }
         if (!step) {
-          totpFails.push(Date.now());
+          await totpFail();
           writeAudit({ actor: 'Owner', role: 'owner', action: 'Wrong 2-step code', ip: String(req.ip || '').slice(0, 60), ok: false });
           await sleep(600);
           return res.status(401).json({ error: 'Invalid code' });
         }
-        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step } });
+        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step, fails: [] } });
       }
     }
     if (!role) {
@@ -860,7 +884,10 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
     }
 
     const jti = crypto.randomUUID();
-    const exp = Date.now() + 8 * 60 * 60 * 1000;
+    // "Keep me signed in" lasts ADMIN_REMEMBER_DAYS (default 14); a normal sign-in lasts 8 hours.
+    const rememberDays = Math.min(90, Math.max(1, parseInt(process.env.ADMIN_REMEMBER_DAYS, 10) || 14));
+    const remember = !!(req.body && req.body.remember === true);
+    const exp = Date.now() + (remember ? rememberDays * 24 : 8) * 60 * 60 * 1000;
     await new AdminSession({
       jti,
       exp: new Date(exp),
@@ -1139,66 +1166,25 @@ const bookingLimit = rateLimit({
   message: { error: 'Too many requests. Please try again later or use WhatsApp.' }
 });
 
+// Extra brake while the Turnstile check is off: only requests that were accepted count, so real customers are not punished.
+const bookingDailyLimit = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 5,
+  skipFailedRequests: true,
+  message: { error: 'Too many booking requests from this connection today. Please use WhatsApp.' }
+});
+
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const PHONE_RE = /^\+?[\d\s()-]{9,25}$/;
 
-// Returns "+<digits>" (9–15 digits) or '' if invalid.
-// UAE local formats are converted so the admin WhatsApp button works: 050 123 4567 -> +971501234567
-function normalizePhone(raw) {
-  let d = String(raw || '').replace(/[^\d+]/g, '');
-  const plus = d.startsWith('+');
-  d = d.replace(/\D/g, '');
-  if (!plus && d.startsWith('00')) d = d.slice(2);
-  else if (!plus && /^05\d{8}$/.test(d)) d = '971' + d.slice(1);
-  if (d.length < 9 || d.length > 15) return '';
-  return '+' + d;
-}
-
-function nowDubaiHM() {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Dubai',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23'
-  }).format(new Date());
-}
+// (phone, date, opening-hours and overlap helpers live in lib/logic.js)
 function todayInDubai() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dubai' });
-}
-function isRealDate(d) {
-  const t = new Date(d + 'T00:00:00Z');
-  return !isNaN(t) && t.toISOString().slice(0, 10) === d;
-}
-function isFridayDate(d) {
-  return new Date(d + 'T00:00:00Z').getUTCDay() === 5;
 }
 function to12h(t) {
   const [h, m] = t.split(':').map(Number);
   return ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h >= 12 ? 'PM' : 'AM');
-}
-// Is "HH:MM" inside open..close? Handles closing after midnight (e.g. 14:00 -> 01:00).
-function withinHours(t, open, close) {
-  if (open === close) return true;
-  if (open < close) return t >= open && t < close;
-  return t >= open || t < close;
-}
-// ---- Availability: opening window, party length, parallel parties, parties per day ----
-const toMin = (t) => {
-  const [h, m] = String(t).split(':').map(Number);
-  return h * 60 + m;
-};
-const fromMin = (n) => {
-  n = ((n % 1440) + 1440) % 1440;
-  return String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
-};
-function dayWindow(date, st) {
-  const friday = isFridayDate(date);
-  const open = toMin(friday ? st.fridayOpen : st.weekdayOpen);
-  let close = toMin(friday ? st.fridayClose : st.weekdayClose);
-  const wrapped = close <= open; // closes after midnight (or open 24h)
-  if (wrapped) close += 1440;
-  return { open, close, wrapped };
 }
 // UAE is UTC+4 all year (no daylight saving).
 const DUBAI_OFFSET_MS = 4 * 60 * 60 * 1000;
@@ -1208,20 +1194,7 @@ function addDaysDubai(n) {
 // Bookings that currently hold a time slot: confirmed ones, and pending ones that are still inside the hold window.
 function holdsSlot() {
   const cutoff = new Date(Date.now() - PENDING_HOLD_HOURS * 3600 * 1000);
-  return { $or: [{ status: 'confirmed' }, { status: 'pending', createdAt: { $gt: cutoff } }] };
-}
-function overlapCount(date, time, st, others) {
-  const { open, wrapped } = dayWindow(date, st);
-  const dur = Number(st.partyMinutes) || 180;
-  let start = toMin(time);
-  if (wrapped && start < open) start += 1440;
-  let n = 0;
-  for (const b of others) {
-    let bs = toMin(b.time);
-    if (wrapped && bs < open) bs += 1440;
-    if (bs < start + dur && start < bs + dur) n++;
-  }
-  return n;
+  return { $or: [{ status: 'confirmed' }, { status: 'pending', createdAt: { $gt: cutoff } }, { status: 'pending', reopenedAt: { $gt: cutoff } }] };
 }
 // existing = bookings of that date that hold a slot (see holdsSlot)
 function checkSlot(date, time, st, existing) {
@@ -1270,7 +1243,7 @@ function bookingJson(b) {
     notifyStatus: b.notifyStatus || '',
     notifyError: b.notifyError || '',
     // a pending request older than the hold window no longer blocks its time slot
-    holdExpired: b.status === 'pending' && new Date(b.createdAt).getTime() < Date.now() - PENDING_HOLD_HOURS * 3600 * 1000
+    holdExpired: b.status === 'pending' && new Date(b.reopenedAt || b.createdAt).getTime() < Date.now() - PENDING_HOLD_HOURS * 3600 * 1000
   };
 }
 
@@ -1458,7 +1431,7 @@ function withBookingLock(fn) {
   bookingChain = run.catch(() => {});
   return run;
 }
-app.post('/api/bookings', bookingLimit, verifyTurnstile, (req, res) =>
+app.post('/api/bookings', bookingLimit, bookingDailyLimit, verifyTurnstile, (req, res) =>
   withBookingLock(() => createBooking(req, res))
 );
 
@@ -1478,9 +1451,16 @@ async function withDateLock(date, fn) {
       await sleep(60 + Math.floor(Math.random() * 80));
     }
   }
+  // Keep the lock alive while the work runs (a slow database must not let a second request in), then release it.
+  const heartbeat = setInterval(() => {
+    BookingLock.updateOne({ _id: id, token: tokenId }, { $set: { expiresAt: new Date(Date.now() + 15000) } })
+      .then((r) => { if (r && r.matchedCount === 0) console.error('Booking lock for ' + id + ' was lost while still in use'); })
+      .catch(() => {});
+  }, 4000);
   try {
     return await fn();
   } finally {
+    clearInterval(heartbeat);
     await BookingLock.deleteOne({ _id: id, token: tokenId }).catch(() => {});
   }
 }
@@ -1682,7 +1662,7 @@ app.get('/api/admin/bookings', auth, async (req, res) => {
     if (BOOKING_STATUSES.includes(req.query.status)) filter.status = req.query.status;
 
     const [rows, grouped] = await Promise.all([
-      Booking.find(filter).sort({ createdAt: -1 }).limit(500).lean(),
+      Booking.find(filter).sort({ createdAt: -1 }).limit(3000).lean(),
       Booking.aggregate([{ $group: { _id: '$status', n: { $sum: 1 } } }])
     ]);
 
@@ -1708,22 +1688,28 @@ app.patch('/api/admin/bookings/:id', auth, async (req, res) => {
     const prev = await Booking.findOne({ id: req.params.id });
     if (!prev) return res.status(404).json({ error: 'Booking not found' });
     const apply = async () => {
-      if (status === 'confirmed' && prev.status !== 'confirmed') {
-        // A cancelled or expired request is being confirmed: make sure nobody else took the time meanwhile.
+      if (status !== 'cancelled' && prev.status !== status) {
+        // A cancelled booking is being confirmed or re-opened: the day must still be open and nobody else may have taken the time meanwhile.
+        const closed = await ClosedDate.findOne({ date: prev.date }).lean();
+        if (closed) return 'closed';
         const stNow = await getSettings();
         const others = await Booking.find({ date: prev.date, id: { $ne: prev.id }, ...holdsSlot() }).select('time').lean();
         if (overlapCount(prev.date, prev.time, stNow, others) >= (Number(stNow.maxParallel) || 1)) return 'conflict';
       }
+      if (status === 'pending' && prev.status !== 'pending') prev.reopenedAt = new Date();
       prev.status = status;
       await prev.save();
       return 'ok';
     };
     let outcome;
     try {
-      outcome = status === 'confirmed' ? await withDateLock(prev.date, apply) : await apply();
+      outcome = status !== 'cancelled' ? await withDateLock(prev.date, apply) : await apply();
     } catch (e) {
       if (e && e.message === 'lock-busy') return res.status(503).json({ error: 'The booking system is busy. Please try again.' });
       throw e;
+    }
+    if (outcome === 'closed') {
+      return res.status(409).json({ error: 'The centre is marked closed on this day. Re-open the day first (Settings), then try again.' });
     }
     if (outcome === 'conflict') {
       return res.status(409).json({ error: 'Another booking now holds this time. Choose a different time with the customer first.' });
@@ -2166,7 +2152,7 @@ app.post('/api/admin/staff', auth, requireOwner, async (req, res) => {
       return res.status(400).json({ error: 'The password must be 10–100 characters.' });
     }
     if (await Staff.exists({ email })) return res.status(409).json({ error: 'A staff account with this e-mail already exists.' });
-    const created = await new Staff({ id: crypto.randomUUID(), name, email, passHash: hashPassword(password) }).save();
+    const created = await new Staff({ id: crypto.randomUUID(), name, email, passHash: await hashPassword(password) }).save();
     res.status(201).json(staffJson(created));
   } catch (err) {
     console.error('Staff create error:', err);
@@ -2191,7 +2177,7 @@ app.patch('/api/admin/staff/:id', auth, requireOwner, async (req, res) => {
     if (b.password !== undefined && String(b.password) !== '') {
       const pw = String(b.password);
       if (pw.length < 10 || pw.length > 100) return res.status(400).json({ error: 'The password must be 10–100 characters.' });
-      set.passHash = hashPassword(pw);
+      set.passHash = await hashPassword(pw);
       kickOut = true; // a new password signs the person out everywhere
     }
     const updated = await Staff.findOneAndUpdate({ id: req.params.id }, { $set: set }, { new: true });
@@ -2221,12 +2207,17 @@ app.delete('/api/admin/staff/:id', auth, requireOwner, async (req, res) => {
 ========================================================= */
 const TRACK_EVENTS = ['visit', 'wa', 'call', 'map', 'book'];
 const BOT_UA = /bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp|telegram|headless|lighthouse|pingdom|uptime/i;
-const trackLimit = rateLimit({ windowMs: 10 * 60 * 1000, max: 120, standardHeaders: true, legacyHeaders: false });
+const trackLimit = rateLimit({ windowMs: 10 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });
 
 app.post('/api/track', trackLimit, async (req, res) => {
   try {
     const ev = String((req.body && req.body.e) || '');
-    if (TRACK_EVENTS.includes(ev) && !BOT_UA.test(String(req.headers['user-agent'] || ''))) {
+    // Ignore calls that come from another website (browsers always send Origin on cross-site POSTs).
+    let sameSite = true;
+    if (req.headers.origin) {
+      try { sameSite = new URL(req.headers.origin).host === req.headers.host; } catch { sameSite = false; }
+    }
+    if (sameSite && TRACK_EVENTS.includes(ev) && !BOT_UA.test(String(req.headers['user-agent'] || ''))) {
       await Stat.updateOne({ day: todayInDubai(), event: ev }, { $inc: { n: 1 } }, { upsert: true });
     }
   } catch (err) {
@@ -2304,9 +2295,9 @@ app.post('/api/admin/2fa/disable', auth, requireOwner, async (req, res) => {
   try {
     const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
     if (!oa) return res.status(400).json({ error: 'Two-step verification is not on.' });
-    if (totpLocked()) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
+    if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
     const step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, oa.lastStep || 0);
-    if (!step) { totpFails.push(Date.now()); return res.status(400).json({ error: 'That code is not correct.' }); }
+    if (!step) { await totpFail(); return res.status(400).json({ error: 'That code is not correct.' }); }
     await OwnerAuth.deleteOne({ key: 'owner' });
     res.json({ enabled: false });
   } catch (err) {
@@ -2332,10 +2323,28 @@ app.get('/api/admin/audit', auth, requireOwner, async (req, res) => {
   }
 });
 
-// One JSON file with everything important (staff password hashes and sessions are left out)
-app.get('/api/admin/backup', auth, requireOwner, async (req, res) => {
+// One JSON file with everything important (staff password hashes and sessions are left out).
+// - With two-step verification on, a fresh code is needed for EVERY download, so a stolen sign-in alone cannot export all customer data.
+// - Children's names, ages and allergy notes are left out unless the owner ticks "include children's details".
+app.post('/api/admin/backup', auth, requireOwner, async (req, res) => {
   try {
-    const [items, bookings, cards, settings, closedDates, staff] = await Promise.all([
+    if (process.env.DISABLE_OWNER_2FA !== 'true') {
+      const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
+      if (oa) {
+        if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
+        let step = 0;
+        try { step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, oa.lastStep || 0); }
+        catch (e) { console.error('2FA decrypt error (backup):', e.message); }
+        if (!step) {
+          await totpFail();
+          return res.status(401).json({ error: 'Enter a fresh two-step code (a code that was just used to sign in cannot be used again - wait for the next one).' });
+        }
+        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step, fails: [] } });
+      }
+    }
+    const withChildren = !!(req.body && req.body.includeChildren === true);
+    const dropChild = ({ childName, childAge, allergies, ...rest }) => rest;
+    const [items, bookingsAll, cardsAll, settings, closedDates, staff] = await Promise.all([
       Item.find({}).lean(),
       Booking.find({}).lean(),
       PlayCard.find({}).lean(),
@@ -2343,14 +2352,16 @@ app.get('/api/admin/backup', auth, requireOwner, async (req, res) => {
       ClosedDate.find({}).lean(),
       Staff.find({}).select('-passHash').lean()
     ]);
-    writeAudit({ actor: req.adminName || 'Owner', role: 'owner', action: 'Downloaded a backup', ip: String(req.ip || '').slice(0, 60) });
+    const bookings = withChildren ? bookingsAll : bookingsAll.map(dropChild);
+    const cards = withChildren ? cardsAll : cardsAll.map(dropChild);
+    writeAudit({ actor: req.adminName || 'Owner', role: 'owner', action: 'Downloaded a backup' + (withChildren ? ' (with children details)' : ''), ip: String(req.ip || '').slice(0, 60) });
     const stamp = new Date().toISOString().slice(0, 10);
     res.set({
       'Content-Type': 'application/json; charset=utf-8',
       'Content-Disposition': 'attachment; filename="rudhat-backup-' + stamp + '.json"',
       'Cache-Control': 'no-store'
     });
-    res.send(JSON.stringify({ exportedAt: new Date().toISOString(), items, bookings, cards, settings, closedDates, staff }, null, 1));
+    res.send(JSON.stringify({ exportedAt: new Date().toISOString(), includesChildren: withChildren, items, bookings, cards, settings, closedDates, staff }, null, 1));
   } catch (err) {
     console.error('Backup error:', err);
     res.status(500).json({ error: 'Failed to create the backup' });
@@ -2507,7 +2518,7 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Admin pages: the dashboard needs inline event attributes (onclick), the login page does not
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => sendHtmlFile(res, 'admin/index.html'));
-app.get('/admin/dashboard.html', (req, res) => sendHtmlFile(res, 'admin/dashboard.html', { attrInline: true }));
+app.get('/admin/dashboard.html', (req, res) => sendHtmlFile(res, 'admin/dashboard.html'));
 
 // The clean addresses are /card and /privacy; the raw files redirect there (no duplicate pages for Google).
 app.get('/card.html', (req, res) => res.redirect(301, '/card'));
@@ -2532,9 +2543,40 @@ app.use((err, req, res, next) => {
   res.status(status).type('text/plain').send(msg);
 });
 
-app.listen(PORT, () => {
+// Children's names, ages and allergies are only needed around the party. After this many days they are erased
+// from the booking (the booking itself stays for your records). Default 90, allowed 7-3650.
+const SENSITIVE_RETENTION_DAYS = Math.min(3650, Math.max(7, parseInt(process.env.SENSITIVE_RETENTION_DAYS, 10) || 90));
+async function purgeOldChildData() {
+  if (!dbUp()) return;
+  const cutoff = addDaysDubai(-SENSITIVE_RETENTION_DAYS);
+  const r = await Booking.updateMany(
+    { date: { $lt: cutoff }, $or: [{ allergies: { $ne: '' } }, { childName: { $ne: '' } }, { childAge: { $ne: null } }] },
+    { $set: { allergies: '', childName: '' }, $unset: { childAge: 1 } }
+  );
+  if (r.modifiedCount) console.log('Erased child details from ' + r.modifiedCount + ' old booking(s).');
+}
+
+const server = app.listen(PORT, () => {
   console.log(`Rudhat running on port ${PORT}`);
   console.log('Email notifications: ' + mailStatus());
   console.log('Booking security check (Turnstile): ' + (turnstileOn ? 'ON' : 'OFF'));
+  if (!turnstileOn) console.warn('WARNING: Turnstile is OFF - bots can fill your calendar with fake pending bookings. Set TURNSTILE_SITE_KEY and TURNSTILE_SECRET.');
+  setTimeout(() => purgeOldChildData().catch((e) => console.error('Purge error:', e.message)), 60 * 1000).unref();
+  setInterval(() => purgeOldChildData().catch((e) => console.error('Purge error:', e.message)), 6 * 60 * 60 * 1000).unref();
   setInterval(() => retryFailedEmails().catch((e) => console.error('Email retry error:', e.message)), 5 * 60 * 1000).unref();
 });
+
+// Render/Docker send SIGTERM on every deploy: finish running requests, close the database, then exit.
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(signal + ' received - shutting down');
+  const force = setTimeout(() => process.exit(1), 10000);
+  force.unref();
+  server.close(async () => {
+    try { await mongoose.disconnect(); } catch (e) { /* ignore */ }
+    process.exit(0);
+  });
+}
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
