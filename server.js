@@ -11,6 +11,26 @@ const { toMin, fromMin, isRealDate, isFridayDate, withinHours, normalizePhone, d
 require('dotenv').config();
 
 const app = express();
+
+// Express 4 ignores the promise an async route handler returns: if it throws (for example the database is down),
+// the request would hang forever and Node 22 would crash on the unhandled rejection.
+// This wrapper sends every thrown or rejected error to the error handler at the bottom (-> a clean 500 answer).
+function wrapAsync(h) {
+  if (typeof h !== 'function' || h.length >= 4) return h; // error handlers keep their 4-argument signature
+  return function (req, res, next) {
+    try {
+      const r = h(req, res, next);
+      if (r && typeof r.catch === 'function') r.catch(next);
+    } catch (e) { next(e); }
+  };
+}
+['get', 'post', 'put', 'patch', 'delete'].forEach((method) => {
+  const original = app[method].bind(app);
+  app[method] = function (path, ...handlers) {
+    if (!handlers.length) return original(path); // app.get('setting-name') is a settings lookup, not a route
+    return original(path, ...handlers.map(wrapAsync));
+  };
+});
 const PORT = process.env.PORT || 3000;
 
 const SECRET = process.env.JWT_SECRET;
@@ -553,6 +573,15 @@ function hotp(secretBuf, counter) {
   const num = ((h[o] & 0x7f) << 24) | (h[o + 1] << 16) | (h[o + 2] << 8) | h[o + 3];
   return String(num % 1000000).padStart(6, '0');
 }
+// Marks a matched step as used. The update only succeeds while the stored step is still OLDER, so when two requests
+// carry the same code at the same moment, exactly one of them wins (the check in totpCheck alone is not atomic).
+async function claimTotpStep(step) {
+  const r = await OwnerAuth.updateOne(
+    { key: 'owner', $or: [{ lastStep: { $lt: step } }, { lastStep: { $exists: false } }] },
+    { $set: { lastStep: step, fails: [] } }
+  );
+  return !!r && r.matchedCount === 1;
+}
 // Returns the matched 30-second step (> 0) or 0. A code can be used once (steps <= lastStep are refused).
 function totpCheck(secretB32, code, lastStep) {
   const c = String(code || '').replace(/\s/g, '');
@@ -660,7 +689,8 @@ const cspFor = (scriptHashes, attrInline) => [
   "default-src 'self'",
   // inline <script> blocks run only if their SHA-256 hash is listed here (computed from the exact page we send)
   "script-src 'self'" + (scriptHashes.length ? ' ' + scriptHashes.join(' ') : '') + CF_HOST,
-  // inline event attributes (onclick=...) are off everywhere except the admin dashboard
+  // inline event attributes (onclick=...) are off on every page (the admin dashboard uses data-click handlers instead;
+  // attrInline stays available as an opt-in, but no page needs it)
   attrInline ? "script-src-attr 'unsafe-inline'" : "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
@@ -873,7 +903,10 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
           await sleep(600);
           return res.status(401).json({ error: 'Invalid code' });
         }
-        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step, fails: [] } });
+        if (!(await claimTotpStep(step))) { // the same code was used a moment ago
+          await sleep(600);
+          return res.status(401).json({ error: 'Invalid code' });
+        }
       }
     }
     if (!role) {
@@ -1423,8 +1456,8 @@ async function verifyTurnstile(req, res, next) {
 }
 
 // Bookings are processed one at a time, so two simultaneous requests cannot take the same slot.
-// NOTE: this lock lives inside one Node process. Run ONE instance of the service (the default on Render);
-// with several instances, add a database-level reservation first.
+// This chain serialises booking requests inside ONE Node process (cheap first line of defence).
+// The per-day database lock (withDateLock, below) is what also protects several instances running at once.
 let bookingChain = Promise.resolve();
 function withBookingLock(fn) {
   const run = bookingChain.then(fn, fn);
@@ -1474,7 +1507,8 @@ async function createBooking(req, res) {
     if (e && e.message === 'lock-busy') {
       return res.status(503).json({ error: 'The booking system is busy. Please try again in a moment.' });
     }
-    throw e;
+    console.error('Booking error:', e);
+    if (!res.headersSent) return res.status(500).json({ error: 'Failed to save booking' });
   }
 }
 
@@ -2258,8 +2292,13 @@ app.get('/api/admin/stats', auth, requireOwner, async (req, res) => {
    ADMIN: TWO-STEP VERIFICATION (owner only)
 ========================================================= */
 app.get('/api/admin/2fa', auth, requireOwner, async (req, res) => {
-  const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
-  res.json({ enabled: !!(oa && oa.enabled), emergencyOff: process.env.DISABLE_OWNER_2FA === 'true' });
+  try {
+    const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
+    res.json({ enabled: !!(oa && oa.enabled), emergencyOff: process.env.DISABLE_OWNER_2FA === 'true' });
+  } catch (err) {
+    console.error('2FA status error:', err);
+    res.status(500).json({ error: 'Could not read the two-step status.' });
+  }
 });
 
 app.post('/api/admin/2fa/setup', auth, requireOwner, async (req, res) => {
@@ -2339,7 +2378,9 @@ app.post('/api/admin/backup', auth, requireOwner, async (req, res) => {
           await totpFail();
           return res.status(401).json({ error: 'Enter a fresh two-step code (a code that was just used to sign in cannot be used again - wait for the next one).' });
         }
-        await OwnerAuth.updateOne({ key: 'owner' }, { $set: { lastStep: step, fails: [] } });
+        if (!(await claimTotpStep(step))) {
+          return res.status(401).json({ error: 'Enter a fresh two-step code (a code that was just used cannot be used again - wait for the next one).' });
+        }
       }
     }
     const withChildren = !!(req.body && req.body.includeChildren === true);
@@ -2516,7 +2557,7 @@ app.get('/sitemap.xml', (req, res) => {
 });
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
-// Admin pages: the dashboard needs inline event attributes (onclick), the login page does not
+// Admin pages (neither page uses inline event attributes, so both run under the strict CSP)
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => sendHtmlFile(res, 'admin/index.html'));
 app.get('/admin/dashboard.html', (req, res) => sendHtmlFile(res, 'admin/dashboard.html'));
 
@@ -2580,3 +2621,5 @@ function shutdown(signal) {
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+// A forgotten promise (e.g. in a background job) must be logged, not take the whole site down.
+process.on('unhandledRejection', (reason) => { console.error('Unhandled promise rejection:', reason); });
