@@ -51,6 +51,9 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 | `DISABLE_OWNER_2FA` | no | Emergency only: set to `true` to skip the owner's 2-step code (e.g. phone lost), sign in, set it up again, then remove it |
 | `TURNSTILE_FAIL_CLOSED` | no | `true` = block bookings if Cloudflare cannot be reached (default: let them through) |
 | `WAIVER_REQUIRED` | no | Set to `false` to make the child name and guardian declaration optional on the booking form (default: required) |
+| `PORT` | no | Port to listen on (Render sets it for you; default 3000) |
+| `SENSITIVE_RETENTION_DAYS` | no | Days after the party before a child's name, age and allergy note are erased from a booking (default 90, allowed 7-3650). Keep `public/privacy.html` in step |
+| `ADMIN_REMEMBER_DAYS` | no | How long "Keep me signed in" lasts (default 14, max 90); a normal sign-in lasts 8 hours |
 | `PRICE_RANGE` | no | `priceRange` in the Google business data (default `AED 20+`) |
 
 If no email settings are present, bookings are still saved and a warning is written to the log.
@@ -71,7 +74,18 @@ Push to GitHub; Render builds from the `Dockerfile` (Node 22). Add the environme
 - Free plan: the service sleeps when idle, so the first visit after a pause is slow.
 
 ## Tests
-`npm test` runs the unit tests for the booking maths (opening hours incl. after-midnight closing, overlaps, phone numbers, dates) in `test/logic.test.js`. The pure helpers live in `lib/logic.js`. Run the tests before every deploy that touches booking rules.
+`npm test` (Node 22, no database or internet needed) runs three groups of tests:
+
+- `test/logic.test.js` – the booking maths in `lib/logic.js`: opening hours incl. after-midnight closing, overlaps, phone numbers, dates.
+- `test/booking-rules.test.js` – the real `checkSlot` / `slotMessage` functions from `server.js` with a fixed clock (Dubai time, 3 h lead time, daily limit, double booking, after-midnight slots).
+- `test/structure.test.js` – project checks: every `require()` resolves and is declared in `package.json`, all inline scripts parse, no inline `onclick` (CSP), every admin dashboard button handler exists, the Arabic page translates every booking message, and fixed bugs stay fixed.
+
+Run the tests before every deploy.
+
+## Things to keep in step
+- **Privacy page vs. retention:** `public/privacy.html` says child details on a booking are erased about 90 days after the party. If you change `SENSITIVE_RETENTION_DAYS`, edit the privacy page too.
+- **`JWT_SECRET`:** do not change it on a live site. It signs everyone out and the owner's 2-step code can no longer be read (recovery: set `DISABLE_OWNER_2FA=true` once, sign in, set 2-step up again, remove the line).
+- **Staff permissions:** staff can top up play cards, change their expiry and see booking details (incl. allergy notes). Everything is written to the activity log; the owner can review it. Turn on 2-step for the owner account - it also protects the data backup download.
 
 ## Backup
 Settings > Backup. With two-step verification on, a fresh code is required for every download (a code just used to sign in cannot be reused - wait for the next one). Children's names, ages and allergy notes are left out unless you tick *Include children's details*; every download is written to the activity log.
