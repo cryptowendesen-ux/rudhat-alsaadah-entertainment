@@ -1477,9 +1477,37 @@ html[dir=rtl] .wa{right:auto;left:20px}
     'Allergies or medical notes (optional)': 'الحساسية أو الملاحظات الطبية (اختياري)',
     "I am the parent or legal guardian. I will supervise my child, I have shared any allergy or medical need above, and I accept the centre's safety rules.": 'أنا ولي الأمر أو الوصي القانوني. سأشرف على طفلي، وقد ذكرت أعلاه أي حساسية أو حاجة طبية، وأوافق على قواعد السلامة في المركز.',
     'We are closed on this date. Please choose another day.': 'نحن مغلقون في هذا التاريخ. يرجى اختيار يوم آخر.',
-    'Please enter the birthday child\'s name.': 'يرجى إدخال اسم صاحب العيد.'
+    'Please enter the birthday child\'s name.': 'يرجى إدخال اسم صاحب العيد.',
+    "Please enter your name.": "يرجى إدخال اسمك.",
+    "Please enter a valid phone number.": "يرجى إدخال رقم هاتف صحيح.",
+    "Please choose a valid date.": "يرجى اختيار تاريخ صحيح.",
+    "The date cannot be in the past.": "لا يمكن أن يكون التاريخ في الماضي.",
+    "Please choose a valid time.": "يرجى اختيار وقت صحيح.",
+    "You already have several open booking requests. Please contact us on WhatsApp to change or add a booking.": "لديك بالفعل عدة طلبات حجز مفتوحة. يرجى التواصل معنا عبر واتساب لتعديل حجز أو إضافة حجز.",
+    "That time is too soon to book online. Please choose a later time, or contact us on WhatsApp.": "هذا الوقت قريب جداً للحجز عبر الإنترنت. يرجى اختيار وقت لاحق أو التواصل معنا عبر واتساب.",
+    "That time is no longer available. Please choose another time.": "هذا الوقت لم يعد متاحاً. يرجى اختيار وقت آخر.",
+    "Number of children must be between 1 and 100.": "يجب أن يكون عدد الأطفال بين 1 و100.",
+    "Message is too long.": "الرسالة طويلة جداً.",
+    "Please confirm the parent / guardian declaration.": "يرجى تأكيد إقرار ولي الأمر.",
+    "The child's age must be between 0 and 17.": "يجب أن يكون عمر الطفل بين 0 و17.",
+    "Please choose a valid package.": "يرجى اختيار باقة صحيحة.",
+    "Please complete the security check and try again.": "يرجى إكمال التحقق الأمني ثم المحاولة مرة أخرى.",
+    "Security check failed. Please try again.": "فشل التحقق الأمني. يرجى المحاولة مرة أخرى.",
+    "The security check is temporarily unavailable. Please contact us on WhatsApp.": "التحقق الأمني غير متاح مؤقتاً. يرجى التواصل معنا عبر واتساب.",
+    "Too many requests. Please try again later or use WhatsApp.": "طلبات كثيرة جداً. يرجى المحاولة لاحقاً أو استخدام واتساب.",
+    "Too many booking requests from this connection today. Please use WhatsApp.": "طلبات حجز كثيرة جداً من هذا الاتصال اليوم. يرجى استخدام واتساب.",
+    "The booking system is busy. Please try again in a moment.": "نظام الحجز مشغول. يرجى المحاولة بعد قليل.",
+    "The security check is still loading. Please wait a moment and try again, or contact us on WhatsApp.": "التحقق الأمني قيد التحميل. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى أو التواصل معنا عبر واتساب.",
+    "Please complete the security check above.": "يرجى إكمال التحقق الأمني أعلاه.",
+    "Please check your details and try again.": "يرجى التحقق من بياناتك والمحاولة مرة أخرى."
   };
   var RX = [
+    /* messages with changing numbers / times (the server builds them) - must run BEFORE the generic AM/PM rules */
+    [/We are open (.+?) – (.+?) on Fridays\. Please choose a time within opening hours\./, 'ساعات العمل أيام الجمعة من $1 إلى $2. يرجى اختيار وقت ضمن ساعات العمل.'],
+    [/We are open (.+?) – (.+?) on this day\. Please choose a time within opening hours\./, 'ساعات العمل في هذا اليوم من $1 إلى $2. يرجى اختيار وقت ضمن ساعات العمل.'],
+    [/Online bookings can be made up to (\d+) days ahead\./, 'يمكن الحجز عبر الإنترنت حتى $1 يوماً مقدماً.'],
+    [/The party must finish before closing time \((.+?)\)\. Please choose an earlier start time\./, 'يجب أن تنتهي الحفلة قبل وقت الإغلاق ($1). يرجى اختيار وقت بدء أبكر.'],
+    [/We are closed on this date \((.+?)\)\. Please choose another day\./, 'نحن مغلقون في هذا التاريخ ($1). يرجى اختيار يوم آخر.'],
     [/\bAED\b/g, 'د.إ'], [/\bAM\b/g, 'ص'], [/\bPM\b/g, 'م'],
     [/(\d)AM\b/g, '$1 ص'], [/(\d)PM\b/g, '$1 م'],
     [/Saturday–Thursday/g, 'السبت–الخميس'], [/\bFriday\b/g, 'الجمعة'],
@@ -1741,7 +1769,7 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     if (!pl.querySelector('.list-msg')) { delete pl.dataset.fb; return; }
     if (pl.dataset.fb) return;
     pl.dataset.fb = '1';
-    pl.innerHTML = '<div class="pricecard hot"><span>' + T('Per hour', 'للساعة') + '</span><strong>' + txt('[data-bind=hourlyPrice]', T('Ask us', 'اسألنا')) +
+    pl.innerHTML = '<div class="pricecard hot"><span>' + T('Per hour', 'للساعة') + '</span><strong>' + String(txt('[data-bind=hourlyPrice]', T('Ask us', 'اسألنا'))).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }) +
       '</strong><span>' + T('Playtime', 'وقت اللعب') + '</span></div>' +
       '<div class="pricecard unlimited"><span>' + T('30, 42, 64 hours and unlimited', '30 و42 و64 ساعة وغير محدودة') + '</span><strong>' +
       T('Ask us', 'اسألنا') + '</strong><span>' + T('Message us on WhatsApp for package prices.', 'راسلنا على واتساب لمعرفة أسعار الباقات.') + '</span></div>';
