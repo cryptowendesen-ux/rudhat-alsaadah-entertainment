@@ -378,6 +378,69 @@ document.documentElement.classList.add('js');
 /* Safety net: only if the main script itself is broken, reveal the built-in values after 9 s (the API request gives up after 8 s) */
 setTimeout(function () { document.documentElement.classList.add('content-ready'); }, 9000);
 </script>
+<style id="motion">
+/* ===== Motion: short, smooth, never needed to read the page (off for people who ask for less motion) ===== */
+:root{--ease:cubic-bezier(.22,.7,.2,1);--dx:34px}
+[dir=rtl]{--dx:-34px}
+@keyframes mUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes mIn{from{opacity:0;transform:translateX(var(--dx)) scale(.93)}to{opacity:1;transform:none}}
+@keyframes lbIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+/* hero: text rises in one line after another, the picture slides + zooms in */
+.hero .eyebrow{animation:mUp .7s var(--ease) .05s both}
+.hero .open-badge{animation:mUp .7s var(--ease) .12s both}
+.hero h1{animation:mUp .8s var(--ease) .18s both}
+.hero h1 ~ p{animation:mUp .8s var(--ease) .3s both}
+.hero .actions{animation:mUp .8s var(--ease) .42s both}
+.hero-card{animation:mIn .95s var(--ease) .2s both}
+/* scroll reveal: from below, from the side, or zoom in; cards follow one by one (--d) */
+.js .reveal{transition:opacity .7s var(--ease) var(--d,0s),transform .7s var(--ease) var(--d,0s)}
+.js .reveal.rv-left{transform:translateX(calc(var(--dx) * -1))}
+.js .reveal.rv-right{transform:translateX(var(--dx))}
+.js .reveal.rv-zoom{transform:scale(.92)}
+.js .reveal.visible{opacity:1;transform:none}
+/* hover: light zoom, shadow and smooth transitions */
+.pricecard,.pkg,.feature,.gallery-card{transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.pricecard:hover,.pkg:hover,.feature:hover,.gallery-card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.hero-photo,.about-photo,.gallery-card img{transition:transform .8s var(--ease)}
+.hero-card:hover .hero-photo,.aboutvisual:hover .about-photo{transform:scale(1.05)}
+.gallery-card:hover img{transform:scale(1.08)}
+.btn{transition:transform .2s var(--ease),box-shadow .2s var(--ease),filter .2s}
+.btn:hover{transform:translateY(-2px)}
+/* gallery: one big white card in the middle, the next ones peek out behind it; it slides by itself (swipe / drag) */
+.gallery{display:flex;gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:18px 8vw 34px;scroll-padding:0 8vw;cursor:grab;grid-template-columns:none;grid-template-rows:none;position:relative;z-index:1}
+.gallery::-webkit-scrollbar{display:none}
+.gallery.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.gallery-card,.gallery-skel{flex:0 0 min(84%,390px);height:auto;scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:38px;padding:22px 22px 28px;box-shadow:0 16px 44px rgba(24,50,74,.09);display:flex;flex-direction:column;align-items:center;text-align:center;min-height:0}
+.gallery-skel{min-height:380px}
+.gallery-empty{flex:1 1 100%}
+.gallery-card::after{display:none}
+.gallery-card img{pointer-events:none;-webkit-user-drag:none;width:100%;height:auto;aspect-ratio:1/1;border-radius:28px;object-fit:cover}
+.gallery-label{position:static;background:none;backdrop-filter:none;color:var(--ink);font-size:21px;font-weight:900;line-height:1.25;padding:20px 6px 0}
+.gallery-sub{color:var(--muted);font-weight:700;font-size:15px;padding:8px 6px 0}
+@media(max-width:899px){
+  .gallery-card{transform:scale(.92);opacity:.6;transition:transform .5s var(--ease),opacity .5s var(--ease),box-shadow .3s var(--ease)}
+  .gallery-card.is-active{transform:none;opacity:1}
+  .gallery-card.is-active:hover{transform:translateY(-4px)}
+}
+@media(min-width:900px){.gallery{padding:18px 4px 34px;scroll-padding:0}.gallery-card,.gallery-skel{flex-basis:calc((100% - 40px) / 3);scroll-snap-align:start}}
+/* soft floating shapes behind the gallery */
+#gallery{position:relative;overflow:hidden}
+#gallery::before,#gallery::after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:0;animation:mFloat 7s ease-in-out infinite}
+#gallery::before{width:170px;height:170px;top:40px;right:-50px;background:radial-gradient(circle at 35% 30%,#fff8,#65a9ff66 60%,#65a9ff00 72%)}
+#gallery::after{width:210px;height:210px;bottom:20px;left:-70px;background:radial-gradient(circle at 35% 30%,#fff9,#ff5f8766 60%,#ff5f8700 72%);animation-delay:-3s}
+#gallery .container,#gallery .sectionhead{position:relative;z-index:1}
+@keyframes mFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+/* big photo viewer */
+#galleryLightbox.show #lightboxImage{animation:lbIn .35s var(--ease) both}
+@media(prefers-reduced-motion:reduce){
+  .hero .eyebrow,.hero .open-badge,.hero h1,.hero h1 ~ p,.hero .actions,.hero-card,#galleryLightbox.show #lightboxImage{animation:none}
+  .js .reveal,.js .reveal.rv-left,.js .reveal.rv-right,.js .reveal.rv-zoom{opacity:1;transform:none;transition:none}
+  .pricecard:hover,.pkg:hover,.feature:hover,.gallery-card:hover,.btn:hover{transform:none}
+  #gallery::before,#gallery::after{animation:none}
+  .gallery-card{transition:none}
+  .hero-card:hover .hero-photo,.aboutvisual:hover .about-photo,.gallery-card:hover img{transform:none}
+}
+</style>
 </head>
 
 <body>
@@ -733,7 +796,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       var title = g.title || 'Rudhat Alsaadah';
       return '<div class="gallery-card" data-index="' + i + '" tabindex="0" role="button" aria-label="Open photo: ' + esc(title) + '">' +
         '<img src="' + esc(safeUrl(g.imageUrl)) + '" alt="' + esc(title) + '" loading="lazy">' +
-        '<div class="gallery-label">' + esc(title) + '</div></div>';
+        '<div class="gallery-label">' + esc(title) + '</div>' +
+        (g.description ? '<div class="gallery-sub">' + esc(g.description) + '</div>' : '') + '</div>';
     }).join('');
   }
 
@@ -1793,6 +1857,131 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     if (document.documentElement.classList.contains('content-ready')) { ready.disconnect(); renderAll(); seo(); }
   });
   ready.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
+
+<script>
+/* Motion: reveal on scroll (up / from the side / zoom), cards one by one, a gallery that slides by itself. */
+(function () {
+  'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasIO = 'IntersectionObserver' in window;
+
+  /* ---- reveal ---- */
+  var io = (hasIO && !reduce) ? new IntersectionObserver(function (es) {
+    es.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var el = en.target;
+      io.unobserve(el);
+      el.classList.add('visible');
+      var d = (parseFloat(el.style.getPropertyValue('--d')) || 0) * 1000;
+      /* when the entrance is over, hand the element back to its normal styles (so the hover lift works) */
+      setTimeout(function () {
+        el.classList.remove('reveal', 'visible', 'rv-left', 'rv-right', 'rv-zoom');
+        el.style.removeProperty('--d');
+      }, 900 + d);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
+
+  function tag(el, variant, delay) {
+    if (!io || !el || el.getAttribute('data-mt')) return;
+    el.setAttribute('data-mt', '1');
+    el.classList.add('reveal');
+    if (variant && variant !== 'up') el.classList.add('rv-' + variant);
+    if (delay) el.style.setProperty('--d', delay + 's');
+    io.observe(el);
+  }
+  function stagger(box, variant) {
+    Array.prototype.forEach.call(box.children, function (c, i) { tag(c, variant, Math.min(i, 6) * 0.09); });
+  }
+  function watch(id, variant) {
+    var box = document.getElementById(id);
+    if (!box || !io) return;
+    stagger(box, variant);
+    new MutationObserver(function () { stagger(box, variant); }).observe(box, { childList: true });
+  }
+  watch('servicesList', 'up');
+  watch('pricesList', 'zoom');
+  watch('birthdayPackages', 'zoom');
+  watch('infoList', 'up');
+  var ab = document.querySelector('.about');
+  if (ab && ab.children.length > 1) { tag(ab.children[0], 'left'); tag(ab.children[1], 'right'); }
+  var gal = document.getElementById('galleryList');
+  if (gal) tag(gal, 'up');
+  /* items the page already reveals: only give them a direction / order */
+  document.querySelectorAll('.sectionhead').forEach(function (e) { e.classList.add('rv-left'); });
+  document.querySelectorAll('.package-main').forEach(function (e) { e.classList.add('rv-zoom'); });
+  document.querySelectorAll('.trust-card').forEach(function (e, i) { e.style.setProperty('--d', Math.min(i, 6) * 0.09 + 's'); });
+
+  /* ---- gallery: slides by itself, swipe (touch) and drag (mouse); a tap opens the big viewer ---- */
+  if (gal) {
+    var hold = false, inView = !hasIO, resume = null, drag = null, moved = 0;
+    var step = function () {
+      var cs = gal.querySelectorAll('.gallery-card');
+      if (cs.length < 2 || hold || document.hidden || !inView) return;
+      var rtl = getComputedStyle(gal).direction === 'rtl';
+      var max = gal.scrollWidth - gal.clientWidth;
+      if (Math.abs(gal.scrollLeft) >= max - 4) { gal.scrollTo({ left: 0, behavior: 'smooth' }); return; }
+      var w = Math.abs(cs[1].offsetLeft - cs[0].offsetLeft) || cs[0].getBoundingClientRect().width + 20;
+      gal.scrollBy({ left: rtl ? -w : w, behavior: 'smooth' });
+    };
+    /* the card nearest to the middle is the "active" one (full size); the others are smaller and softer on phones */
+    var marking = false;
+    var markActive = function () {
+      marking = false;
+      var mid = gal.getBoundingClientRect().left + gal.clientWidth / 2, best = null, bd = 1e9;
+      gal.querySelectorAll('.gallery-card').forEach(function (c) {
+        var r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
+        if (d < bd) { bd = d; best = c; }
+      });
+      gal.querySelectorAll('.gallery-card').forEach(function (c) { c.classList.toggle('is-active', c === best); });
+    };
+    var queueMark = function () { if (!marking) { marking = true; requestAnimationFrame(markActive); } };
+    gal.addEventListener('scroll', queueMark, { passive: true });
+    window.addEventListener('resize', queueMark);
+    new MutationObserver(queueMark).observe(gal, { childList: true });
+    queueMark();
+    if (!reduce) setInterval(step, 3800);
+    if (hasIO) new IntersectionObserver(function (es) { inView = es[0].isIntersecting; }, { threshold: 0.25 }).observe(gal);
+    gal.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hold = true; });
+    gal.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hold = false; });
+    gal.addEventListener('touchstart', function () { hold = true; clearTimeout(resume); }, { passive: true });
+    var release = function () { clearTimeout(resume); resume = setTimeout(function () { hold = false; }, 5000); };
+    gal.addEventListener('touchend', release, { passive: true });
+    gal.addEventListener('touchcancel', release, { passive: true });
+    gal.addEventListener('focusin', function () { hold = true; });
+    gal.addEventListener('focusout', function () { hold = false; });
+    gal.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, l: gal.scrollLeft }; moved = 0;
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x;
+      moved = Math.max(moved, Math.abs(dx));
+      if (moved > 4) gal.classList.add('dragging');
+      gal.scrollLeft = drag.l - dx;
+    });
+    var endDrag = function () { if (!drag) return; drag = null; gal.classList.remove('dragging'); };
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+    /* a drag must not count as a tap on a photo */
+    gal.addEventListener('click', function (e) { if (moved > 6) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
+  }
+
+  /* ---- big viewer: swipe left / right on a phone ---- */
+  var lb = document.getElementById('galleryLightbox');
+  if (lb) {
+    var sx = null;
+    lb.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function (e) {
+      if (sx === null) return;
+      var dx = e.changedTouches[0].clientX - sx; sx = null;
+      if (Math.abs(dx) < 50) return;
+      var b = document.getElementById(dx < 0 ? 'lightboxNext' : 'lightboxPrev');
+      if (b) b.click();
+    }, { passive: true });
+  }
 })();
 </script>
 
