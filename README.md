@@ -92,3 +92,10 @@ Settings > Backup. With two-step verification on, a fresh code is required for e
 
 ## Staying signed in
 The admin login has a *Keep me signed in on this device* box. Ticked: the sign-in survives closing the browser for `ADMIN_REMEMBER_DAYS` days (default 14). Not ticked: it ends when the tab is closed (8 hours at most). Only tick it on your own phone or computer. *Sign out everywhere* in the dashboard ends every sign-in at once.
+
+## Package requests and package photos
+- **Hour prices and birthday packages are cards with an optional photo.** Dashboard > add or edit a price / birthday item > *Photo (optional)*. Without a photo the card shows a coloured background with an emoji. Cards slide by themselves, swipe on phones, drag with the mouse; tapping a card opens its details.
+- **Hour prices: "Request Online".** The visitor leaves a name and phone number (no payment online). It appears in the dashboard under *Package requests* (and in your e-mail). Answer on WhatsApp, take the payment at the centre, then press *Create card*: the card form is filled in for you. Requests are erased automatically after 90 days.
+- **Birthday packages: "Book Online"** opens the normal birthday booking form with that package selected.
+- Protection for requests: hidden trap field, 6 per hour and 4 per day per connection, at most 60 requests per day for the whole site, and the same open request is stored once.
+
