@@ -166,6 +166,26 @@ const itemSchema = new mongoose.Schema(
 const Item = mongoose.model('Item', itemSchema);
 
 /* =========================================================
+   PACKAGE REQUESTS (visitor asks for an hours package; staff answer on WhatsApp, no online payment)
+========================================================= */
+const packageRequestSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true, unique: true },
+    packageId: { type: String, default: '' },
+    packageTitle: { type: String, default: '', maxlength: 200 },
+    packagePrice: { type: String, default: '', maxlength: 100 },
+    name: { type: String, required: true, maxlength: 100 },
+    phone: { type: String, required: true, maxlength: 30 },
+    message: { type: String, default: '', maxlength: 300 },
+    status: { type: String, enum: ['new', 'contacted', 'done', 'cancelled'], default: 'new' }
+  },
+  { timestamps: true }
+);
+// Requests are erased automatically after 90 days (the privacy page says so)
+packageRequestSchema.index({ createdAt: 1 }, { expireAfterSeconds: 90 * 86400 });
+const PackageRequest = mongoose.model('PackageRequest', packageRequestSchema);
+
+/* =========================================================
    BOOKINGS + SETTINGS SCHEMAS
 ========================================================= */
 const bookingSchema = new mongoose.Schema(
@@ -357,16 +377,28 @@ const Settings = mongoose.model('Settings', settingsSchema);
 
 // These may be emptied by the admin (e.g. remove the Instagram link); every other field falls back to its default when empty.
 const CLEARABLE_SETTINGS = ['instagram', 'tiktok', 'reviewUrl', 'bannerText', 'bannerTextAr', 'bannerUntil'];
+// Settings are read on every page view and booking check, so a short in-memory copy (30 s) keeps the database quiet.
+// It is cleared the moment the owner saves new settings; if the database is down, the last known copy is used.
+let settingsCache = null; // { at, value }
+const SETTINGS_TTL_MS = 30 * 1000;
+const clearSettingsCache = () => { settingsCache = null; };
 async function getSettings() {
-  const doc = await Settings.findOne({ key: 'main' }).lean();
-  const out = { ...SETTINGS_DEFAULTS };
-  if (doc) {
-    Object.keys(SETTINGS_DEFAULTS).forEach((k) => {
-      const v = doc[k];
-      if (CLEARABLE_SETTINGS.includes(k) ? v !== undefined && v !== null : v) out[k] = v;
-    });
+  if (settingsCache && Date.now() - settingsCache.at < SETTINGS_TTL_MS) return { ...settingsCache.value };
+  try {
+    const doc = await Settings.findOne({ key: 'main' }).lean();
+    const out = { ...SETTINGS_DEFAULTS };
+    if (doc) {
+      Object.keys(SETTINGS_DEFAULTS).forEach((k) => {
+        const v = doc[k];
+        if (CLEARABLE_SETTINGS.includes(k) ? v !== undefined && v !== null : v) out[k] = v;
+      });
+    }
+    settingsCache = { at: Date.now(), value: out };
+    return { ...out };
+  } catch (err) {
+    if (settingsCache) return { ...settingsCache.value };
+    throw err;
   }
-  return out;
 }
 
 /* =========================================================
@@ -432,6 +464,7 @@ async function seedDatabase() {
     console.log('Default content seeded to MongoDB database.');
   }
   await Settings.updateOne({ key: 'main' }, { $setOnInsert: SETTINGS_DEFAULTS }, { upsert: true });
+  clearSettingsCache();
 }
 
 // The first connection is retried with a growing pause (1s, 2s, 4s ... max 30s) until it works,
@@ -750,6 +783,10 @@ const AUDIT_LABELS = {
   'PUT /api/admin/items/:type/:id': 'Edited website item',
   'DELETE /api/admin/items/:type/:id': 'Deleted website item',
   'POST /api/admin/gallery/upload': 'Uploaded a photo',
+  'POST /api/admin/items/:type/:id/image': 'Set a package photo',
+  'DELETE /api/admin/items/:type/:id/image': 'Removed a package photo',
+  'PATCH /api/admin/package-requests/:id': 'Changed a package request',
+  'DELETE /api/admin/package-requests/:id': 'Deleted a package request',
   'PATCH /api/admin/bookings/:id': 'Changed booking status',
   'POST /api/admin/bookings/:id/resend': 'Re-sent booking e-mail',
   'POST /api/admin/bookings/:id/reminded': 'Marked reminder as sent',
@@ -770,7 +807,7 @@ const AUDIT_LABELS = {
   'POST /api/auth/logout': 'Signed out',
   'POST /api/auth/logout-all': 'Signed out all devices'
 };
-const AUDIT_BODY_KEYS = ['status', 'minutes', 'hours', 'note', 'active', 'type', 'title', 'date', 'reason', 'name', 'email', 'holder'];
+const AUDIT_BODY_KEYS = ['status', 'minutes', 'hours', 'note', 'active', 'type', 'title', 'date', 'reason', 'name', 'email', 'holder', 'expiresAt'];
 function writeAudit(entry) {
   AuditLog.create(entry).catch((err) => console.error('Audit write failed:', err.message));
 }
@@ -780,6 +817,7 @@ function auditMiddleware(req, res, next) {
   res.on('finish', () => {
     try {
       if (res.statusCode >= 400 || !req.adminRole) return;
+      if (req.route && req.route.path === '/api/admin/backup') return; // the backup route writes its own (more detailed) entry
       const key = req.method + ' ' + (req.route ? req.route.path : req.path);
       const body = req.body && typeof req.body === 'object' ? req.body : {};
       const detail = AUDIT_BODY_KEYS.filter((k) => body[k] !== undefined && typeof body[k] !== 'object')
@@ -806,7 +844,8 @@ app.use('/api/admin', auditMiddleware);
 app.use('/api/auth', auditMiddleware);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false }));
+// The hosting health checks (/api/health, /api/ready) are exempt: a 429 there would look like an outage and restart the site.
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false, skip: (req) => req.path === '/health' || req.path === '/ready' }));
 // Only FAILED sign-ins count toward the limit (the owner is never locked out by successful logins)
 const loginLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -879,12 +918,16 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
     if (ownerOk) {
       role = 'owner';
     } else {
-      // The owner's e-mail never belongs to a staff account, so a wrong owner password skips the (slow) staff check.
+      // The owner's e-mail never belongs to a staff account, so no staff look-up is needed for it.
       const ownerEmail = safeEqual(email, String(process.env.ADMIN_EMAIL || '').trim().toLowerCase());
       if (!ownerEmail) {
         staff = await Staff.findOne({ email, active: true }).lean();
         const okPw = await verifyPassword(password, staff ? staff.passHash : await DUMMY_HASH_P);
         if (staff && okPw) role = 'staff';
+      } else {
+        // The owner's e-mail never belongs to a staff account, but it must still take as long as any other e-mail,
+        // otherwise the response time would reveal which e-mail is the owner's.
+        await verifyPassword(password, await DUMMY_HASH_P);
       }
     }
     // Owner two-step verification (switch off in an emergency with DISABLE_OWNER_2FA=true in Render)
@@ -1187,6 +1230,192 @@ app.delete('/api/admin/items/:type/:id', auth, requireOwner, async (req, res) =>
   } catch (err) {
     console.error('Delete item error:', err);
     res.status(500).json({ error: 'Failed to delete item' });
+  }
+});
+
+/* =========================================================
+   OPTIONAL PHOTO FOR A PRICE / BIRTHDAY PACKAGE (owner only)
+========================================================= */
+const PHOTO_OPTIONAL_TYPES = ['prices', 'birthday'];
+
+app.post('/api/admin/items/:type/:id/image', auth, requireOwner, handleUpload, async (req, res) => {
+  let newPublicId = '';
+  try {
+    const { type, id } = req.params;
+    if (!PHOTO_OPTIONAL_TYPES.includes(type)) return res.status(400).json({ error: 'This item type has no photo' });
+    if (!req.file) return res.status(400).json({ error: 'Please select an image file' });
+    const item = await Item.findOne({ type, id });
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+
+    const cloud = await uploadToCloudinary(req.file.buffer, type);
+    newPublicId = cloud.public_id || '';
+    const oldPublicId = item.publicId;
+    item.imageUrl = cloud.secure_url;
+    item.publicId = cloud.public_id;
+    try {
+      await item.save();
+    } catch (dbErr) {
+      if (newPublicId) await cloudinary.uploader.destroy(newPublicId, { resource_type: 'image' }).catch(() => {});
+      throw dbErr;
+    }
+    if (oldPublicId) {
+      cloudinary.uploader.destroy(oldPublicId, { resource_type: 'image' }).catch((e) => console.error('Old package photo cleanup error:', e.message));
+    }
+    res.json(adminItemJson(item));
+  } catch (err) {
+    console.error('Package photo error:', err);
+    res.status(500).json({ error: 'Failed to upload the photo' });
+  }
+});
+
+app.delete('/api/admin/items/:type/:id/image', auth, requireOwner, async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    if (!PHOTO_OPTIONAL_TYPES.includes(type)) return res.status(400).json({ error: 'This item type has no photo' });
+    const item = await Item.findOne({ type, id });
+    if (!item) return res.status(404).json({ error: 'Item not found' });
+    if (item.publicId) {
+      try {
+        const r = await cloudinary.uploader.destroy(item.publicId, { resource_type: 'image' });
+        if (r.result !== 'ok' && r.result !== 'not found') return res.status(500).json({ error: 'Failed to delete image from Cloudinary' });
+      } catch (e) {
+        console.error('Cloudinary delete error:', e);
+        return res.status(500).json({ error: 'Failed to delete image from Cloudinary' });
+      }
+    }
+    item.imageUrl = '';
+    item.publicId = '';
+    await item.save();
+    res.json(adminItemJson(item));
+  } catch (err) {
+    console.error('Remove package photo error:', err);
+    res.status(500).json({ error: 'Failed to remove the photo' });
+  }
+});
+
+/* =========================================================
+   PACKAGE REQUESTS
+   A visitor picks an hours package and leaves a name + phone. Nothing is held or paid:
+   staff answer on WhatsApp, take the payment at the centre and then create the play card in the dashboard.
+   Protection: hidden trap field, per-connection limits, a site-wide daily cap, and a repeat of the same request is not stored twice.
+========================================================= */
+const requestLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 6,
+  message: { error: 'Too many requests. Please try again later or use WhatsApp.' }
+});
+const requestDailyLimit = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 4,
+  skipFailedRequests: true,
+  message: { error: 'Too many requests from this connection today. Please use WhatsApp.' }
+});
+const REQUESTS_PER_DAY_CAP = 60;
+
+function packageRequestJson(r) {
+  return {
+    id: r.id,
+    reference: r.id.slice(0, 8).toUpperCase(),
+    packageId: r.packageId,
+    packageTitle: r.packageTitle,
+    packagePrice: r.packagePrice,
+    name: r.name,
+    phone: r.phone,
+    message: r.message || '',
+    status: r.status,
+    createdAt: r.createdAt
+  };
+}
+
+async function notifyPackageRequest(r) {
+  if (!mailConfigured()) return;
+  try {
+    const rows = [
+      ['Reference', r.id.slice(0, 8).toUpperCase()],
+      ['Package', r.packageTitle + (r.packagePrice ? ' - ' + r.packagePrice : '')],
+      ['Name', r.name],
+      ['Phone', r.phone],
+      ['Message', r.message || '-']
+    ];
+    const html =
+      '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto"><h2 style="margin:0 0 12px">New package request</h2>' +
+      '<table style="border-collapse:collapse;width:100%">' +
+      rows.map(([k, v]) => '<tr><td style="padding:8px;border-bottom:1px solid #eee;color:#64748b;width:110px">' + escHtml(k) +
+        '</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">' + escHtml(v) + '</td></tr>').join('') +
+      '</table><p><a href="https://wa.me/' + escHtml(r.phone.replace(/\D/g, '')) + '">Answer on WhatsApp</a></p>' +
+      '<p style="color:#64748b;font-size:13px">Nothing is paid or held yet. Answer on WhatsApp, take the payment, then create the play card in the dashboard.</p></div>';
+    const text = rows.map(([k, v]) => k + ': ' + v).join('\n');
+    await sendMail({ subject: 'New package request: ' + r.packageTitle + (r.packagePrice ? ' (' + r.packagePrice + ')' : ''), html, text });
+  } catch (err) {
+    console.error('Package request email failed:', err.message);
+  }
+}
+
+app.post('/api/package-requests', requestLimit, requestDailyLimit, async (req, res) => {
+  const b = req.body || {};
+  if (String(b.website || '').trim()) return res.status(201).json({ ok: true, reference: 'OK' }); // trap field: looks accepted, stores nothing
+  const name = clip(b.name, 100).trim();
+  const phoneRaw = String(b.phone || '').trim();
+  if (name.length < 2) return res.status(400).json({ error: 'Please enter your name.' });
+  if (!PHONE_RE.test(phoneRaw)) return res.status(400).json({ error: 'Please enter a valid phone number.' });
+  const phone = normalizePhone(phoneRaw);
+  if (!phone) return res.status(400).json({ error: 'Please enter a valid phone number.' });
+
+  // The package name and price always come from the database, never from the visitor
+  const item = await Item.findOne({ type: 'prices', id: String(b.packageId || ''), published: true }).lean();
+  if (!item) return res.status(400).json({ error: 'Please choose a package.' });
+
+  const since = new Date(Date.now() - 24 * 3600 * 1000);
+  if ((await PackageRequest.countDocuments({ createdAt: { $gt: since } })) >= REQUESTS_PER_DAY_CAP) {
+    return res.status(429).json({ error: 'We are receiving many requests right now. Please use WhatsApp.' });
+  }
+  const same = await PackageRequest.findOne({ phone, packageId: item.id, status: 'new' }).lean();
+  if (same) return res.status(200).json({ ok: true, reference: same.id.slice(0, 8).toUpperCase() });
+
+  const r = await PackageRequest.create({
+    id: crypto.randomUUID(),
+    packageId: item.id,
+    packageTitle: clip(item.title, 200),
+    packagePrice: clip(item.price, 100),
+    name,
+    phone,
+    message: clip(b.message, 300).trim()
+  });
+  notifyPackageRequest(r);
+  res.status(201).json({ ok: true, reference: r.id.slice(0, 8).toUpperCase() });
+});
+
+app.get('/api/admin/package-requests', auth, async (req, res) => {
+  try {
+    const list = await PackageRequest.find({}).sort({ createdAt: -1 }).limit(500).lean();
+    res.json(list.map(packageRequestJson));
+  } catch (err) {
+    console.error('List package requests error:', err);
+    res.status(500).json({ error: 'Failed to load package requests' });
+  }
+});
+
+app.patch('/api/admin/package-requests/:id', auth, async (req, res) => {
+  try {
+    const status = String((req.body && req.body.status) || '');
+    if (!['new', 'contacted', 'done', 'cancelled'].includes(status)) return res.status(400).json({ error: 'Invalid status' });
+    const r = await PackageRequest.findOneAndUpdate({ id: req.params.id }, { $set: { status } }, { new: true }).lean();
+    if (!r) return res.status(404).json({ error: 'Request not found' });
+    res.json(packageRequestJson(r));
+  } catch (err) {
+    console.error('Update package request error:', err);
+    res.status(500).json({ error: 'Failed to update the request' });
+  }
+});
+
+app.delete('/api/admin/package-requests/:id', auth, requireOwner, async (req, res) => {
+  try {
+    const r = await PackageRequest.deleteOne({ id: req.params.id });
+    if (!r.deletedCount) return res.status(404).json({ error: 'Request not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Delete package request error:', err);
+    res.status(500).json({ error: 'Failed to delete the request' });
   }
 });
 
@@ -1989,10 +2218,11 @@ app.post('/api/admin/cards/:id/topup', auth, async (req, res) => {
     if (!c) return res.status(404).json({ error: 'Card not found' });
     if (c.status === 'cancelled') return res.status(409).json({ error: 'This card is cancelled.' });
     const updated = await PlayCard.findOneAndUpdate(
-      { id: c.id },
+      { id: c.id, status: 'active' },
       { $inc: { totalMinutes: minutes }, $push: { ledger: { at: new Date(), minutes, note } } },
       { new: true }
     );
+    if (!updated) return res.status(409).json({ error: 'This card was just cancelled.' });
     res.json(cardJson(updated, true));
   } catch (err) {
     console.error('Top-up card error:', err);
@@ -2105,6 +2335,7 @@ app.put('/api/admin/settings', auth, requireOwner, async (req, res) => {
     }
 
     await Settings.updateOne({ key: 'main' }, { $set: update }, { upsert: true });
+    clearSettingsCache();
     res.json(await getSettings());
   } catch (err) {
     console.error('Update settings error:', err);
@@ -2385,13 +2616,14 @@ app.post('/api/admin/backup', auth, requireOwner, async (req, res) => {
     }
     const withChildren = !!(req.body && req.body.includeChildren === true);
     const dropChild = ({ childName, childAge, allergies, ...rest }) => rest;
-    const [items, bookingsAll, cardsAll, settings, closedDates, staff] = await Promise.all([
+    const [items, bookingsAll, cardsAll, settings, closedDates, staff, packageRequests] = await Promise.all([
       Item.find({}).lean(),
       Booking.find({}).lean(),
       PlayCard.find({}).lean(),
       Settings.find({}).lean(),
       ClosedDate.find({}).lean(),
-      Staff.find({}).select('-passHash').lean()
+      Staff.find({}).select('-passHash').lean(),
+      PackageRequest.find({}).lean()
     ]);
     const bookings = withChildren ? bookingsAll : bookingsAll.map(dropChild);
     const cards = withChildren ? cardsAll : cardsAll.map(dropChild);
@@ -2402,7 +2634,7 @@ app.post('/api/admin/backup', auth, requireOwner, async (req, res) => {
       'Content-Disposition': 'attachment; filename="rudhat-backup-' + stamp + '.json"',
       'Cache-Control': 'no-store'
     });
-    res.send(JSON.stringify({ exportedAt: new Date().toISOString(), includesChildren: withChildren, items, bookings, cards, settings, closedDates, staff }, null, 1));
+    res.send(JSON.stringify({ exportedAt: new Date().toISOString(), includesChildren: withChildren, items, bookings, cards, settings, closedDates, staff, packageRequests }, null, 1));
   } catch (err) {
     console.error('Backup error:', err);
     res.status(500).json({ error: 'Failed to create the backup' });
