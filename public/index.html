@@ -430,6 +430,120 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 #gallery::after{width:210px;height:210px;bottom:20px;left:-70px;background:radial-gradient(circle at 35% 30%,#fff9,#ff5f8766 60%,#ff5f8700 72%);animation-delay:-3s}
 #gallery .container,#gallery .sectionhead{position:relative;z-index:1}
 @keyframes mFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+/* hero: price chip on the photo, text link for prices, photo first on phones */
+.hero-chip{position:absolute;left:22px;top:22px;z-index:2;display:flex;align-items:baseline;gap:8px;background:#fff;padding:10px 14px;border-radius:18px;box-shadow:0 12px 28px rgba(24,50,74,.12)}
+.hero-chip b{font-family:"Baloo 2",Arial,sans-serif;font-size:22px;line-height:1;color:var(--pink)}
+.hero-chip span{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:.5px}
+.hero-card:not(.has-photo) .hero-chip{display:none}
+.hero-link{align-self:center;font-weight:900;color:var(--ink);text-decoration:underline;text-underline-offset:4px;padding:12px 6px}
+.hero-photo{object-position:50% 42%}
+@media(max-width:900px){.hero-card{order:-1;min-height:270px}.hero-chip{left:16px;top:16px}}
+/* hero with a photo: the photo fills the whole section, title on top, buttons + facts at the bottom.
+   Without a photo (or in a browser without :has) the normal light layout stays. */
+@supports selector(:has(*)){
+  .hero:has(.hero-card.has-photo){padding:0;color:#fff;isolation:isolate}
+  .hero:has(.hero-card.has-photo)::before,.hero:has(.hero-card.has-photo)::after{display:none}
+  .hero:has(.hero-card.has-photo) .hero-card{position:absolute;inset:0;z-index:0;min-height:0;order:0;border-radius:0;box-shadow:none;animation:none}
+  .hero:has(.hero-card.has-photo) .hero-card::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(16,34,52,.62) 0%,rgba(16,34,52,.14) 38%,rgba(16,34,52,.10) 55%,rgba(16,34,52,.68) 100%)}
+  .hero:has(.hero-card.has-photo) .hero-photo{animation:mKen 5s var(--ease) backwards}
+  .hero:has(.hero-card.has-photo) .hero-chip,.hero:has(.hero-card.has-photo) .hero-badge{display:none}
+  .hero:has(.hero-card.has-photo) .gridhero{display:block}
+  .hero:has(.hero-card.has-photo) .gridhero>div:first-child{position:relative;z-index:2;min-height:clamp(600px,88vh,780px);padding:46px 0 24px;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .hero:has(.hero-card.has-photo) h1{color:#fff;font-size:clamp(40px,8.4vw,84px);text-shadow:0 3px 22px rgba(0,0,0,.35);margin:16px 0 0}
+  .hero:has(.hero-card.has-photo) h1 em{color:#ffd95a}
+  .hero:has(.hero-card.has-photo) h1 + p{color:rgba(255,255,255,.94);max-width:560px;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+  .hero:has(.hero-card.has-photo) .actions{margin:auto 0 0;justify-content:center;padding-top:28px}
+  .hero:has(.hero-card.has-photo) .hero-link{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+  .hero:has(.hero-card.has-photo) .location,.hero:has(.hero-card.has-photo) .loc-link{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.5);margin:14px 0 0}
+  .hero:has(.hero-card.has-photo) .stats{width:min(100%,760px);margin-top:18px}
+  .hero:has(.hero-card.has-photo) .stat{box-shadow:0 14px 34px rgba(0,0,0,.18);color:var(--ink)}
+  .hero:has(.hero-card.has-photo) .eyebrow,.hero:has(.hero-card.has-photo) .open-badge{color:var(--ink)}
+  .hero:has(.hero-card.has-photo) .stat strong{color:var(--ink)}
+}
+@keyframes mKen{from{transform:scale(1.07)}to{transform:scale(1)}}
+@media(max-width:600px){
+  @supports selector(:has(*)){.hero:has(.hero-card.has-photo) h1 + p{display:none}.hero:has(.hero-card.has-photo) .gridhero>div:first-child{min-height:clamp(560px,86vh,680px)}}
+}
+@media(prefers-reduced-motion:reduce){.hero-photo{animation:none!important}}
+/* package cards (hour prices + birthday packages): photo or colour on top, name, big price, two buttons */
+.slider{display:flex;gap:20px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:18px 8vw 12px;scroll-padding:0 8vw;cursor:grab;position:relative;z-index:1;grid-template-columns:none}
+.slider::-webkit-scrollbar{display:none}
+.slider.dragging{scroll-snap-type:none;cursor:grabbing;user-select:none}
+.slider[hidden]{display:none}
+.pcard{flex:0 0 min(84%,390px);scroll-snap-align:center;background:#fff;border:1px solid var(--line);border-radius:38px;padding:20px 20px 24px;box-shadow:0 16px 44px rgba(24,50,74,.09);display:flex;flex-direction:column;text-align:center;cursor:pointer;position:relative;min-width:0;outline-offset:4px}
+.pcard.hot{border-color:#ffb3c6}
+.pcard-media{position:relative;aspect-ratio:4/3;border-radius:26px;overflow:hidden;display:grid;place-items:center;background:var(--g,linear-gradient(135deg,#ffe29a,#ff9ec2))}
+.pcard-media.g1{--g:linear-gradient(135deg,#bde7ff,#8fb8ff)}
+.pcard-media.g2{--g:linear-gradient(135deg,#c8f3dd,#7fd8c0)}
+.pcard-media.g3{--g:linear-gradient(135deg,#ffd6e5,#d9b8ff)}
+.pcard-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none;transition:transform .8s var(--ease)}
+.pcard-media .emo{font-size:68px;line-height:1;filter:drop-shadow(0 8px 16px rgba(0,0,0,.18))}
+.pcard-media .pop{position:absolute;left:12px;top:12px;z-index:1;background:#fff;color:var(--ink);font-weight:900;font-size:12.5px;padding:7px 12px;border-radius:99px;box-shadow:0 8px 20px rgba(0,0,0,.14)}
+[dir=rtl] .pcard-media .pop{left:auto;right:12px}
+.pcard-title{font-family:"Baloo 2",Arial,sans-serif;font-size:22px;font-weight:900;line-height:1.2;margin:18px 0 0;color:var(--ink)}
+.pcard-price{font-family:"Baloo 2",Arial,sans-serif;font-size:36px;font-weight:900;line-height:1.1;color:var(--pink);margin:6px 0 0}
+.pcard-desc{color:var(--muted);font-weight:700;font-size:14.5px;line-height:1.45;margin:8px 0 0}
+.pcard ul{list-style:none;margin:10px 0 0;padding:0;color:var(--muted);font-weight:700;font-size:14.5px;line-height:1.5}
+.pcard ul li:before{content:"\2713\00a0";color:var(--pink);font-weight:900}
+.pcard-btns{display:grid;gap:10px;margin-top:auto;padding-top:18px}
+.pcard-btns .btn{width:100%;justify-content:center;text-align:center}
+.pcard:hover .pcard-media img{transform:scale(1.07)}
+@media(max-width:899px){
+  .pcard{transform:scale(.92);opacity:.6;transition:transform .5s var(--ease),opacity .5s var(--ease),box-shadow .3s var(--ease)}
+  .pcard.is-active{transform:none;opacity:1}
+}
+@media(min-width:900px){
+  .slider{padding:18px 4px 12px;scroll-padding:0}
+  .pcard{flex-basis:calc((100% - 40px) / 3);scroll-snap-align:start;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+  .pcard:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+}
+.dots{display:flex;justify-content:center;gap:8px;margin:8px 0 0;position:relative;z-index:1}
+.dots button{width:9px;height:9px;border-radius:99px;border:0;padding:0;background:#c9d4e2;cursor:pointer;transition:width .25s var(--ease),background .25s}
+.dots button.on{width:26px;background:var(--pink)}
+.compare-link{display:block;margin:14px auto 0;background:none;border:0;font:inherit;font-weight:900;color:var(--ink);text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:8px 10px;position:relative;z-index:1}
+#prices,#birthday{position:relative;overflow:hidden}
+#prices::before,#prices::after,#birthday::before,#birthday::after{content:"";position:absolute;border-radius:50%;pointer-events:none;z-index:0;animation:mFloat 8s ease-in-out infinite}
+#prices::before{width:170px;height:170px;top:40px;left:-60px;background:radial-gradient(circle at 35% 30%,#fff9,#ffd95a77 60%,#ffd95a00 72%)}
+#prices::after{width:200px;height:200px;bottom:70px;right:-70px;background:radial-gradient(circle at 35% 30%,#fff9,#7fd8c066 60%,#7fd8c000 72%);animation-delay:-4s}
+#birthday::before{width:150px;height:150px;top:30px;right:-50px;background:radial-gradient(circle at 35% 30%,#fff9,#d9b8ff77 60%,#d9b8ff00 72%)}
+#birthday::after{width:180px;height:180px;bottom:90px;left:-60px;background:radial-gradient(circle at 35% 30%,#fff9,#ff9ec266 60%,#ff9ec200 72%);animation-delay:-2s}
+#prices .container,#birthday .container{position:relative;z-index:1}
+/* details / request sheet */
+.pk-dialog{position:fixed;inset:0;z-index:2000;display:flex;align-items:flex-end;justify-content:center}
+.pk-dialog[hidden]{display:none}
+.pk-backdrop{position:absolute;inset:0;background:rgba(16,34,52,.55);animation:pkFade .25s both}
+.pk-panel{position:relative;width:min(100%,520px);max-height:92vh;overflow:auto;background:#fff;border-radius:30px 30px 0 0;padding:22px 20px 28px;box-shadow:0 -20px 60px rgba(0,0,0,.25);animation:pkUp .35s var(--ease) both;outline:none}
+@media(min-width:700px){.pk-dialog{align-items:center}.pk-panel{border-radius:32px;padding:26px}}
+.pk-close{position:absolute;right:14px;top:14px;width:40px;height:40px;border-radius:50%;border:0;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.18);font-size:24px;line-height:1;cursor:pointer;z-index:3}
+[dir=rtl] .pk-close{right:auto;left:14px}
+@keyframes pkUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pkFade{from{opacity:0}to{opacity:1}}
+.pk-media{aspect-ratio:16/10}
+.pk-title{font-family:"Baloo 2",Arial,sans-serif;font-size:26px;font-weight:900;line-height:1.2;margin:16px 0 0;color:var(--ink);text-align:center}
+.pk-dialog .pcard-price{text-align:center}
+.pk-desc{text-align:center;color:var(--muted);font-weight:700;margin:10px 0 0}
+.pk-dialog ul{list-style:none;margin:12px 0 0;padding:0;color:var(--muted);font-weight:700}
+.pk-dialog ul li{padding:5px 0}
+.pk-dialog ul li:before{content:"\2713\00a0";color:var(--pink);font-weight:900}
+.pk-form label{display:block;font-weight:800;margin:12px 0 6px}
+.pk-form input,.pk-form textarea{width:100%;padding:13px 14px;border:2px solid var(--line);border-radius:16px;font:inherit;background:#fff}
+.pk-form input:focus,.pk-form textarea:focus{outline:none;border-color:var(--pink)}
+.pk-trap{position:absolute!important;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+.pk-note{color:var(--muted);font-weight:700;font-size:14px;margin:12px 0 0}
+.pk-err{color:#c0392b;font-weight:800;min-height:1.4em;margin:8px 0 0}
+.pk-back{background:none;border:0;font:inherit;font-weight:900;color:var(--ink);cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:4px}
+.pk-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.pk-row b{display:block;color:var(--ink)}
+.pk-row small{display:block;color:var(--muted);font-weight:700}
+.pk-row .pcard-price{font-size:24px;margin:0;white-space:nowrap}
+.pk-done{text-align:center;padding:14px 4px 4px}
+.pk-done .emo{font-size:64px}
+@media(prefers-reduced-motion:reduce){
+  #prices::before,#prices::after,#birthday::before,#birthday::after{animation:none}
+  .pk-panel,.pk-backdrop{animation:none}.pcard{transition:none}
+  .pcard:hover,.pcard:hover .pcard-media img{transform:none}
+}
+.slider>.skel{flex:0 0 min(84%,390px);min-height:380px;border-radius:38px}
 /* big photo viewer */
 #galleryLightbox.show #lightboxImage{animation:lbIn .35s var(--ease) both}
 @media(prefers-reduced-motion:reduce){
@@ -479,8 +593,9 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <h1>A happy place for <em>little explorers.</em></h1>
     <p>A clean, safe and exciting children's entertainment center in Al Majaz 3, Sharjah — where play becomes an adventure.</p>
     <div class="actions">
-      <a class="btn primary" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Book on WhatsApp</a>
-      <a class="btn light" href="#prices">View Prices →</a>
+      <button type="button" class="btn primary" id="heroBirthday">🎂 Book Birthday Party</button>
+      <a class="btn light" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Book on WhatsApp</a>
+      <a class="hero-link" href="#prices">View Prices →</a>
     </div>
     <p class="location"><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></a></p>
     <div class="stats">
@@ -490,6 +605,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     </div>
   </div>
   <div class="hero-card">
+    <div class="hero-chip"><b data-bind="hourlyPrice">AED 20</b><span>PER HOUR</span></div>
     <div class="bubble b1">🎨 Create</div><div class="bubble b2">💃 Dance</div><div class="bubble b3">🧩 Learn</div>
     <div class="playground">🛝</div>
     <div class="hero-badge">🛡️ Clean &amp; Safe Environment</div>
@@ -553,7 +669,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <a class="btn light" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Ask on WhatsApp</a>
     </div>
   </div>
-  <div class="packages" id="birthdayPackages" hidden></div>
+  <div class="packages slider" id="birthdayPackages" hidden></div>
   <div class="birthday-booking-trigger">
     <button type="button" class="birthday-book-btn" id="openBirthdayModal" aria-haspopup="dialog">🎂 Book Birthday Party</button>
   </div>
@@ -564,7 +680,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <div><div class="kicker">Simple pricing</div><h2>Play your way.</h2></div>
     <p>Choose the option that works best for your little ones.</p>
   </div>
-  <div class="prices" id="pricesList" aria-busy="true"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
+  <div class="prices slider" id="pricesList" aria-busy="true"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
 </div></section>
 
 <section id="reviews"><div class="container">
@@ -802,13 +918,9 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   }
 
   function renderPrices(data) {
-    document.getElementById('pricesList').innerHTML = (data.prices || []).map(function (p, i) {
-      var title = String(p.title || '');
-      var cls = 'pricecard' + (p.featured ? ' hot' : '') + (title.toLowerCase().indexOf('unlimited') !== -1 ? ' unlimited' : '');
-      return '<div class="' + cls + '">' + (p.featured ? '<span class="pop">⭐ Most Popular</span>' : '') +
-        '<span>' + esc(title) + '</span><strong>' + esc(p.price) +
-        '</strong><span>' + esc(p.description) + '</span></div>';
-    }).join('');
+    /* the cards (photo, name, price, buttons) are drawn by the motion script below */
+    window.RudhatPrices = data.prices || [];
+    if (window.RudhatCards) window.RudhatCards.render();
   }
 
   /* ---- Birthday packages: cards, booking-form select, price note ---- */
@@ -851,15 +963,11 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     }
 
     var box = document.getElementById('birthdayPackages');
+    window.RudhatBirthday = list;
     if (box) {
       if (multi) {
-        box.innerHTML = list.map(function (p) {
-          var items = String(p.description || '').split(/\r?\n|•/).map(function (x) { return x.trim(); }).filter(Boolean);
-          return '<div class="pkg"><h3>' + esc(p.title) + '</h3><div class="pkg-price">' + esc(p.price) + '</div>' +
-            (items.length ? '<ul>' + items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
-            '<button type="button" class="btn primary" data-pkg="' + esc(p.id) + '">🎂 Choose</button></div>';
-        }).join('');
         box.hidden = false;
+        if (window.RudhatCards) window.RudhatCards.render();
       } else {
         box.innerHTML = '';
         box.hidden = true;
@@ -1860,6 +1968,10 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
 })();
 </script>
 
+<div class="pk-dialog" id="pkDialog" hidden>
+  <div class="pk-backdrop" data-pkclose></div>
+  <div class="pk-panel" id="pkPanel" role="dialog" aria-modal="true" aria-labelledby="pkTitle" tabindex="-1"><div id="pkBody"></div></div>
+</div>
 <script>
 /* Motion: reveal on scroll (up / from the side / zoom), cards one by one, a gallery that slides by itself. */
 (function () {
@@ -1868,20 +1980,39 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
   var hasIO = 'IntersectionObserver' in window;
 
   /* ---- reveal ---- */
+  /* show one element; when its entrance is over, hand it back to its normal styles (so the hover lift works) */
+  function reveal(el) {
+    if (el.classList.contains('visible')) return;
+    el.classList.add('visible');
+    var d = (parseFloat(el.style.getPropertyValue('--d')) || 0) * 1000;
+    setTimeout(function () {
+      el.classList.remove('reveal', 'visible', 'rv-left', 'rv-right', 'rv-zoom');
+      el.style.removeProperty('--d');
+    }, 900 + d);
+  }
   var io = (hasIO && !reduce) ? new IntersectionObserver(function (es) {
     es.forEach(function (en) {
       if (!en.isIntersecting) return;
-      var el = en.target;
-      io.unobserve(el);
-      el.classList.add('visible');
-      var d = (parseFloat(el.style.getPropertyValue('--d')) || 0) * 1000;
-      /* when the entrance is over, hand the element back to its normal styles (so the hover lift works) */
-      setTimeout(function () {
-        el.classList.remove('reveal', 'visible', 'rv-left', 'rv-right', 'rv-zoom');
-        el.style.removeProperty('--d');
-      }, 900 + d);
+      io.unobserve(en.target);
+      reveal(en.target);
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }) : null;
+  /* safety net: if the browser ever misses an "element came into view" signal, nothing stays hidden -
+     anything that is on screen gets shown on scroll / resize and every 2 seconds */
+  var sweeping = false;
+  function sweep() {
+    sweeping = false;
+    document.querySelectorAll('[data-mt].reveal:not(.visible)').forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) { if (io) io.unobserve(el); reveal(el); }
+    });
+  }
+  function queueSweep() { if (!sweeping) { sweeping = true; requestAnimationFrame(sweep); } }
+  if (io) {
+    window.addEventListener('scroll', queueSweep, { passive: true });
+    window.addEventListener('resize', queueSweep);
+    setInterval(sweep, 2000);
+  }
 
   function tag(el, variant, delay) {
     if (!io || !el || el.getAttribute('data-mt')) return;
@@ -1901,8 +2032,8 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     new MutationObserver(function () { stagger(box, variant); }).observe(box, { childList: true });
   }
   watch('servicesList', 'up');
-  watch('pricesList', 'zoom');
-  watch('birthdayPackages', 'zoom');
+  tag(document.getElementById('pricesList'), 'up');
+  tag(document.getElementById('birthdayPackages'), 'up');
   watch('infoList', 'up');
   var ab = document.querySelector('.about');
   if (ab && ab.children.length > 1) { tag(ab.children[0], 'left'); tag(ab.children[1], 'right'); }
@@ -1913,61 +2044,269 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
   document.querySelectorAll('.package-main').forEach(function (e) { e.classList.add('rv-zoom'); });
   document.querySelectorAll('.trust-card').forEach(function (e, i) { e.style.setProperty('--d', Math.min(i, 6) * 0.09 + 's'); });
 
-  /* ---- gallery: slides by itself, swipe (touch) and drag (mouse); a tap opens the big viewer ---- */
-  if (gal) {
-    var hold = false, inView = !hasIO, resume = null, drag = null, moved = 0;
-    var step = function () {
-      var cs = gal.querySelectorAll('.gallery-card');
-      if (cs.length < 2 || hold || document.hidden || !inView) return;
-      var rtl = getComputedStyle(gal).direction === 'rtl';
-      var max = gal.scrollWidth - gal.clientWidth;
-      if (Math.abs(gal.scrollLeft) >= max - 4) { gal.scrollTo({ left: 0, behavior: 'smooth' }); return; }
-      var w = Math.abs(cs[1].offsetLeft - cs[0].offsetLeft) || cs[0].getBoundingClientRect().width + 20;
-      gal.scrollBy({ left: rtl ? -w : w, behavior: 'smooth' });
-    };
-    /* the card nearest to the middle is the "active" one (full size); the others are smaller and softer on phones */
-    var marking = false;
-    var markActive = function () {
-      marking = false;
-      var mid = gal.getBoundingClientRect().left + gal.clientWidth / 2, best = null, bd = 1e9;
-      gal.querySelectorAll('.gallery-card').forEach(function (c) {
-        var r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
-        if (d < bd) { bd = d; best = c; }
+  /* ---- sliders: gallery, hour prices, birthday packages.
+         They slide by themselves, swipe on a phone, drag with the mouse; small dots show the place ---- */
+  function makeSlider(el, o) {
+    if (!el) return;
+    var hold = false, inView = !hasIO, resume = null, drag = null, moved = 0, marking = false, dots = null;
+    var cards = function () { return el.querySelectorAll(o.card); };
+    var pause = function (ms) { hold = true; clearTimeout(resume); resume = setTimeout(function () { hold = false; }, ms); };
+    function buildDots() {
+      var cs = cards();
+      if (cs.length < 2) { if (dots) { dots.remove(); dots = null; } return; }
+      if (!dots) { dots = document.createElement('div'); dots.className = 'dots'; el.parentNode.insertBefore(dots, el.nextSibling); }
+      dots.innerHTML = '';
+      Array.prototype.forEach.call(cs, function (c, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', (i + 1) + ' / ' + cs.length);
+        b.addEventListener('click', function () { c.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); pause(6000); });
+        dots.appendChild(b);
       });
-      gal.querySelectorAll('.gallery-card').forEach(function (c) { c.classList.toggle('is-active', c === best); });
-    };
-    var queueMark = function () { if (!marking) { marking = true; requestAnimationFrame(markActive); } };
-    gal.addEventListener('scroll', queueMark, { passive: true });
+    }
+    /* the card nearest to the middle is the "active" one (full size on phones) */
+    function markActive() {
+      marking = false;
+      var cs = cards(), mid = el.getBoundingClientRect().left + el.clientWidth / 2, best = -1, bd = 1e9;
+      Array.prototype.forEach.call(cs, function (c, i) {
+        var r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
+        if (d < bd) { bd = d; best = i; }
+      });
+      Array.prototype.forEach.call(cs, function (c, i) { c.classList.toggle('is-active', i === best); });
+      if (dots) Array.prototype.forEach.call(dots.children, function (b, i) { b.classList.toggle('on', i === best); });
+    }
+    function queueMark() { if (!marking) { marking = true; requestAnimationFrame(markActive); } }
+    function step() {
+      var cs = cards();
+      if (cs.length < 2 || hold || document.hidden || !inView) return;
+      var rtl = getComputedStyle(el).direction === 'rtl';
+      var max = el.scrollWidth - el.clientWidth;
+      if (Math.abs(el.scrollLeft) >= max - 4) { el.scrollTo({ left: 0, behavior: 'smooth' }); return; }
+      var w = Math.abs(cs[1].offsetLeft - cs[0].offsetLeft) || cs[0].getBoundingClientRect().width + 20;
+      el.scrollBy({ left: rtl ? -w : w, behavior: 'smooth' });
+    }
+    el.addEventListener('scroll', queueMark, { passive: true });
     window.addEventListener('resize', queueMark);
-    new MutationObserver(queueMark).observe(gal, { childList: true });
-    queueMark();
-    if (!reduce) setInterval(step, 3800);
-    if (hasIO) new IntersectionObserver(function (es) { inView = es[0].isIntersecting; }, { threshold: 0.25 }).observe(gal);
-    gal.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hold = true; });
-    gal.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hold = false; });
-    gal.addEventListener('touchstart', function () { hold = true; clearTimeout(resume); }, { passive: true });
-    var release = function () { clearTimeout(resume); resume = setTimeout(function () { hold = false; }, 5000); };
-    gal.addEventListener('touchend', release, { passive: true });
-    gal.addEventListener('touchcancel', release, { passive: true });
-    gal.addEventListener('focusin', function () { hold = true; });
-    gal.addEventListener('focusout', function () { hold = false; });
-    gal.addEventListener('pointerdown', function (e) {
+    new MutationObserver(function () { buildDots(); queueMark(); }).observe(el, { childList: true, attributes: true, attributeFilter: ['hidden'] });
+    buildDots(); queueMark();
+    if (!reduce) setInterval(step, o.delay);
+    if (hasIO) new IntersectionObserver(function (es) { inView = es[0].isIntersecting; if (inView) queueMark(); }, { threshold: 0.25 }).observe(el);
+    el.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hold = true; });
+    el.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') hold = false; });
+    el.addEventListener('touchstart', function () { hold = true; clearTimeout(resume); }, { passive: true });
+    var release = function () { pause(5000); };
+    el.addEventListener('touchend', release, { passive: true });
+    el.addEventListener('touchcancel', release, { passive: true });
+    el.addEventListener('focusin', function () { hold = true; });
+    el.addEventListener('focusout', function () { hold = false; });
+    el.addEventListener('pointerdown', function (e) {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      drag = { x: e.clientX, l: gal.scrollLeft }; moved = 0;
+      drag = { x: e.clientX, l: el.scrollLeft }; moved = 0;
     });
     window.addEventListener('pointermove', function (e) {
       if (!drag) return;
       var dx = e.clientX - drag.x;
       moved = Math.max(moved, Math.abs(dx));
-      if (moved > 4) gal.classList.add('dragging');
-      gal.scrollLeft = drag.l - dx;
+      if (moved > 4) el.classList.add('dragging');
+      el.scrollLeft = drag.l - dx;
     });
-    var endDrag = function () { if (!drag) return; drag = null; gal.classList.remove('dragging'); };
+    var endDrag = function () { if (!drag) return; drag = null; el.classList.remove('dragging'); };
     window.addEventListener('pointerup', endDrag);
     window.addEventListener('pointercancel', endDrag);
-    /* a drag must not count as a tap on a photo */
-    gal.addEventListener('click', function (e) { if (moved > 6) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
+    /* a drag must not count as a tap on a card or photo */
+    el.addEventListener('click', function (e) { if (moved > 6) { e.stopPropagation(); e.preventDefault(); moved = 0; } }, true);
   }
+  makeSlider(gal, { card: '.gallery-card', delay: 3800 });
+  makeSlider(document.getElementById('pricesList'), { card: '.pcard', delay: 6000 });
+  makeSlider(document.getElementById('birthdayPackages'), { card: '.pcard', delay: 6500 });
+
+  /* ---- package cards: photo or colour, name, price, two buttons; tap = details sheet; request form; compare list ---- */
+  var isAr = function () { return document.documentElement.lang === 'ar'; };
+  var T = function (en, ar) { return isAr() ? ar : en; };
+  var esc = function (v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  };
+  var safeSrc = function (u) { u = String(u || ''); return (/^https:\/\//i.test(u) || u.charAt(0) === '/') ? u : ''; };
+  var waBase = function () { var a = document.querySelector('.navcta'); return a ? a.href.split('?')[0] : 'https://wa.me/971585187788'; };
+  var ttl = function (p) { return isAr() && p.titleAr ? p.titleAr : String(p.title || ''); };
+  var dsc = function (p) { return isAr() && p.descriptionAr ? p.descriptionAr : String(p.description || ''); };
+  var lines = function (v) { return String(v || '').split(/\r?\n|\u2022/).map(function (x) { return x.trim(); }).filter(Boolean); };
+  var findPkg = function (kind, id) {
+    var list = (kind === 'birthday' ? window.RudhatBirthday : window.RudhatPrices) || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  };
+  var waHref = function (p) {
+    var name = ttl(p), price = p.price ? ' (' + p.price + ')' : '';
+    var msg = T("Hello, I'd like to ask about the " + name + price + ' at Rudhat Al Saadah Entertainment.',
+      '\u0645\u0631\u062d\u0628\u0627\u064b\u060c \u0623\u0648\u062f \u0627\u0644\u0627\u0633\u062a\u0641\u0633\u0627\u0631 \u0639\u0646 ' + name + price + '.');
+    return waBase() + '?text=' + encodeURIComponent(msg);
+  };
+  function mediaHtml(p, kind, i) {
+    var src = safeSrc(p.imageUrl);
+    var emo = kind === 'birthday' ? '\uD83C\uDF82' : (/unlimited|month/i.test(p.title || '') ? '\uD83C\uDF1F' : (/hour/i.test(p.title || '') ? '\u23F1\uFE0F' : '\uD83C\uDF9F\uFE0F'));
+    var pop = (kind === 'prices' && p.featured) ? '<span class="pop">\u2B50 Most Popular</span>' : '';
+    return '<div class="pcard-media g' + (i % 4) + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="emo">' + emo + '</span>') + pop + '</div>';
+  }
+  var L = {
+    wa: function () { return '\uD83D\uDCAC ' + T('Ask on WhatsApp', '\u0627\u0633\u0623\u0644 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628'); },
+    req: function () { return T('Request Online', '\u0637\u0644\u0628 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639'); },
+    book: function () { return '\uD83C\uDF82 ' + T('Book Online', '\u0627\u062d\u062c\u0632 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639'); }
+  };
+  function cardHtml(kind, p, i) {
+    var title = String(p.title || '');
+    var body = kind === 'birthday'
+      ? (function () { var ls = lines(p.description).slice(0, 3); return ls.length ? '<ul>' + ls.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : ''; })()
+      : (p.description ? '<p class="pcard-desc">' + esc(p.description) + '</p>' : '');
+    var primary = kind === 'birthday'
+      ? '<button type="button" class="btn primary" data-pkg="' + esc(p.id) + '">' + L.book() + '</button>'
+      : '<button type="button" class="btn primary" data-req="' + esc(p.id) + '">' + L.req() + '</button>';
+    return '<article class="pcard' + ((kind === 'prices' && p.featured) ? ' hot' : '') + '" data-kind="' + kind + '" data-id="' + esc(p.id) + '" tabindex="0" role="button" aria-label="' + esc(T('Details', '\u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644') + ': ' + title) + '">' +
+      mediaHtml(p, kind, i) + '<h3 class="pcard-title">' + esc(title) + '</h3><div class="pcard-price">' + esc(p.price) + '</div>' + body +
+      '<div class="pcard-btns">' + primary + '<a class="btn light" data-pkwa href="#" target="_blank" rel="noopener noreferrer">' + L.wa() + '</a></div></article>';
+  }
+  function renderCards() {
+    var pl = document.getElementById('pricesList');
+    if (pl && window.RudhatPrices) {
+      pl.innerHTML = window.RudhatPrices.map(function (p, i) { return cardHtml('prices', p, i); }).join('');
+      pl.removeAttribute('aria-busy');
+      var cmp = document.getElementById('pkCompare');
+      if (window.RudhatPrices.length > 1) {
+        if (!cmp) {
+          cmp = document.createElement('button');
+          cmp.type = 'button'; cmp.id = 'pkCompare'; cmp.className = 'compare-link'; cmp.setAttribute('data-pk', 'compare');
+          pl.parentNode.appendChild(cmp);
+        }
+        cmp.textContent = T('Compare all prices', '\u0642\u0627\u0631\u0646 \u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0633\u0639\u0627\u0631');
+      } else if (cmp) { cmp.remove(); }
+    }
+    var bb = document.getElementById('birthdayPackages'), bd = window.RudhatBirthday || [];
+    if (bb && bd.length > 1) bb.innerHTML = bd.map(function (p, i) { return cardHtml('birthday', p, i); }).join('');
+    document.querySelectorAll('.pcard').forEach(function (c) {
+      var p = findPkg(c.getAttribute('data-kind'), c.getAttribute('data-id')), a = c.querySelector('[data-pkwa]');
+      if (p && a) a.href = waHref(p);
+    });
+  }
+  window.RudhatCards = { render: renderCards };
+  if (window.RudhatPrices || window.RudhatBirthday) renderCards();
+
+  /* details sheet / request form / compare list */
+  var dlg = document.getElementById('pkDialog'), panel = document.getElementById('pkPanel'), pbody = document.getElementById('pkBody');
+  var cur = { kind: 'prices', id: '' }, lastFocus = null;
+  var ERR_AR = {
+    'Please enter your name.': '\u0627\u0644\u0631\u062c\u0627\u0621 \u0625\u062f\u062e\u0627\u0644 \u0627\u0633\u0645\u0643.',
+    'Please enter a valid phone number.': '\u0627\u0644\u0631\u062c\u0627\u0621 \u0625\u062f\u062e\u0627\u0644 \u0631\u0642\u0645 \u0647\u0627\u062a\u0641 \u0635\u062d\u064a\u062d.',
+    'Please choose a package.': '\u0627\u0644\u0631\u062c\u0627\u0621 \u0627\u062e\u062a\u064a\u0627\u0631 \u0628\u0627\u0642\u0629.',
+    'We are receiving many requests right now. Please use WhatsApp.': '\u0646\u0633\u062a\u0642\u0628\u0644 \u0637\u0644\u0628\u0627\u062a \u0643\u062b\u064a\u0631\u0629 \u062d\u0627\u0644\u064a\u0627\u064b. \u064a\u0631\u062c\u0649 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0648\u0627\u062a\u0633\u0627\u0628.',
+    'Too many requests. Please try again later or use WhatsApp.': '\u0637\u0644\u0628\u0627\u062a \u0643\u062b\u064a\u0631\u0629. \u064a\u0631\u062c\u0649 \u0627\u0644\u0645\u062d\u0627\u0648\u0644\u0629 \u0644\u0627\u062d\u0642\u0627\u064b \u0623\u0648 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0648\u0627\u062a\u0633\u0627\u0628.',
+    'Too many requests from this connection today. Please use WhatsApp.': '\u0637\u0644\u0628\u0627\u062a \u0643\u062b\u064a\u0631\u0629 \u0645\u0646 \u0647\u0630\u0627 \u0627\u0644\u0627\u062a\u0635\u0627\u0644 \u0627\u0644\u064a\u0648\u0645. \u064a\u0631\u062c\u0649 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0648\u0627\u062a\u0633\u0627\u0628.'
+  };
+  var errText = function (m) {
+    return isAr() ? (ERR_AR[m] || '\u062a\u0639\u0630\u0631 \u0625\u0631\u0633\u0627\u0644 \u0637\u0644\u0628\u0643. \u064a\u0631\u062c\u0649 \u0627\u0633\u062a\u062e\u062f\u0627\u0645 \u0648\u0627\u062a\u0633\u0627\u0628.') : (m || "We couldn't send your request. Please use WhatsApp.");
+  };
+  var closeBtn = function () { return '<button type="button" class="pk-close" data-pkclose aria-label="' + T('Close', '\u0625\u063a\u0644\u0627\u0642') + '">&times;</button>'; };
+  function viewDetails(kind, p) {
+    var items = lines(dsc(p));
+    var desc = kind === 'birthday'
+      ? (items.length ? '<ul>' + items.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
+      : (dsc(p) ? '<p class="pk-desc">' + esc(dsc(p)) + '</p>' : '');
+    var primary = kind === 'birthday'
+      ? '<button type="button" class="btn primary" data-pk="book" data-id="' + esc(p.id) + '">' + L.book() + '</button>'
+      : '<button type="button" class="btn primary" data-pk="request" data-id="' + esc(p.id) + '">' + L.req() + '</button>';
+    pbody.innerHTML = closeBtn() + mediaHtml(p, kind, 0).replace('pcard-media', 'pcard-media pk-media') +
+      '<h3 class="pk-title" id="pkTitle">' + esc(ttl(p)) + '</h3><div class="pcard-price">' + esc(p.price) + '</div>' + desc +
+      '<div class="pcard-btns">' + primary + '<a class="btn light" href="' + esc(waHref(p)) + '" target="_blank" rel="noopener noreferrer">' + L.wa() + '</a></div>';
+  }
+  function viewRequest(p) {
+    pbody.innerHTML = closeBtn() +
+      '<button type="button" class="pk-back" data-pk="back">\u2190 ' + T('Back', '\u0631\u062c\u0648\u0639') + '</button>' +
+      '<h3 class="pk-title" id="pkTitle">' + esc(ttl(p)) + '</h3><div class="pcard-price">' + esc(p.price) + '</div>' +
+      '<form class="pk-form" data-pkform data-id="' + esc(p.id) + '" novalidate>' +
+      '<label for="pkName">' + T('Your name', '\u0627\u0633\u0645\u0643') + '</label><input id="pkName" name="name" maxlength="100" autocomplete="name">' +
+      '<label for="pkPhone">' + T('Phone number', '\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062a\u0641') + '</label><input id="pkPhone" name="phone" type="tel" inputmode="tel" maxlength="25" autocomplete="tel" placeholder="+971 50 123 4567" dir="ltr">' +
+      '<label for="pkMsg">' + T('Message (optional)', '\u0631\u0633\u0627\u0644\u0629 (\u0627\u062e\u062a\u064a\u0627\u0631\u064a)') + '</label><textarea id="pkMsg" name="message" rows="2" maxlength="300"></textarea>' +
+      '<div class="pk-trap" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>' +
+      '<p class="pk-err" role="alert"></p>' +
+      '<div class="pcard-btns"><button type="submit" class="btn primary">' + T('Send Request', '\u0625\u0631\u0633\u0627\u0644 \u0627\u0644\u0637\u0644\u0628') + '</button></div>' +
+      '<p class="pk-note">' + T('No payment online. We will contact you on WhatsApp to confirm and arrange payment at the centre.',
+        '\u0644\u0627 \u064a\u0648\u062c\u062f \u062f\u0641\u0639 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639. \u0633\u0646\u062a\u0648\u0627\u0635\u0644 \u0645\u0639\u0643 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628 \u0644\u0644\u062a\u0623\u0643\u064a\u062f \u0648\u062a\u0631\u062a\u064a\u0628 \u0627\u0644\u062f\u0641\u0639 \u0641\u064a \u0627\u0644\u0645\u0631\u0643\u0632.') + '</p></form>';
+  }
+  function viewDone(ref) {
+    pbody.innerHTML = closeBtn() + '<div class="pk-done"><div class="emo">\uD83C\uDF89</div><h3 class="pk-title" id="pkTitle">' + T('Request received!', '\u062a\u0645 \u0627\u0633\u062a\u0644\u0627\u0645 \u0637\u0644\u0628\u0643!') + '</h3>' +
+      '<p class="pk-desc">' + T('We will contact you on WhatsApp soon.', '\u0633\u0646\u062a\u0648\u0627\u0635\u0644 \u0645\u0639\u0643 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628 \u0642\u0631\u064a\u0628\u0627\u064b.') + '</p>' +
+      '<p class="pk-note">' + T('Reference', '\u0627\u0644\u0645\u0631\u062c\u0639') + ': <b>#' + esc(ref) + '</b></p>' +
+      '<div class="pcard-btns"><button type="button" class="btn primary" data-pkclose>' + T('Close', '\u0625\u063a\u0644\u0627\u0642') + '</button></div></div>';
+  }
+  function viewCompare() {
+    var rows = (window.RudhatPrices || []).map(function (p) {
+      return '<div class="pk-row" role="button" tabindex="0" data-pk="open" data-id="' + esc(p.id) + '"><div><b>' + esc(ttl(p)) + '</b>' + (dsc(p) ? '<small>' + esc(dsc(p)) + '</small>' : '') + '</div><div class="pcard-price">' + esc(p.price) + '</div></div>';
+    }).join('');
+    pbody.innerHTML = closeBtn() + '<h3 class="pk-title" id="pkTitle">' + T('All prices', '\u062c\u0645\u064a\u0639 \u0627\u0644\u0623\u0633\u0639\u0627\u0631') + '</h3>' + rows +
+      '<div class="pcard-btns"><a class="btn light" href="' + esc(waBase()) + '" target="_blank" rel="noopener noreferrer">' + L.wa() + '</a></div>';
+  }
+  function openDlg(view, kind, id) {
+    var p = kind && id ? findPkg(kind, id) : null;
+    if (view !== 'compare' && !p) return;
+    if (p) cur = { kind: kind, id: id };
+    if (view === 'details') viewDetails(kind, p); else if (view === 'request') viewRequest(p); else viewCompare();
+    if (dlg.hidden) { lastFocus = document.activeElement; dlg.hidden = false; document.body.classList.add('modal-open'); }
+    panel.scrollTop = 0; panel.focus();
+  }
+  function closeDlg() {
+    if (dlg.hidden) return;
+    dlg.hidden = true; document.body.classList.remove('modal-open');
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t || !t.closest) return;
+    var x;
+    if (t.closest('[data-pkclose]')) { closeDlg(); return; }
+    if ((x = t.closest('[data-req]'))) { openDlg('request', 'prices', x.getAttribute('data-req')); return; }
+    if ((x = t.closest('[data-pk]'))) {
+      var act = x.getAttribute('data-pk'), id = x.getAttribute('data-id');
+      if (act === 'request') openDlg('request', cur.kind, id);
+      else if (act === 'back') openDlg('details', cur.kind, cur.id);
+      else if (act === 'compare') openDlg('compare');
+      else if (act === 'open') openDlg('details', 'prices', id);
+      else if (act === 'book') {
+        closeDlg();
+        var bs = document.querySelectorAll('#birthdayPackages [data-pkg]');
+        for (var i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-pkg') === id) { bs[i].click(); break; }
+      }
+      return;
+    }
+    if ((x = t.closest('.pcard')) && !t.closest('a,button')) openDlg('details', x.getAttribute('data-kind'), x.getAttribute('data-id'));
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closeDlg(); return; }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.getAttribute && (e.target.classList.contains('pcard') || e.target.getAttribute('data-pk') === 'open')) {
+      e.preventDefault(); e.target.click();
+    }
+  });
+  pbody.addEventListener('submit', function (e) {
+    var f = e.target.closest ? e.target.closest('form[data-pkform]') : null;
+    if (!f) return;
+    e.preventDefault();
+    var q = function (n) { return f.querySelector('[name=' + n + ']'); };
+    var err = f.querySelector('.pk-err'), btn = f.querySelector('button[type=submit]');
+    var name = q('name').value.trim(), phone = q('phone').value.trim();
+    if (name.length < 2) { err.textContent = errText('Please enter your name.'); return; }
+    if (phone.replace(/\D/g, '').length < 9) { err.textContent = errText('Please enter a valid phone number.'); return; }
+    err.textContent = ''; btn.disabled = true;
+    fetch('/api/package-requests', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ packageId: f.getAttribute('data-id'), name: name, phone: phone, message: q('message').value, website: q('website').value })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+    }).then(function (x) {
+      if (x.ok && x.j && x.j.ok) viewDone(x.j.reference || '');
+      else { err.textContent = errText(x.j && x.j.error); btn.disabled = false; }
+    }).catch(function () { err.textContent = errText(''); btn.disabled = false; });
+  });
+
+  /* ---- hero: the main button opens the birthday booking form ---- */
+  var hb = document.getElementById('heroBirthday'), ob = document.getElementById('openBirthdayModal');
+  if (hb && ob) hb.addEventListener('click', function () { ob.click(); });
 
   /* ---- big viewer: swipe left / right on a phone ---- */
   var lb = document.getElementById('galleryLightbox');
