@@ -603,6 +603,15 @@ textarea{
     <div class="hint">The customer opens their card from the link or QR code and sees the balance. History notes are visible to the customer.</div>
   </section>
 
+  <section class="panel" id="requestsPanel">
+    <div class="panelhead">
+      <h2>&#128229; Package requests <span class="badge pending" id="reqCount" hidden></span></h2>
+      <div class="headbtns"><button class="add" type="button" data-click="loadRequests()">&#128260; Refresh</button></div>
+    </div>
+    <div id="requestsList"><div class="empty">Loading&hellip;</div></div>
+    <div class="hint">Visitors ask for an hours package on the website. Nothing is paid or held online: answer on WhatsApp, take the payment, then press <b>Create card</b> (the form is filled in for you). Requests are erased automatically after 90 days.</div>
+  </section>
+
   <div class="scanbox" id="scanBox" hidden>
     <video id="scanVideo" playsinline muted></video>
     <div class="scanbar"><span>Point the camera at the customer's QR code</span><button class="add" id="scanClose" type="button">Close</button></div>
@@ -761,6 +770,16 @@ textarea{
     <!-- GALLERY ONLY -->
     <div id="featuredGroup" style="display:none;margin:10px 0">
       <label style="display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer"><input type="checkbox" id="featured" style="width:auto"> ⭐ Mark as “Most Popular” (shown on the website)</label>
+    </div>
+
+    <!-- PRICE / BIRTHDAY: optional photo -->
+    <div id="pkgPhotoGroup" style="display:none">
+      <label>PHOTO (optional)</label>
+      <input id="pkgImage" type="file" accept="image/jpeg,image/png,image/webp,image/jpg">
+      <div class="file-help">A square photo looks best (JPG, PNG or WebP, max 10MB). Without a photo the card shows a colourful background.</div>
+      <img id="pkgPreview" class="preview" alt="Selected photo preview">
+      <img id="pkgCurrent" class="current-image" alt="Current photo">
+      <label id="pkgRemoveRow" style="display:none;align-items:center;gap:8px;font-weight:800;cursor:pointer;margin-top:8px"><input type="checkbox" id="pkgRemove" style="width:auto"> Remove the current photo</label>
     </div>
 
     <div id="galleryFields" style="display:none">
@@ -954,6 +973,7 @@ function render(){
 
           return `
             <div class="row">
+              ${item.imageUrl ? `<img class="gallery-thumb" style="width:52px;height:52px" src="${escapeHtml(item.imageUrl)}" alt="" loading="lazy">` : ''}
               <div class="info">
                 <div class="title">${item.featured ? '⭐ ' : ''}${escapeHtml(item.title)}${item.titleAr ? ' <span class="badge confirmed">AR ✓</span>' : ''}</div>
                 <div class="desc">${escapeHtml(item.description || '')}</div>
@@ -989,6 +1009,7 @@ function updateModalFields(){
   const type = typeSelect.value;
   featuredGroup.style.display = type === 'prices' ? 'block' : 'none';
   arFields.style.display = (type === 'hero' || type === 'about') ? 'none' : 'block';
+  document.getElementById('pkgPhotoGroup').style.display = (type === 'prices' || type === 'birthday') ? 'block' : 'none';
 
   if(isImg(type)){
     normalFields.style.display='block';
@@ -1032,6 +1053,7 @@ function openAdd(type){
   saveButton.disabled=false;
   saveButton.textContent='Save';
 
+  resetPkgPhoto(null);
   updateModalFields();
   modal.classList.add('open');
 }
@@ -1076,8 +1098,49 @@ function openEdit(type,id){
   saveButton.disabled=false;
   saveButton.textContent='Save';
 
+  resetPkgPhoto(item);
   updateModalFields();
   modal.classList.add('open');
+}
+
+/* =========================================================
+   OPTIONAL PHOTO FOR A PRICE / BIRTHDAY PACKAGE
+========================================================= */
+function resetPkgPhoto(item){
+  const $ = id => document.getElementById(id);
+  $('pkgImage').value = '';
+  $('pkgPreview').src = ''; $('pkgPreview').classList.remove('show');
+  $('pkgRemove').checked = false;
+  const has = !!(item && item.imageUrl);
+  $('pkgCurrent').src = has ? item.imageUrl : '';
+  $('pkgCurrent').classList.toggle('show', has);
+  $('pkgRemoveRow').style.display = has ? 'flex' : 'none';
+}
+document.getElementById('pkgImage').addEventListener('change', () => {
+  const $ = id => document.getElementById(id);
+  const file = $('pkgImage').files[0];
+  $('pkgPreview').classList.remove('show');
+  if(!file) return;
+  if(!['image/jpeg','image/jpg','image/png','image/webp'].includes(file.type.toLowerCase())){
+    errorBox.textContent = 'Only JPG, JPEG, PNG and WebP images are allowed.'; $('pkgImage').value = ''; return;
+  }
+  if(file.size > 10 * 1024 * 1024){
+    errorBox.textContent = 'Image size must be 10MB or less.'; $('pkgImage').value = ''; return;
+  }
+  errorBox.textContent = '';
+  const reader = new FileReader();
+  reader.onload = e => { $('pkgPreview').src = e.target.result; $('pkgPreview').classList.add('show'); };
+  reader.readAsDataURL(file);
+});
+async function syncPkgPhoto(type, id){
+  if(type !== 'prices' && type !== 'birthday') return;
+  const file = document.getElementById('pkgImage').files[0];
+  if(file){
+    const fd = new FormData(); fd.append('image', file);
+    await api(`/api/admin/items/${type}/${id}/image`, { method:'POST', body:fd });
+  }else if(document.getElementById('pkgRemove').checked){
+    await api(`/api/admin/items/${type}/${id}/image`, { method:'DELETE' });
+  }
 }
 
 /* =========================================================
@@ -1143,6 +1206,7 @@ saveButton.onclick = async () => {
     return;
   }
 
+  let createdId = null;
   try{
     saveButton.disabled=true;
     saveButton.textContent='Saving...';
@@ -1199,7 +1263,7 @@ saveButton.onclick = async () => {
       });
     }
     else{
-      await api('/api/admin/items', {
+      const created = await api('/api/admin/items', {
         method:'POST',
         body:JSON.stringify({
           title,
@@ -1212,6 +1276,16 @@ saveButton.onclick = async () => {
           type
         })
       });
+      createdId = created && created.id;
+    }
+
+    try{
+      await syncPkgPhoto(type, editing ? editing.id : createdId);
+    }catch(pe){
+      // the text was saved; only the photo failed. A second press of Save must not create a duplicate.
+      if(!editing && createdId) editing = { type, id:createdId };
+      await load();
+      throw new Error('Saved, but the photo failed: ' + pe.message);
     }
 
     modal.classList.remove('open');
@@ -1746,7 +1820,7 @@ kEl('newCardBtn').onclick = () => {
   f.hidden = !f.hidden;
   if(!f.hidden){ fillPkgOptions(); kEl('kMsg').innerHTML = ''; kEl('kName').focus(); }
 };
-kEl('kClose').onclick = () => { kEl('cardForm').hidden = true; };
+kEl('kClose').onclick = () => { kEl('cardForm').hidden = true; fromRequest = null; };
 kEl('kCreate').onclick = async () => {
   const btn = kEl('kCreate'), msg = kEl('kMsg');
   const sel = kEl('kPkg').selectedOptions[0];
@@ -1767,12 +1841,75 @@ kEl('kCreate').onclick = async () => {
     ['kName','kPhone','kChild','kExp'].forEach(id => { kEl(id).value = ''; });
     kQuery = c.code; kEl('kSearch').value = c.code;
     await loadCards();
+    if(fromRequest){
+      const rid = fromRequest; fromRequest = null;
+      try{ await api('/api/admin/package-requests/' + encodeURIComponent(rid), { method:'PATCH', body:JSON.stringify({ status:'done' }) }); }catch(_){ }
+      loadRequests();
+    }
   }catch(e){
     msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>';
   }
   btn.disabled = false;
 };
 kEl('kSearch').addEventListener('input', e => { kQuery = e.target.value; renderCards(); });
+
+/* ----- package requests (visitors ask for an hours package; staff answer on WhatsApp) ----- */
+let requests = [], fromRequest = null;
+async function loadRequests(){
+  const el = document.getElementById('requestsList');
+  try{
+    requests = (await api('/api/admin/package-requests')) || [];
+    renderRequests();
+  }catch(e){
+    if(el) el.innerHTML = '<div class="empty">' + escapeHtml(e.message) + '</div>';
+  }
+}
+function renderRequests(){
+  const el = document.getElementById('requestsList'), badge = document.getElementById('reqCount');
+  const fresh = requests.filter(r => r.status === 'new').length;
+  badge.hidden = !fresh; badge.textContent = fresh + ' new';
+  if(!requests.length){ el.innerHTML = '<div class="empty">No requests yet.</div>'; return; }
+  const cls = { new:'pending', contacted:'confirmed', done:'confirmed', cancelled:'cancelled' };
+  el.innerHTML = requests.map(r => {
+    const when = new Date(r.createdAt).toLocaleString([], { dateStyle:'medium', timeStyle:'short' });
+    const msg = 'Hello ' + r.name + ', thank you for your request for ' + r.packageTitle + (r.packagePrice ? ' (' + r.packagePrice + ')' : '') + ' at Rudhat Al Saadah Entertainment. ';
+    return `
+      <div class="row">
+        <div class="info">
+          <div class="title">${escapeHtml(r.packageTitle)}${r.packagePrice ? ' &middot; ' + escapeHtml(r.packagePrice) : ''} <span class="badge ${cls[r.status] || 'pending'}">${escapeHtml(r.status)}</span></div>
+          <div class="desc">${escapeHtml(r.name)} &middot; <a href="tel:${escapeHtml(r.phone)}">${escapeHtml(r.phone)}</a> &middot; ${escapeHtml(when)} &middot; #${escapeHtml(r.reference)}${r.message ? '<br>&ldquo;' + escapeHtml(r.message) + '&rdquo;' : ''}</div>
+        </div>
+        <a class="edit" target="_blank" rel="noopener noreferrer" href="https://wa.me/${escapeHtml(waDigits(r.phone))}?text=${encodeURIComponent(msg)}">WhatsApp</a>
+        <button class="edit" type="button" data-click="setRequestStatus('${r.id}','contacted')">Contacted</button>
+        <button class="edit" type="button" data-click="requestToCard('${r.id}')">Create card</button>
+        <button class="edit" type="button" data-click="setRequestStatus('${r.id}','done')">Done</button>
+        <button class="delete" type="button" data-click="setRequestStatus('${r.id}','cancelled')">Cancel</button>
+      </div>`;
+  }).join('');
+}
+async function setRequestStatus(id, status){
+  try{
+    await api('/api/admin/package-requests/' + encodeURIComponent(id), { method:'PATCH', body:JSON.stringify({ status }) });
+    await loadRequests();
+  }catch(e){ alert(e.message); }
+}
+function requestToCard(id){
+  const r = requests.find(x => x.id === id);
+  if(!r) return;
+  fromRequest = id;
+  kEl('cardForm').hidden = false;
+  fillPkgOptions();
+  const idx = (data.prices || []).findIndex(p => p.title === r.packageTitle);
+  const sel = kEl('kPkg');
+  if(idx >= 0 && Array.from(sel.options).some(o => o.value === String(idx))){
+    sel.value = String(idx);
+    sel.dispatchEvent(new Event('change'));
+  }
+  kEl('kName').value = r.name;
+  kEl('kPhone').value = r.phone;
+  kEl('kMsg').innerHTML = '<span class="msg-ok">Filled from request #' + escapeHtml(r.reference) + '. Check the hours and press Create card.</span>';
+  kEl('cardsPanel').scrollIntoView({ behavior:'smooth' });
+}
 
 /* ----- scan the customer's QR code with the camera (Chrome / Android) ----- */
 let scanStream = null, scanTimer = null;
@@ -1885,13 +2022,13 @@ modal.addEventListener('click', event => {
 /* =========================================================
    ROLES: the owner sees everything, staff only bookings + play cards
 ========================================================= */
-let role = 'owner';
+let role = 'staff'; // the lowest access until the server says otherwise
 const isOwner = () => role === 'owner';
 const hideEl = id => { const e = document.getElementById(id); if(e) e.style.display = 'none'; };
 const showEl = id => { const e = document.getElementById(id); if(e) e.style.display = ''; };
 
 function applyRole(me){
-  role = (me && me.role) || 'owner';
+  role = (me && me.role) || 'staff';
   document.getElementById('whoami').textContent = role === 'owner' ? 'Owner' : ((me && me.name) || 'Staff') + ' \u00B7 Staff';
   if(role !== 'owner'){
     ['statsPanel','customersPanel','settingsPanel','securityPanel','content','closedForm','closedActions','csvBookings'].forEach(hideEl);
@@ -2119,7 +2256,7 @@ document.getElementById('backupBtn').onclick = async () => {
    START
 ========================================================= */
 (async function init(){
-  let me = { role:'owner', name:'' };
+  let me = { role:'staff', name:'' };
   try{ me = (await api('/api/auth/me')) || me; }catch(e){}
   applyRole(me);
   if(isOwner()){
@@ -2131,8 +2268,10 @@ document.getElementById('backupBtn').onclick = async () => {
   loadBookings();
   loadSettings();
   loadCards();
+  loadRequests();
   loadClosed();
   setInterval(loadBookings, 60000);
+  setInterval(loadRequests, 60000);
 })();
 
 /* ---------- collapsible sections (state remembered) ---------- */
@@ -2161,7 +2300,7 @@ document.getElementById('backupBtn').onclick = async () => {
    Every [data-click] holds calls such as  setBookingStatus('id','confirmed');showPending()
    Only the listed functions of this page can be called, and only with plain text, number or true/false arguments. */
 (function () {
-  var ALLOWED = ['showPending', 'loadBookings', 'openAdd', 'openEdit', 'removeItem', 'setBookingStatus', 'resendBookingEmail', 'removeBooking', 'setBookingFilter', 'setView', 'selectDay', 'deductCard', 'topupCard', 'copyCardLink', 'setCardExpiry', 'setCardStatus', 'removeCard', 'markReminded', 'removeClosed', 'toggleStaff', 'resetStaffPw', 'removeStaff'];
+  var ALLOWED = ['showPending', 'loadBookings', 'openAdd', 'openEdit', 'removeItem', 'setBookingStatus', 'resendBookingEmail', 'removeBooking', 'setBookingFilter', 'setView', 'selectDay', 'deductCard', 'topupCard', 'copyCardLink', 'setCardExpiry', 'setCardStatus', 'removeCard', 'markReminded', 'removeClosed', 'toggleStaff', 'resetStaffPw', 'removeStaff', 'loadRequests', 'setRequestStatus', 'requestToCard'];
   var callRe = /\s*([A-Za-z_$][\w$]*)\s*\(/y;
   var closeRe = /\s*\)/y;
   var argRe = /\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)"|(-?\d+(?:\.\d+)?)|(true|false))\s*/y;
