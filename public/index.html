@@ -8,7 +8,7 @@
 <title>RUDHAT ALSAADAH | Kids Entertainment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <meta name="google-site-verification" content="JPIU2ga-UCC0LGSQ_4f7ocvuILLYjSrs_MXSP5ZUEHg">
 <meta property="og:type" content="website">
 <meta property="og:title" content="RUDHAT ALSAADAH | Kids Entertainment">
@@ -30,10 +30,10 @@
 </script>
 
 <style>
-:root{--ink:#18324a;--muted:#64748b;--bg:#fffaf5;--pink:#ff5f87;--yellow:#ffd95a;--mint:#61d9c2;--blue:#65a9ff;--line:#f0e6dd;--shadow:0 22px 65px rgba(24,50,74,.12)}
+:root{--ink:#14283d;--muted:#5b6b7c;--bg:#fbfaf8;--pink:#d0335d;--yellow:#efd58f;--mint:#9bd5c7;--blue:#2f6aa8;--line:#e8e4de;--shadow:0 24px 60px rgba(20,40,61,.09);--gold:#b38b4d;--gold-2:#e0c48a;--soft:#f3f5f8;--display:Fraunces,Georgia,"Times New Roman",serif;--body:"Plus Jakarta Sans","Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,Arial,sans-serif;line-height:1.55}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.55}
 body.modal-open{overflow:hidden}
 a{text-decoration:none;color:inherit}
 .container{width:min(1160px,92%);margin:auto}
@@ -45,7 +45,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .topin span{opacity:.9}.topin a{font-weight:900}
 
 /* Buttons */
-.btn,.navcta{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:900 15px Nunito,Arial,sans-serif;padding:13px 19px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 11px 26px rgba(24,50,74,.18);transition:transform .2s ease,box-shadow .2s ease}
+.btn,.navcta{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:900 15px var(--body);padding:13px 19px;border-radius:999px;background:var(--ink);color:#fff;box-shadow:0 11px 26px rgba(24,50,74,.18);transition:transform .2s ease,box-shadow .2s ease}
 .btn:hover,.navcta:hover{transform:translateY(-2px)}
 .btn.primary{background:var(--pink)}
 .btn.light{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:none}
@@ -55,7 +55,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .navin{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .brand{display:flex;align-items:center;gap:11px;font-weight:900;flex-shrink:0}
 .logo{width:47px;height:47px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--yellow),var(--pink));font-size:25px;box-shadow:0 9px 25px rgba(255,95,135,.25)}
-.brand span{font-family:"Baloo 2",Arial,sans-serif;font-size:20px;line-height:.92}
+.brand span{font-family:var(--display);font-size:20px;line-height:.92}
 .links{display:flex;align-items:center;justify-content:center;gap:20px;font-weight:900;font-size:14px}
 .links a{position:relative;padding:10px 2px;transition:color .2s ease,transform .2s ease}
 .links a:not(.mobile-whatsapp)::after{content:"";position:absolute;left:0;right:0;bottom:3px;height:2px;border-radius:10px;background:var(--pink);transform:scaleX(0);transition:transform .2s ease}
@@ -72,7 +72,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .hero:after{width:360px;height:360px;background:#c9f7ed;left:-170px;bottom:-160px}
 .gridhero{display:grid;grid-template-columns:1.02fr .98fr;align-items:center;gap:58px}
 .eyebrow{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:900;font-size:13px;box-shadow:0 8px 24px rgba(24,50,74,.05)}
-.hero h1{font-family:"Baloo 2",Arial,sans-serif;font-size:clamp(55px,7vw,88px);line-height:.9;margin:18px 0 20px;letter-spacing:-2.5px}
+.hero h1{font-family:var(--display);font-size:clamp(55px,7vw,88px);line-height:.9;margin:18px 0 20px;letter-spacing:-2.5px}
 .hero h1 em{font-style:normal;color:var(--pink)}
 .hero p{font-size:18px;color:var(--muted);max-width:610px}
 .actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0}
@@ -85,7 +85,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .hero-badge{position:absolute;right:24px;bottom:25px;background:#fff;padding:12px 15px;border-radius:18px;font-size:12px;font-weight:900;box-shadow:0 12px 28px rgba(24,50,74,.1)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:26px}
 .stat{background:#fff;border:1px solid var(--line);border-radius:22px;padding:17px 18px}
-.stat strong{display:block;font:800 28px "Baloo 2",Arial,sans-serif}
+.stat strong{display:block;font:800 28px var(--display)}
 .stat span{font-size:12px;color:var(--muted);font-weight:800}
 
 /* Social links + hero stats (Stage 1) */
@@ -109,7 +109,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .slot-field{display:flex;flex-direction:column;gap:7px}
 .slot-label{font-weight:700;font-size:.92rem}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
-.slot{border:1px solid #dce2ea;background:#fff;color:var(--ink);border-radius:12px;padding:10px 6px;font:800 14px Nunito,Arial,sans-serif;cursor:pointer;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.slot{border:1px solid #dce2ea;background:#fff;color:var(--ink);border-radius:12px;padding:10px 6px;font:800 14px var(--body);cursor:pointer;transition:transform .15s ease,background .15s ease,border-color .15s ease}
 .slot:hover:not(:disabled){transform:translateY(-1px);border-color:var(--pink)}
 .slot.on{background:var(--pink);border-color:var(--pink);color:#fff}
 .slot:disabled{background:#f4efe9;color:#9aa6b2;text-decoration:line-through;cursor:not-allowed}
@@ -118,8 +118,8 @@ section{padding:82px 0;scroll-margin-top:90px}
 .packages[hidden]{display:none}
 .pkg{background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 28px rgba(24,50,74,.05);transition:transform .25s ease,box-shadow .25s ease}
 .pkg:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.pkg h3{font:800 24px "Baloo 2",Arial,sans-serif;margin:0}
-.pkg-price{font:900 36px/1 "Baloo 2",Arial,sans-serif;color:var(--pink)}
+.pkg h3{font:800 24px var(--display);margin:0}
+.pkg-price{font:900 36px/1 var(--display);color:var(--pink)}
 .pkg ul{list-style:none;margin:6px 0 10px;padding:0;display:grid;gap:7px;color:var(--muted);font-weight:700;font-size:14px}
 .pkg li:before{content:"✓";color:#20c76a;font-weight:900;margin-inline-end:8px}
 .pkg .btn{margin-top:auto;width:100%}
@@ -143,7 +143,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .offer .offer-note{margin-top:10px;font-size:14px;color:#c7d4df}
 .offer-btns .btn.light{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3)}
 .review-call{margin-top:0;display:flex;align-items:center;justify-content:space-between;gap:20px;background:#fff;border:1px solid var(--line);border-radius:28px;padding:26px 30px;box-shadow:var(--shadow)}
-.review-call h3{font:800 28px "Baloo 2",Arial,sans-serif;margin:0 0 4px}
+.review-call h3{font:800 28px var(--display);margin:0 0 4px}
 .review-call p{margin:0;color:var(--muted)}
 .privacy-note{margin:10px 0 0;font-size:12px;color:var(--muted);text-align:center}
 @media(max-width:700px){.review-call{flex-direction:column;align-items:flex-start;padding:22px}.review-call .btn{width:100%}}
@@ -151,7 +151,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 /* Section heads */
 .sectionhead{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:31px}
 .kicker{color:var(--pink);font-weight:900;text-transform:uppercase;letter-spacing:2px;font-size:12px}
-.sectionhead h2{font:800 45px/1 "Baloo 2",Arial,sans-serif;margin:6px 0 0}
+.sectionhead h2{font:800 45px/1 var(--display);margin:6px 0 0}
 .sectionhead p{color:var(--muted);max-width:500px;margin:0}
 
 /* Features */
@@ -166,7 +166,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .about{display:grid;grid-template-columns:.9fr 1.1fr;gap:25px;align-items:stretch}
 .aboutvisual{min-height:360px;border-radius:36px;background:linear-gradient(145deg,#ffe6ed,#fff0ad);display:grid;place-items:center;font-size:135px;box-shadow:var(--shadow)}
 .aboutbox{background:#fff;border:1px solid var(--line);border-radius:36px;padding:38px;box-shadow:var(--shadow)}
-.aboutbox h3{font:800 38px "Baloo 2",Arial,sans-serif;margin:7px 0 12px}
+.aboutbox h3{font:800 38px var(--display);margin:7px 0 12px}
 .aboutbox p{color:var(--muted)}
 .ticks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
 .tick{font-weight:900;background:#fffaf5;border-radius:16px;padding:12px}
@@ -197,10 +197,10 @@ section{padding:82px 0;scroll-margin-top:90px}
 /* Birthday offer */
 .offer{background:var(--ink);color:#fff;border-radius:40px;padding:42px;display:grid;grid-template-columns:1fr auto;gap:25px;align-items:center;overflow:hidden;position:relative;box-shadow:var(--shadow)}
 .offer:after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;background:var(--yellow);opacity:.13;right:-80px;top:-80px;pointer-events:none}
-.offer h2{font:800 45px/1 "Baloo 2",Arial,sans-serif;margin:6px 0 9px}
+.offer h2{font:800 45px/1 var(--display);margin:6px 0 9px}
 .offer p{color:#c7d4df;margin:0}
 .offer .kicker{color:var(--yellow)}
-.price{font:900 60px/1 "Baloo 2",Arial,sans-serif;white-space:nowrap}
+.price{font:900 60px/1 var(--display);white-space:nowrap}
 .offer-btns{display:flex;flex-direction:column;gap:10px;align-items:flex-start;position:relative;z-index:1}
 .birthday-booking-trigger{margin-top:24px;text-align:center}
 .birthday-book-btn{border:0;border-radius:16px;padding:15px 24px;background:var(--blue);color:var(--ink);font:inherit;font-weight:900;font-size:1rem;cursor:pointer;box-shadow:0 10px 25px rgba(0,0,0,.12);transition:transform .2s ease,box-shadow .2s ease}
@@ -210,7 +210,7 @@ section{padding:82px 0;scroll-margin-top:90px}
 .prices{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
 .pricecard{background:#fff;border:1px solid var(--line);border-radius:26px;padding:26px;transition:transform .25s ease,box-shadow .25s ease}
 .pricecard:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.pricecard strong{display:block;font:800 39px "Baloo 2",Arial,sans-serif;margin:3px 0}
+.pricecard strong{display:block;font:800 39px var(--display);margin:3px 0}
 .pricecard span{color:var(--muted);font-weight:800}
 .pricecard.hot{background:#fff4d3;border-color:#f3d87a}
 .pricecard.unlimited{grid-column:span 2;background:linear-gradient(135deg,#ffe7ef,#fff)}
@@ -218,14 +218,14 @@ section{padding:82px 0;scroll-margin-top:90px}
 /* Package */
 .package{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:stretch}
 .package-main{background:linear-gradient(145deg,#ffedf2,#fff2bd);border-radius:34px;padding:35px}
-.package-main h3{font:800 38px "Baloo 2",Arial,sans-serif;margin:6px 0}
-.package-price{font:900 55px "Baloo 2",Arial,sans-serif;margin:10px 0}
+.package-main h3{font:800 38px var(--display);margin:6px 0}
+.package-price{font:900 55px var(--display);margin:10px 0}
 .package-list{display:grid;gap:10px;margin-top:20px}
 .package-list div{font-weight:900;background:rgba(255,255,255,.72);border-radius:15px;padding:11px 13px}
 
 /* Boxes, FAQ, visit */
 .box{background:#fff;border-radius:32px;padding:31px;border:1px solid var(--line);box-shadow:var(--shadow)}
-.box h3{font:800 32px "Baloo 2",Arial,sans-serif;margin:0 0 8px}
+.box h3{font:800 32px var(--display);margin:0 0 8px}
 .box p{color:var(--muted)}
 .booking{display:grid;grid-template-columns:1fr 1fr;gap:25px}
 .info{display:grid;gap:14px;margin-top:22px}
@@ -236,13 +236,13 @@ section{padding:82px 0;scroll-margin-top:90px}
 .faq summary{cursor:pointer;font-weight:900}
 .faq p{color:var(--muted);margin:12px 0 0}
 .cta{margin-top:25px;background:linear-gradient(135deg,#ffedf2,#fff5c8);border-radius:34px;padding:38px;display:flex;justify-content:space-between;align-items:center;gap:25px}
-.cta h2{font:800 39px "Baloo 2",Arial,sans-serif;margin:0 0 5px}
+.cta h2{font:800 39px var(--display);margin:0 0 5px}
 .cta p{margin:0;color:var(--muted)}
 
 /* Footer + floating WhatsApp */
 footer{background:#10283b;color:#fff;padding:45px 0 25px}
 .footergrid{display:flex;justify-content:space-between;gap:25px}
-.footbrand{font:800 25px "Baloo 2",Arial,sans-serif}
+.footbrand{font:800 25px var(--display)}
 .footergrid p{color:#b9c8d4}
 .footlinks{display:flex;gap:18px;align-items:center;font-weight:800}
 .copy{border-top:1px solid rgba(255,255,255,.12);margin-top:28px;padding-top:18px;color:#91a5b4;font-size:13px}
@@ -432,7 +432,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 @keyframes mFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
 /* hero: price chip on the photo, text link for prices, photo first on phones */
 .hero-chip{position:absolute;left:22px;top:22px;z-index:2;display:flex;align-items:baseline;gap:8px;background:#fff;padding:10px 14px;border-radius:18px;box-shadow:0 12px 28px rgba(24,50,74,.12)}
-.hero-chip b{font-family:"Baloo 2",Arial,sans-serif;font-size:22px;line-height:1;color:var(--pink)}
+.hero-chip b{font-family:var(--display);font-size:22px;line-height:1;color:var(--pink)}
 .hero-chip span{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:.5px}
 .hero-card:not(.has-photo) .hero-chip{display:none}
 .hero-link{align-self:center;font-weight:900;color:var(--ink);text-decoration:underline;text-underline-offset:4px;padding:12px 6px}
@@ -480,8 +480,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 .pcard-media .emo{font-size:68px;line-height:1;filter:drop-shadow(0 8px 16px rgba(0,0,0,.18))}
 .pcard-media .pop{position:absolute;left:12px;top:12px;z-index:1;background:#fff;color:var(--ink);font-weight:900;font-size:12.5px;padding:7px 12px;border-radius:99px;box-shadow:0 8px 20px rgba(0,0,0,.14)}
 [dir=rtl] .pcard-media .pop{left:auto;right:12px}
-.pcard-title{font-family:"Baloo 2",Arial,sans-serif;font-size:22px;font-weight:900;line-height:1.2;margin:18px 0 0;color:var(--ink)}
-.pcard-price{font-family:"Baloo 2",Arial,sans-serif;font-size:36px;font-weight:900;line-height:1.1;color:var(--pink);margin:6px 0 0}
+.pcard-title{font-family:var(--display);font-size:22px;font-weight:900;line-height:1.2;margin:18px 0 0;color:var(--ink)}
+.pcard-price{font-family:var(--display);font-size:36px;font-weight:900;line-height:1.1;color:var(--pink);margin:6px 0 0}
 .pcard-desc{color:var(--muted);font-weight:700;font-size:14.5px;line-height:1.45;margin:8px 0 0}
 .pcard ul{list-style:none;margin:10px 0 0;padding:0;color:var(--muted);font-weight:700;font-size:14.5px;line-height:1.5}
 .pcard ul li:before{content:"\2713\00a0";color:var(--pink);font-weight:900}
@@ -519,7 +519,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 @keyframes pkUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @keyframes pkFade{from{opacity:0}to{opacity:1}}
 .pk-media{aspect-ratio:16/10}
-.pk-title{font-family:"Baloo 2",Arial,sans-serif;font-size:26px;font-weight:900;line-height:1.2;margin:16px 0 0;color:var(--ink);text-align:center}
+.pk-title{font-family:var(--display);font-size:26px;font-weight:900;line-height:1.2;margin:16px 0 0;color:var(--ink);text-align:center}
 .pk-dialog .pcard-price{text-align:center}
 .pk-desc{text-align:center;color:var(--muted);font-weight:700;margin:10px 0 0}
 .pk-dialog ul{list-style:none;margin:12px 0 0;padding:0;color:var(--muted);font-weight:700}
@@ -555,16 +555,195 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   .hero-card:hover .hero-photo,.aboutvisual:hover .about-photo,.gallery-card:hover img{transform:none}
 }
 </style>
+<style id="premium">
+/* ===== PREMIUM THEME =====
+   Calmer palette (navy + one raspberry accent + gold hairlines), serif display type,
+   line icons instead of emoji, fewer decorative blobs, consistent radii.
+   To go back to the old look, delete this whole <style id="premium"> block. */
+:root{--r-lg:28px;--r-md:20px;--r-sm:14px;--card-shadow:0 1px 2px rgba(20,40,61,.04),0 14px 34px rgba(20,40,61,.07)}
+body{font-family:var(--body);-webkit-font-smoothing:antialiased;line-height:1.6;color:var(--ink)}
+section{padding:104px 0}
+#activities,#faq{background:var(--soft)}
+@media(max-width:600px){section{padding:68px 0}}
+
+/* inline line icons */
+.i{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.2em}
+.ico svg,.emo svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+
+/* top bar + navigation */
+.topbar{font-size:12.5px;letter-spacing:.03em}
+.topin a{font-weight:600}
+.main-nav{background:rgba(251,250,248,.88);border-bottom:1px solid var(--line)}
+.logo{width:44px;height:44px;border-radius:13px;background:var(--ink);box-shadow:none;font-size:0}
+.logo svg{width:28px;height:28px}
+.brand span{font:600 16px/1.12 var(--display);letter-spacing:.015em}
+.links{font-weight:600;font-size:14px;gap:26px}
+.links a:hover{color:var(--ink);transform:none}
+.links a::after{background:var(--gold)!important;height:1.5px!important}
+
+/* buttons */
+.btn,.navcta{font:600 15px/1 var(--body);padding:15px 26px;box-shadow:none;gap:8px;letter-spacing:.005em}
+.btn.primary{background:var(--pink);box-shadow:0 10px 24px rgba(208,51,93,.22)}
+.btn.light{background:#fff;border:1px solid #d6dce4;color:var(--ink)}
+.btn:hover,.navcta:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.navcta{padding:12px 20px;font-size:14px}
+html .lang-btn{font:600 14px var(--body);border-color:#d6dce4}
+html .lang-btn:hover{background:var(--soft)}
+:focus-visible{outline-color:var(--ink)}
+
+/* hero */
+.hero{padding:88px 0 96px;background:radial-gradient(900px 520px at 88% -10%,#e7eef7 0,rgba(231,238,247,0) 70%)}
+.hero:before,.hero:after{display:none}
+.hero h1{font:600 clamp(42px,5.4vw,74px)/1.05 var(--display);letter-spacing:-.025em;margin:22px 0}
+.hero h1 em{color:inherit;font-style:normal}
+.hero h1 + p,.hero p{font-size:18px;line-height:1.65}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px;text-transform:none;letter-spacing:.01em;padding:8px 16px;background:#fff;border:1px solid var(--line);box-shadow:none;border-radius:999px}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
+html .open-badge{font-weight:600;font-size:13px}
+.stats{gap:0;margin-top:36px}
+.stat{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:18px 18px 0 0}
+html[dir=rtl] .stat{padding:18px 0 0 18px}
+.stat strong{font:600 28px/1.1 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.stat span{font-size:12.5px;letter-spacing:.04em;font-weight:600}
+.stat em.stat-fri{color:var(--gold)}
+.hero-card{min-height:520px;border-radius:var(--r-lg);background:linear-gradient(160deg,#1b3a58 0%,#0f2236 100%);box-shadow:0 30px 70px rgba(20,40,61,.2)}
+.hero-card:before{display:none}
+.playground{position:absolute;inset:0;width:100%;height:auto;border-radius:0;background:none;box-shadow:none;font-size:0;display:block}
+.playground svg{width:100%;height:100%;display:block}
+.bubble{position:absolute;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;border-radius:999px;padding:9px 16px 9px 12px;font-weight:600;font-size:14px;box-shadow:none;right:auto;bottom:auto;z-index:2}
+.bubble .i{color:var(--gold-2);width:18px;height:18px}
+.hero-card .b1{top:26px;left:26px}.hero-card .b2{top:74px;left:26px}.hero-card .b3{top:122px;left:26px}
+html[dir=rtl] .hero-card .bubble{left:auto;right:26px;padding:9px 12px 9px 16px}
+html .b1,html .b2,html .b3{animation:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;box-shadow:none;font-weight:600;font-size:13.5px;z-index:2}
+.hero-badge .i{color:var(--gold-2)}
+.hero-card.has-photo .hero-badge{background:rgba(255,255,255,.92);color:var(--ink)}
+@media(max-width:900px){
+  .hero{padding:44px 0 64px}
+  .hero-card{min-height:330px}
+  .bubble{padding:7px 12px 7px 9px;font-size:12.5px}
+  .hero-card .b2{top:66px}.hero-card .b3{display:none}
+}
+@media(max-width:600px){.hero h1{font-size:clamp(38px,11vw,50px)}.stat{padding:14px 8px 0 0}.stat strong{font-size:19px}}
+@supports selector(:has(*)){
+  .hero:has(.hero-card.has-photo) h1 em{color:inherit}
+  .hero:has(.hero-card.has-photo) .stats{gap:12px}
+  .hero:has(.hero-card.has-photo) .stat{background:rgba(255,255,255,.95);border:0;border-radius:var(--r-sm);padding:16px 18px}
+  .hero:has(.hero-card.has-photo) .eyebrow,.hero:has(.hero-card.has-photo) html .open-badge{background:rgba(255,255,255,.92)}
+}
+
+/* section heads */
+.kicker{color:var(--gold);font-weight:600;text-transform:none;letter-spacing:.01em;font-size:15px}
+.sectionhead{margin-bottom:44px;align-items:flex-end}
+.sectionhead h2,.offer h2{font:600 clamp(32px,3.6vw,46px)/1.1 var(--display);letter-spacing:-.02em;margin:8px 0 0}
+.sectionhead p{font-size:16.5px}
+@media(max-width:600px){.sectionhead{margin-bottom:30px}}
+
+/* cards */
+.feature,.pricecard,.pkg,.trust-card,.box,.aboutbox,.faq details,.review-call,.list-msg,.gallery-empty{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:none}
+.box,.aboutbox{border-radius:var(--r-lg);padding:38px}
+.feature{padding:28px 22px;transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
+.feature:hover,.pricecard:hover,.pkg:hover,.trust-card:hover{transform:none;box-shadow:var(--card-shadow);border-color:#d9d3c8}
+.feature h3{font:600 18px/1.25 var(--display);margin:18px 0 6px}
+.feature p{font-size:14px;line-height:1.6}
+.icon{width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-size:0}
+.icon .ico{display:grid;place-items:center}
+.icon svg{width:24px;height:24px;stroke-width:1.6}
+.box h3,.aboutbox h3{font:600 clamp(26px,2.8vw,34px)/1.15 var(--display);letter-spacing:-.02em;margin:8px 0 10px}
+.review-call h3{font:600 26px/1.2 var(--display);letter-spacing:-.01em}
+
+/* about */
+.aboutvisual{position:relative;border-radius:var(--r-lg);background:linear-gradient(150deg,#e7eef7,#f5eee2);box-shadow:none;font-size:0;min-height:420px;overflow:hidden}
+.aboutvisual .about-art{position:absolute;inset:0;width:100%;height:100%}
+.aboutvisual.has-photo .about-art{display:none}
+.ticks{gap:10px}
+.tick{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:var(--r-sm);padding:13px 14px;font-weight:600;font-size:14.5px}
+.tick .i{width:20px;height:20px;color:var(--gold)}
+@media(max-width:600px){.aboutvisual{min-height:300px}.box,.aboutbox{padding:26px}}
+
+/* gallery + package slider cards */
+.gallery-card,.gallery-skel,.pcard,.slider>.skel{border-radius:24px;border:1px solid var(--line);box-shadow:var(--card-shadow)}
+.gallery-card,.gallery-skel{padding:14px 14px 22px}
+.gallery-card img{border-radius:16px}
+.gallery-label{font:600 18px/1.3 var(--display)}
+.pcard{padding:14px 14px 24px}
+.pcard.hot{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),var(--card-shadow)}
+.pcard-media{border-radius:16px}
+.pcard-media.g0,.pcard-media{--g:linear-gradient(135deg,#e8eef6,#d6e1ee)}
+.pcard-media.g1{--g:linear-gradient(135deg,#f1ebdf,#e5d9c2)}
+.pcard-media.g2{--g:linear-gradient(135deg,#e7efec,#cfe2dc)}
+.pcard-media.g3{--g:linear-gradient(135deg,#eeeaf2,#ddd6e9)}
+.pcard-media .emo{font-size:0;filter:none;color:var(--ink);opacity:.82}
+.pcard-media .emo svg{width:56px;height:56px;stroke-width:1.2}
+.pcard-media .pop{background:var(--ink);color:#fff;font-weight:600;box-shadow:none}
+.pcard-title,.pk-title{font:600 21px/1.25 var(--display);letter-spacing:-.01em}
+.pcard-price{font:600 34px/1.1 var(--display);color:var(--ink);letter-spacing:-.02em}
+.pcard-desc,.pcard ul{font-weight:500}
+.pcard ul li:before,.pk-dialog ul li:before{color:var(--gold)}
+.pcard:hover,.gallery-card:hover{transform:none;box-shadow:0 2px 4px rgba(20,40,61,.05),0 22px 44px rgba(20,40,61,.1)}
+.dots button{background:#d3d9e1}
+.dots button.on{background:var(--ink)}
+#gallery::before,#gallery::after,#prices::before,#prices::after,#birthday::before,#birthday::after{display:none}
+.js .reveal{transform:translateY(14px)}
+.js .reveal.visible{transform:none}
+
+/* birthday offer */
+.offer{border-radius:var(--r-lg);padding:56px;background:linear-gradient(135deg,#14283d 0%,#1d3a56 100%);box-shadow:0 30px 70px rgba(20,40,61,.2)}
+.offer:after{width:340px;height:340px;right:-110px;top:-140px;background:none;border:1px solid rgba(224,196,138,.35);opacity:1}
+.offer .kicker{color:var(--gold-2)}
+.offer h2{color:#fff}
+.price{font:600 56px/1 var(--display);letter-spacing:-.02em;color:var(--gold-2)}
+.offer-btns .btn.light{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.28);color:#fff}
+.birthday-book-btn{background:var(--pink);color:#fff;border-radius:999px;font:600 15px var(--body);padding:16px 30px;box-shadow:0 10px 24px rgba(208,51,93,.22);display:inline-flex;align-items:center;gap:8px}
+@media(max-width:600px){.offer{padding:34px 26px}.price{font-size:46px}}
+
+/* steps, faq, cta, footer */
+html .steps-wrap h3{font:600 26px var(--display)}
+html .step{border-radius:var(--r-md)}
+html .step:before{background:var(--soft);color:var(--ink);font-weight:700;border:1px solid var(--line)}
+.faq details{padding:20px 24px}
+.faq summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;font-weight:600;font-size:16.5px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:24px;font-weight:300;color:var(--gold);transition:transform .25s var(--ease);line-height:1}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.info div{display:flex;align-items:center;gap:10px}
+.info .i{color:var(--gold);width:20px;height:20px}
+.mapbtn{display:inline-flex}
+footer{background:#0e2033}
+.footbrand{font:600 24px var(--display);letter-spacing:.01em}
+.wa{background:#1fa855;box-shadow:0 14px 32px rgba(31,168,85,.3)}
+.wa .wa-i{width:28px;height:28px;stroke-width:1.7}
+html .site-banner{background:var(--ink);font-weight:600}
+
+/* forms + booking modal */
+.booking-icon{background:var(--soft);color:var(--ink)}
+.booking-icon .i{width:26px;height:26px}
+.birthday-form input:focus,.birthday-form textarea:focus,.birthday-form select:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(20,40,61,.1)}
+.slot.on{background:var(--ink);border-color:var(--ink)}
+.slot:hover:not(:disabled){border-color:var(--gold)}
+.birthday-modal-box,.pk-panel{border-radius:24px}
+@media(max-width:980px){.links a:hover{background:var(--soft)}.mobile-whatsapp{box-shadow:none}}
+
+html .open-badge{font-style:normal}
+.birthday-booking-trigger{margin-top:30px}
+html .steps-wrap{margin-top:48px}
+html .open-badge em{font-style:normal}
+@supports selector(:has(*)){
+  .hero:has(.hero-card.has-photo) .hero-card::after{background:linear-gradient(to bottom,rgba(16,34,52,.68) 0%,rgba(16,34,52,.4) 45%,rgba(16,34,52,.55) 100%)}
+}
+html[dir=rtl] .hero h1{font-size:clamp(36px,4.4vw,60px);line-height:1.3}
+
+</style>
 </head>
 
 <body>
 <div class="site-banner" id="siteBanner" role="status" hidden><span id="siteBannerText"></span><button type="button" id="siteBannerClose" aria-label="Close">&times;</button></div>
-<div class="topbar"><div class="container topin"><span>✨ FUN • LEARN • GROW</span><a href="tel:+971585187788" data-tel>📞 <span data-bind="displayPhone">+971 58 518 7788</span></a></div></div>
+<div class="topbar"><div class="container topin"><span>FUN • LEARN • GROW</span><a href="tel:+971585187788" data-tel><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> <span data-bind="displayPhone">+971 58 518 7788</span></a></div></div>
 
 <nav class="main-nav">
   <div class="container navin">
     <a class="brand" href="#top" aria-label="Rudhat Alsaadah Home">
-      <div class="logo">🎈</div>
+      <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M7 25V15a5 5 0 0 1 10 0v10z" fill="#f4ecdd"/><circle cx="22.5" cy="20" r="5" fill="#c9a15c"/><rect x="5" y="25" width="22" height="1.8" rx=".9" fill="#e4577d"/></svg></div>
       <span>RUDHAT ALSAADAH<br>ENTERTAINMENT</span>
     </a>
 
@@ -576,10 +755,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
       <a href="#prices">Prices</a>
       <a href="#birthday">Birthday</a>
       <a href="#visit">Visit Us</a>
-      <a class="mobile-whatsapp" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 WhatsApp Us</a>
+      <a class="mobile-whatsapp" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> WhatsApp Us</a>
     </div>
 
-    <a class="navcta" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 WhatsApp</a>
+    <a class="navcta" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> WhatsApp</a>
 
     <button class="menu-btn" id="menuButton" type="button" aria-label="Open navigation menu" aria-controls="mainMenu" aria-expanded="false">☰</button>
   </div>
@@ -589,15 +768,15 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
 <section class="hero"><div class="container gridhero">
   <div>
-    <div class="eyebrow">🌈 A PLACE TO PLAY &amp; GROW</div>
+    <div class="eyebrow">A place to play &amp; grow</div>
     <h1>A happy place for <em>little explorers.</em></h1>
     <p>A clean, safe and exciting children's entertainment center in Al Majaz 3, Sharjah — where play becomes an adventure.</p>
     <div class="actions">
-      <button type="button" class="btn primary" id="heroBirthday">🎂 Book Birthday Party</button>
-      <a class="btn light" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Book on WhatsApp</a>
+      <button type="button" class="btn primary" id="heroBirthday"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/></svg> Book Birthday Party</button>
+      <a class="btn light" data-wa="Hello Rudhat Alsaadah, I would like to book." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Book on WhatsApp</a>
       <a class="hero-link" href="#prices">View Prices →</a>
     </div>
-    <p class="location"><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><b>📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</b></a></p>
+    <p class="location"><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><b><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Sarab Tower, Al Majaz 3, Sharjah, UAE</b></a></p>
     <div class="stats">
       <div class="stat"><strong data-bind="hourlyPrice">AED 20</strong><span>PER HOUR</span></div>
       <div class="stat"><strong data-bind="birthdayPrice">AED 300</strong><span>BIRTHDAY</span></div>
@@ -606,19 +785,19 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   </div>
   <div class="hero-card">
     <div class="hero-chip"><b data-bind="hourlyPrice">AED 20</b><span>PER HOUR</span></div>
-    <div class="bubble b1">🎨 Create</div><div class="bubble b2">💃 Dance</div><div class="bubble b3">🧩 Learn</div>
-    <div class="playground">🛝</div>
-    <div class="hero-badge">🛡️ Clean &amp; Safe Environment</div>
+    <div class="bubble b1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7H16c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/></svg> Create</div><div class="bubble b2"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Dance</div><div class="bubble b3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/></svg> Learn</div>
+    <div class="playground"><svg viewBox="0 0 520 560" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false"><circle cx="410" cy="150" r="118" fill="none" stroke="#e0c48a" stroke-opacity=".28"/><circle cx="410" cy="150" r="78" fill="none" stroke="#e0c48a" stroke-opacity=".18"/><rect x="0" y="470" width="520" height="90" fill="#fff" fill-opacity=".05"/><path d="M70 470V318a82 82 0 0 1 164 0v152z" fill="#f4ecdd"/><path d="M122 470V338a30 30 0 0 1 60 0v132z" fill="#14283d" fill-opacity=".9"/><rect x="234" y="352" width="96" height="118" rx="10" fill="#7fb0dc"/><path d="M226 352 282 262 338 352z" fill="#e4577d"/><circle cx="404" cy="410" r="60" fill="#c9a15c"/><rect x="360" y="262" width="88" height="88" rx="14" fill="#6fc3b2" transform="rotate(-8 404 306)"/><circle cx="152" cy="196" r="14" fill="#e0c48a"/></svg></div>
+    <div class="hero-badge"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Clean &amp; Safe Environment</div>
   </div>
 </div></section>
 
 <section id="about"><div class="container about">
-  <div class="aboutvisual">🎈🧸</div>
+  <div class="aboutvisual"><svg class="about-art" viewBox="0 0 480 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><circle cx="352" cy="116" r="84" fill="#c9a15c" fill-opacity=".2"/><rect x="0" y="340" width="480" height="80" fill="#14283d" fill-opacity=".05"/><path d="M96 340V210a70 70 0 0 1 140 0v130z" fill="#14283d"/><path d="M130 340V232a36 36 0 0 1 72 0v108z" fill="#f4ecdd"/><circle cx="316" cy="280" r="60" fill="#e4577d"/><rect x="288" y="168" width="54" height="54" rx="11" fill="#c9a15c" transform="rotate(10 315 195)"/><path d="M352 340a42 42 0 0 1 84 0z" fill="#7fb0dc"/></svg></div>
   <div class="aboutbox">
     <div class="kicker">Welcome</div>
     <h3>Where every visit becomes a happy memory.</h3>
     <p>RUDHAT ALSAADAH ENTERTAINMENT is a children's entertainment center designed around fun, creativity, movement and learning. Our activities give children a welcoming place to explore and enjoy their time.</p>
-    <div class="ticks"><div class="tick">🎨 Creative play</div><div class="tick">🧩 Educational fun</div><div class="tick">💃 Music &amp; movement</div><div class="tick">🛡️ Clean &amp; safe</div></div>
+    <div class="ticks"><div class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7H16c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/></svg> Creative play</div><div class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/></svg> Educational fun</div><div class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Music &amp; movement</div><div class="tick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Clean &amp; safe</div></div>
   </div>
 </div></section>
 
@@ -643,17 +822,17 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   <div class="offer">
     <div>
       <div class="kicker">Birthday celebrations</div>
-      <h2>Make their big day unforgettable. 🎂</h2>
+      <h2>Make their big day unforgettable.</h2>
       <p class="offer-note" id="birthdayDescription" hidden></p>
     </div>
     <div class="offer-btns">
       <div class="price" id="birthdayPrice" data-bind="birthdayPrice">AED 300</div>
-      <a class="btn light" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 Ask on WhatsApp</a>
+      <a class="btn light" id="birthdayButton" data-wa="Hello, I want to ask about the {birthdayPrice}birthday package." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Ask on WhatsApp</a>
     </div>
   </div>
   <div class="packages slider" id="birthdayPackages" hidden></div>
   <div class="birthday-booking-trigger">
-    <button type="button" class="birthday-book-btn" id="openBirthdayModal" aria-haspopup="dialog">🎂 Book Birthday Party</button>
+    <button type="button" class="birthday-book-btn" id="openBirthdayModal" aria-haspopup="dialog"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/></svg> Book Birthday Party</button>
   </div>
 </div></section>
 
@@ -667,8 +846,8 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
 <section id="reviews"><div class="container">
   <div class="review-call">
-    <div><h3>Loved your visit? ⭐</h3><p>Your review helps other parents find us. It takes less than a minute.</p></div>
-    <a class="btn primary" id="reviewLink" href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">⭐ Leave a Review</a>
+    <div><h3>Loved your visit?</h3><p>Your review helps other parents find us. It takes less than a minute.</p></div>
+    <a class="btn primary" id="reviewLink" href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l2.4 5.6 6 .6-4.5 4 1.4 5.9L12 16l-5.3 3.1 1.4-5.9-4.5-4 6-.6z"/></svg> Leave a Review</a>
   </div>
 </div></section>
 
@@ -686,7 +865,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     <p>Quick answers based on the information currently provided for the venue.</p>
   </div>
   <div class="faq">
-    <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE. <a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a></p></details>
+    <details><summary>Where are you located?</summary><p>Sarab Tower, Al Majaz 3, Sharjah, UAE. <a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Open in Google Maps</a></p></details>
     <details><summary>What are the opening hours?</summary><p data-bind="faqHours">Saturday–Thursday: 9:00 AM–9:00 PM. Friday: 2:00 PM–10:00 PM.</p></details>
     <details><summary>How much is playtime?</summary><p data-bind="faqPlay">Per hour is AED 20. There are also 30-hour, 42-hour, 64-hour and unlimited-hour options.</p></details>
     <details><summary>How much is a birthday package?</summary><p>Birthday packages start from <span data-bind="birthdayPrice">AED 300</span>. Tap “Book Birthday Party” or message us on WhatsApp.</p></details>
@@ -700,23 +879,23 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   <div class="container booking">
     <div class="box">
       <div class="kicker">Plan your visit</div>
-      <h3>Come play with us! 🌈</h3>
+      <h3>Come play with us!</h3>
       <p>We're open every day with special Friday hours.</p>
       <div class="info">
-        <div>🕘 <b>Sat–Thu:</b> <span data-bind="weekdayHours">9:00 AM – 9:00 PM</span></div>
-        <div>🌙 <b>Friday:</b> <span data-bind="fridayHours">2:00 PM – 10:00 PM</span></div>
-        <div>📞 <a href="tel:+971585187788" data-tel data-bind="displayPhone">+971 58 518 7788</a></div>
-        <div><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Sarab Tower, Al Majaz 3, Sharjah, UAE</a></div>
+        <div><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <b>Sat–Thu:</b> <span data-bind="weekdayHours">9:00 AM – 9:00 PM</span></div>
+        <div><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> <b>Friday:</b> <span data-bind="fridayHours">2:00 PM – 10:00 PM</span></div>
+        <div><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> <a href="tel:+971585187788" data-tel data-bind="displayPhone">+971 58 518 7788</a></div>
+        <div><a class="loc-link" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Sarab Tower, Al Majaz 3, Sharjah, UAE</a></div>
       </div>
-      <a class="btn mapbtn" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer">📍 Open in Google Maps</a>
+      <a class="btn mapbtn" data-map href="https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg> Open in Google Maps</a>
       <div class="socials on-light" hidden><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div>
     </div>
     <div class="box">
       <div class="kicker">Ready to book?</div>
       <h3>Let's make today fun.</h3>
       <p>Message our team on WhatsApp for birthday bookings, questions and visit details.</p>
-      <a class="btn primary" style="width:100%;margin-top:12px" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer">💬 WhatsApp Us</a>
-      <a class="btn light" style="width:100%;margin-top:10px" href="tel:+971585187788" data-tel>📞 <span data-bind="displayPhone">+971 58 518 7788</span></a>
+      <a class="btn primary" style="width:100%;margin-top:12px" data-wa="Hello Rudhat Alsaadah Entertainment, I would like more information." href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> WhatsApp Us</a>
+      <a class="btn light" style="width:100%;margin-top:10px" href="tel:+971585187788" data-tel><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> <span data-bind="displayPhone">+971 58 518 7788</span></a>
     </div>
   </div>
 </section>
@@ -725,13 +904,13 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
 <footer><div class="container">
   <div class="footergrid">
-    <div><div class="footbrand">🎈 RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE<br><span data-mail-wrap hidden>✉️ <a data-mail></a></span></p><div class="socials" hidden><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div></div>
+    <div><div class="footbrand">RUDHAT ALSAADAH</div><p>Play • Explore • Celebrate<br>Al Majaz 3, Sharjah, UAE<br><span data-mail-wrap hidden>✉️ <a data-mail></a></span></p><div class="socials" hidden><a class="soc" data-soc="instagram" target="_blank" rel="noopener noreferrer" aria-label="Instagram" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.3"/><circle class="f" cx="17.6" cy="6.4" r="1.1"/></svg></a><a class="soc" data-soc="tiktok" target="_blank" rel="noopener noreferrer" aria-label="TikTok" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M16.6 5.8a4.3 4.3 0 0 1-1-2.8h-3.2v12.3a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a5.9 5.9 0 1 0 5 5.8V9.1a7.5 7.5 0 0 0 4.3 1.4V7.3a4.3 4.3 0 0 1-3.3-1.5z"/></svg></a></div></div>
     <div class="footlinks"><a href="#about">About</a><a href="#activities">Services</a><a href="#gallery">Gallery</a><a href="#prices">Prices</a><a href="#info" id="infoLink" hidden>Visitor Info</a><a href="#faq">FAQ</a><a href="/card">Play Card</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></div>
   </div>
   <div class="copy">© 2026 Rudhat Alsaadah Entertainment. All rights reserved.</div>
 </div></footer>
 
-<a class="wa" href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">💬</a>
+<a class="wa" href="https://wa.me/971585187788" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg class="i wa-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></a>
 
 <!-- Gallery lightbox -->
 <div class="lightbox" id="galleryLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photo gallery">
@@ -750,7 +929,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   <div class="birthday-modal-box" role="dialog" aria-modal="true" aria-labelledby="birthdayModalTitle">
     <button type="button" class="birthday-modal-close" id="closeBirthdayModal" aria-label="Close">×</button>
     <div class="booking-head">
-      <span class="booking-icon">🎂</span>
+      <span class="booking-icon"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/></svg></span>
       <div>
         <h3 id="birthdayModalTitle">Birthday Booking Request</h3>
         <p>Tell us your preferred date and details.</p>
@@ -858,23 +1037,27 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
   /* ===== Content (ONE fetch drives prices, hours, phone, FAQ, everything) ===== */
   var galleryData = [];
+  /* line icons (replace the old emoji icons) */
+  var ICO = {chat:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',cake:'<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/>',pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',palette:'<circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7H16c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/>',music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',shapes:'<path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>',star:'<path d="M12 3l2.4 5.6 6 .6-4.5 4 1.4 5.9L12 16l-5.3 3.1 1.4-5.9-4.5-4 6-.6z"/>',smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',sock:'<path d="M8 3h6v8l5 4a3 3 0 0 1-2 6H9a3 3 0 0 1-3-3V3z"/><path d="M8 7h6"/>',parking:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',hourglass:'<path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4A2 2 0 0 0 7 17.8V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/>',infinity:'<path d="M12 12c-2-2.7-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.3 6-4zm0 0c2 2.7 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.3-6 4z"/>',ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/>',mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>'};
+  window.RudhatICO = ICO;
+  function ico(k) { return '<span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (ICO[k] || ICO.pin) + '</svg></span>'; }
 
   function renderServices(data) {
-    var icons = ['🎨', '💃', '🧩', '🧠', '🛡️'];
+    var icons = ['palette', 'music', 'shapes', 'star', 'shield'];
     /* the icon follows the service name, so reordering services in the admin never mixes them up */
     var iconRules = [
-      [/art|colou?r|draw|paint/i, '🎨'],
-      [/zumba|danc|music/i, '💃'],
-      [/educat|learn|game|puzzle/i, '🧩'],
-      [/skill|develop|brain/i, '🧠'],
-      [/clean|safe|safety/i, '🛡️']
+      [/art|colou?r|draw|paint/i, 'palette'],
+      [/zumba|danc|music/i, 'music'],
+      [/educat|learn|game|puzzle/i, 'shapes'],
+      [/skill|develop|brain/i, 'star'],
+      [/clean|safe|safety/i, 'shield']
     ];
     document.getElementById('servicesList').innerHTML = (data.services || []).map(function (s, i) {
       var ic = icons[i % icons.length];
       for (var k = 0; k < iconRules.length; k++) {
         if (iconRules[k][0].test(s.title || '')) { ic = iconRules[k][1]; break; }
       }
-      return '<div class="feature"><div class="icon">' + ic + '</div><h3>' +
+      return '<div class="feature"><div class="icon">' + ico(ic) + '</div><h3>' +
         esc(s.title) + '</h3><p>' + esc(s.description) + '</p></div>';
     }).join('');
   }
@@ -1089,14 +1272,14 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
 
   function infoIcon(it) {
     var s = (String(it.title || '') + ' ' + String(it.titleAr || '')).toLowerCase();
-    if (/age|year|عمر|سن/.test(s)) return '👶';
-    if (/parent|guardian|والد|أهل|ولي/.test(s)) return '👨‍👩‍👧';
-    if (/sock|جورب|شراب/.test(s)) return '🧦';
-    if (/safe|rule|أمان|سلامة|قواعد|قوانين/.test(s)) return '🛡️';
-    if (/park|موقف/.test(s)) return '🅿️';
-    if (/pay|card|cash|دفع|بطاقة|نقد/.test(s)) return '💳';
-    if (/valid|expir|صلاحية|انتهاء/.test(s)) return '⏳';
-    return '📌';
+    if (/age|year|عمر|سن/.test(s)) return 'smile';
+    if (/parent|guardian|والد|أهل|ولي/.test(s)) return 'users';
+    if (/sock|جورب|شراب/.test(s)) return 'sock';
+    if (/safe|rule|أمان|سلامة|قواعد|قوانين/.test(s)) return 'shield';
+    if (/park|موقف/.test(s)) return 'parking';
+    if (/pay|card|cash|دفع|بطاقة|نقد/.test(s)) return 'card';
+    if (/valid|expir|صلاحية|انتهاء/.test(s)) return 'hourglass';
+    return 'pin';
   }
   function renderInfo(data) {
     var list = data.info || [];
@@ -1105,7 +1288,7 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
     sec.hidden = !list.length;
     if (link) link.hidden = !list.length;
     box.innerHTML = list.map(function (it) {
-      return '<div class="feature"><div class="icon">' + infoIcon(it) + '</div><h3>' + esc(it.title) + '</h3><p class="pl">' + esc(it.description) + '</p></div>';
+      return '<div class="feature"><div class="icon">' + ico(infoIcon(it)) + '</div><h3>' + esc(it.title) + '</h3><p class="pl">' + esc(it.description) + '</p></div>';
     }).join('');
   }
 
@@ -1525,10 +1708,10 @@ setTimeout(function () { document.documentElement.classList.add('content-ready')
   right BEFORE the closing </body> tag. Nothing else changes.
   ============================================================ -->
 <style>
-.lang-btn{border:1px solid var(--line);background:#fff;color:var(--ink);font:900 14px Nunito,Arial,sans-serif;padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s ease}
+.lang-btn{border:1px solid var(--line);background:#fff;color:var(--ink);font:900 14px var(--body);padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background .2s ease}
 .lang-btn:hover{background:#fff4f7}
 .lang-btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-html[dir=rtl] *{font-family:Cairo,Nunito,Arial,sans-serif!important;letter-spacing:0!important}
+html[dir=rtl] *{font-family:Cairo,var(--body)!important;letter-spacing:0!important}
 html[dir=rtl] .hero h1{line-height:1.2}
 html[dir=rtl] .sectionhead h2,html[dir=rtl] .offer h2{line-height:1.25}
 html[dir=rtl] .wa{right:auto;left:20px}
@@ -1539,6 +1722,28 @@ html[dir=rtl] .wa{right:auto;left:20px}
 (function () {
   'use strict';
   var AR = {
+    'FUN • LEARN • GROW': 'مرح • تعلّم • نمو',
+    'WhatsApp Us': 'راسلنا على واتساب',
+    'WhatsApp': 'واتساب',
+    'A place to play & grow': 'مكان للعب والنمو',
+    'Book Birthday Party': 'احجز حفلة عيد ميلاد',
+    'Book on WhatsApp': 'احجز عبر واتساب',
+    'Sarab Tower, Al Majaz 3, Sharjah, UAE': 'برج سراب، المجاز 3، الشارقة، الإمارات',
+    'Create': 'ابتكر',
+    'Dance': 'ارقص',
+    'Learn': 'تعلّم',
+    'Clean & Safe Environment': 'بيئة نظيفة وآمنة',
+    'Creative play': 'لعب إبداعي',
+    'Educational fun': 'مرح تعليمي',
+    'Music & movement': 'موسيقى وحركة',
+    'Clean & safe': 'نظيف وآمن',
+    'Make their big day unforgettable.': 'اجعلوا يومهم الكبير لا يُنسى.',
+    'Ask on WhatsApp': 'اسأل عبر واتساب',
+    'Loved your visit?': 'أعجبتكم زيارتكم؟',
+    'Leave a Review': 'اكتب تقييماً',
+    'Come play with us!': 'تعالَ العب معنا!',
+    'Open in Google Maps': 'افتح في خرائط جوجل',
+    'Most Popular': 'الأكثر طلباً',
     '⭐ Most Popular': '⭐ الأكثر طلباً',
     '💬 Ask on WhatsApp': '💬 اسأل عبر واتساب',
     'Loved your visit? ⭐': 'أعجبتكم زيارتكم؟ ⭐',
@@ -1775,7 +1980,7 @@ html[dir=rtl] .wa{right:auto;left:20px}
 .b2{animation-delay:-1.6s}.b3{animation-delay:-3.2s}
 @keyframes floaty{50%{transform:translateY(-9px)}}
 .steps-wrap{margin-top:30px}
-.steps-wrap h3{font:800 28px "Baloo 2",Arial,sans-serif;margin:0 0 14px;text-align:center}
+.steps-wrap h3{font:800 28px var(--display);margin:0 0 14px;text-align:center}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;counter-reset:s}
 .step{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px 22px 22px 70px;position:relative;counter-increment:s}
 html[dir=rtl] .step{padding:22px 70px 22px 22px}
@@ -2133,14 +2338,16 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
   };
   function mediaHtml(p, kind, i) {
     var src = safeSrc(p.imageUrl);
-    var emo = kind === 'birthday' ? '\uD83C\uDF82' : (/unlimited|month/i.test(p.title || '') ? '\uD83C\uDF1F' : (/hour/i.test(p.title || '') ? '\u23F1\uFE0F' : '\uD83C\uDF9F\uFE0F'));
-    var pop = (kind === 'prices' && p.featured) ? '<span class="pop">\u2B50 Most Popular</span>' : '';
-    return '<div class="pcard-media g' + (i % 4) + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="emo">' + emo + '</span>') + pop + '</div>';
+    var emo = kind === 'birthday' ? 'cake' : (/unlimited|month/i.test(p.title || '') ? 'infinity' : (/hour/i.test(p.title || '') ? 'clock' : 'ticket'));
+    var I = window.RudhatICO || {};
+    var pop = (kind === 'prices' && p.featured) ? '<span class="pop">Most Popular</span>' : '';
+    return '<div class="pcard-media g' + (i % 4) + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="emo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (I[emo] || '') + '</svg></span>') + pop + '</div>';
   }
+  function icoI(k) { var I = window.RudhatICO || {}; return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (I[k] || '') + '</svg>'; }
   var L = {
-    wa: function () { return '\uD83D\uDCAC ' + T('Ask on WhatsApp', '\u0627\u0633\u0623\u0644 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628'); },
+    wa: function () { return icoI('chat') + ' ' + T('Ask on WhatsApp', '\u0627\u0633\u0623\u0644 \u0639\u0628\u0631 \u0648\u0627\u062a\u0633\u0627\u0628'); },
     req: function () { return T('Request Online', '\u0637\u0644\u0628 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639'); },
-    book: function () { return '\uD83C\uDF82 ' + T('Book Online', '\u0627\u062d\u062c\u0632 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639'); }
+    book: function () { return icoI('cake') + ' ' + T('Book Online', '\u0627\u062d\u062c\u0632 \u0639\u0628\u0631 \u0627\u0644\u0645\u0648\u0642\u0639'); }
   };
   function cardHtml(kind, p, i) {
     var title = String(p.title || '');
