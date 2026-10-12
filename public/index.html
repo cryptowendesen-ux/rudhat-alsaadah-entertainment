@@ -593,7 +593,6 @@ html .lang-btn:hover{background:var(--soft)}
 
 /* hero */
 .hero{padding:88px 0 96px;background:radial-gradient(900px 520px at 88% -10%,#e7eef7 0,rgba(231,238,247,0) 70%)}
-.hero:before,.hero:after{display:none}
 .hero h1{font:600 clamp(42px,5.4vw,74px)/1.05 var(--display);letter-spacing:-.025em;margin:22px 0}
 .hero h1 em{color:inherit;font-style:normal}
 .hero h1 + p,.hero p{font-size:18px;line-height:1.65}
@@ -614,7 +613,6 @@ html[dir=rtl] .stat{padding:18px 0 0 18px}
 .bubble .i{color:var(--gold-2);width:18px;height:18px}
 .hero-card .b1{top:26px;left:26px}.hero-card .b2{top:74px;left:26px}.hero-card .b3{top:122px;left:26px}
 html[dir=rtl] .hero-card .bubble{left:auto;right:26px;padding:9px 12px 9px 16px}
-html .b1,html .b2,html .b3{animation:none}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;box-shadow:none;font-weight:600;font-size:13.5px;z-index:2}
 .hero-badge .i{color:var(--gold-2)}
 .hero-card.has-photo .hero-badge{background:rgba(255,255,255,.92);color:var(--ink)}
@@ -643,7 +641,7 @@ html .b1,html .b2,html .b3{animation:none}
 .feature,.pricecard,.pkg,.trust-card,.box,.aboutbox,.faq details,.review-call,.list-msg,.gallery-empty{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);box-shadow:none}
 .box,.aboutbox{border-radius:var(--r-lg);padding:38px}
 .feature{padding:28px 22px;transition:box-shadow .3s var(--ease),border-color .3s var(--ease)}
-.feature:hover,.pricecard:hover,.pkg:hover,.trust-card:hover{transform:none;box-shadow:var(--card-shadow);border-color:#d9d3c8}
+.feature:hover,.pricecard:hover,.pkg:hover,.trust-card:hover{box-shadow:0 2px 4px rgba(20,40,61,.05),0 22px 44px rgba(20,40,61,.1);border-color:#d9d3c8}
 .feature h3{font:600 18px/1.25 var(--display);margin:18px 0 6px}
 .feature p{font-size:14px;line-height:1.6}
 .icon{width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--ink);display:grid;place-items:center;font-size:0}
@@ -680,12 +678,9 @@ html .b1,html .b2,html .b3{animation:none}
 .pcard-price{font:600 34px/1.1 var(--display);color:var(--ink);letter-spacing:-.02em}
 .pcard-desc,.pcard ul{font-weight:500}
 .pcard ul li:before,.pk-dialog ul li:before{color:var(--gold)}
-.pcard:hover,.gallery-card:hover{transform:none;box-shadow:0 2px 4px rgba(20,40,61,.05),0 22px 44px rgba(20,40,61,.1)}
+.pcard:hover,.gallery-card:hover{box-shadow:0 2px 4px rgba(20,40,61,.05),0 22px 44px rgba(20,40,61,.1)}
 .dots button{background:#d3d9e1}
 .dots button.on{background:var(--ink)}
-#gallery::before,#gallery::after,#prices::before,#prices::after,#birthday::before,#birthday::after{display:none}
-.js .reveal{transform:translateY(14px)}
-.js .reveal.visible{transform:none}
 
 /* birthday offer */
 .offer{border-radius:var(--r-lg);padding:56px;background:linear-gradient(135deg,#14283d 0%,#1d3a56 100%);box-shadow:0 30px 70px rgba(20,40,61,.2)}
@@ -732,6 +727,59 @@ html .open-badge em{font-style:normal}
   .hero:has(.hero-card.has-photo) .hero-card::after{background:linear-gradient(to bottom,rgba(16,34,52,.68) 0%,rgba(16,34,52,.4) 45%,rgba(16,34,52,.55) 100%)}
 }
 html[dir=rtl] .hero h1{font-size:clamp(36px,4.4vw,60px);line-height:1.3}
+
+/* ===== Playful motion for a children's venue (toy-block shapes drift behind every section) ===== */
+@keyframes pSway{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-18px) rotate(calc(var(--r,0deg) + 10deg))}}
+@keyframes pBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes pSpin{to{transform:rotate(360deg)}}
+@keyframes pTwinkle{0%,100%{opacity:0.37;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+#about,#activities,#faq,#gallery,#birthday,#prices{position:relative;overflow:hidden}
+.hero{position:relative;overflow:hidden}
+#about .container,#activities .container,#faq .container,.hero .container{position:relative;z-index:1}
+.hero::before,.hero::after,
+#about::before,#about::after,#activities::before,#activities::after,#faq::before,#faq::after,
+#gallery::before,#gallery::after,#birthday::before,#birthday::after,#prices::before,#prices::after{
+  content:"";position:absolute;pointer-events:none;z-index:0;display:block;
+  animation:pSway 7s ease-in-out infinite}
+/* hero */
+.hero::before{width:110px;height:110px;border-radius:50%;background:#c9a15c;opacity:0.40;left:-34px;top:90px;right:auto;bottom:auto}
+.hero::after{width:84px;height:84px;border-radius:20px;background:#7fb0dc;opacity:0.50;right:5%;left:auto;bottom:70px;top:auto;--r:16deg;animation-delay:-3s}
+/* about */
+#about::before{width:130px;height:130px;border-radius:50%;background:#e4577d;opacity:0.28;left:-40px;top:50px}
+#about::after{width:86px;height:86px;border-radius:20px;background:#c9a15c;opacity:0.42;right:6%;bottom:46px;--r:-14deg;animation-delay:-2s}
+/* services */
+#activities::before{width:150px;height:150px;border-radius:50%;border:16px solid #6fc3b2;opacity:0.40;right:-40px;top:40px}
+#activities::after{width:92px;height:92px;border-radius:50%;background:#e4577d;opacity:0.32;left:4%;bottom:34px;animation-delay:-4s}
+/* gallery */
+#gallery::before{width:150px;height:150px;border-radius:50%;background:#7fb0dc;opacity:0.42;right:-48px;top:40px}
+#gallery::after{width:96px;height:96px;border-radius:22px;background:#e4577d;opacity:0.32;left:-20px;bottom:50px;--r:20deg;animation-delay:-3s}
+/* birthday */
+#birthday::before{width:100px;height:100px;background:#e4577d;opacity:0.38;clip-path:polygon(50% 0,100% 100%,0 100%);right:6%;top:26px;animation-delay:-1s}
+#birthday::after{width:120px;height:120px;border-radius:50%;background:#c9a15c;opacity:0.42;left:-40px;bottom:70px;animation-delay:-2s}
+/* prices */
+#prices::before{width:140px;height:140px;border-radius:50%;background:#c9a15c;opacity:0.38;left:-48px;top:40px}
+#prices::after{width:100px;height:100px;border-radius:24px;background:#6fc3b2;opacity:0.42;right:-24px;bottom:60px;--r:12deg;animation-delay:-4s}
+/* faq */
+#faq::before{width:120px;height:120px;border-radius:50%;border:14px solid #e4577d;opacity:0.32;left:-36px;top:40px}
+#faq::after{width:90px;height:90px;border-radius:50%;background:#7fb0dc;opacity:0.42;right:5%;bottom:40px;animation-delay:-3s}
+html[dir=rtl] .hero::before,html[dir=rtl] #about::before,html[dir=rtl] #activities::before,html[dir=rtl] #faq::before{left:auto;right:-40px}
+html[dir=rtl] .hero::after,html[dir=rtl] #about::after,html[dir=rtl] #faq::after{right:auto;left:5%}
+@media(max-width:700px){
+  .hero::before,.hero::after,#about::before,#about::after,#activities::before,#activities::after,#faq::before,#faq::after,
+  #gallery::before,#gallery::after,#birthday::before,#birthday::after,#prices::before,#prices::after{transform-origin:center;zoom:.7}
+}
+/* the toy-block scene inside the hero card is alive too */
+.playground svg .fl-ball{animation:pBob 4s ease-in-out infinite}
+.playground svg .fl-block{transform-box:fill-box;transform-origin:50% 100%;animation:pSway 6s ease-in-out infinite;--r:0deg}
+.playground svg .fl-ring{transform-box:fill-box;transform-origin:center;animation:pSpin 50s linear infinite}
+.playground svg .fl-tri{transform-box:fill-box;transform-origin:50% 100%;animation:pBob 5s ease-in-out infinite;animation-delay:-1.5s}
+.playground svg .sp,.about-art .sp{transform-box:fill-box;transform-origin:center;animation:pTwinkle 2.6s ease-in-out infinite}
+.playground svg .sp:nth-of-type(2),.about-art .sp:nth-of-type(2){animation-delay:-.9s}
+.playground svg .sp:nth-of-type(3),.about-art .sp:nth-of-type(3){animation-delay:-1.7s}
+.about-art .fl-block{transform-box:fill-box;transform-origin:50% 100%;animation:pSway 6s ease-in-out infinite;--r:0deg}
+.about-art .fl-ball{animation:pBob 4.4s ease-in-out infinite}
+/* cards hop a little when touched, buttons wiggle */
+.btn.primary:hover,.birthday-book-btn:hover{transform:translateY(-3px) rotate(-1deg)}
 
 </style>
 </head>
@@ -786,13 +834,13 @@ html[dir=rtl] .hero h1{font-size:clamp(36px,4.4vw,60px);line-height:1.3}
   <div class="hero-card">
     <div class="hero-chip"><b data-bind="hourlyPrice">AED 20</b><span>PER HOUR</span></div>
     <div class="bubble b1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7H16c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/></svg> Create</div><div class="bubble b2"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Dance</div><div class="bubble b3"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/></svg> Learn</div>
-    <div class="playground"><svg viewBox="0 0 520 560" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false"><circle cx="410" cy="150" r="118" fill="none" stroke="#e0c48a" stroke-opacity=".28"/><circle cx="410" cy="150" r="78" fill="none" stroke="#e0c48a" stroke-opacity=".18"/><rect x="0" y="470" width="520" height="90" fill="#fff" fill-opacity=".05"/><path d="M70 470V318a82 82 0 0 1 164 0v152z" fill="#f4ecdd"/><path d="M122 470V338a30 30 0 0 1 60 0v132z" fill="#14283d" fill-opacity=".9"/><rect x="234" y="352" width="96" height="118" rx="10" fill="#7fb0dc"/><path d="M226 352 282 262 338 352z" fill="#e4577d"/><circle cx="404" cy="410" r="60" fill="#c9a15c"/><rect x="360" y="262" width="88" height="88" rx="14" fill="#6fc3b2" transform="rotate(-8 404 306)"/><circle cx="152" cy="196" r="14" fill="#e0c48a"/></svg></div>
+    <div class="playground"><svg viewBox="0 0 520 560" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false"><g class="fl-ring"><circle cx="410" cy="150" r="118" fill="none" stroke="#e0c48a" stroke-opacity=".3" stroke-dasharray="3 9" stroke-linecap="round"/></g><circle cx="410" cy="150" r="78" fill="none" stroke="#e0c48a" stroke-opacity=".18"/><path class="sp" d="M300 90l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#e0c48a"/><path class="sp" d="M470 250l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#f4ecdd"/><path class="sp" d="M60 150l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#e0c48a"/><rect x="0" y="470" width="520" height="90" fill="#fff" fill-opacity=".05"/><path d="M70 470V318a82 82 0 0 1 164 0v152z" fill="#f4ecdd"/><path d="M122 470V338a30 30 0 0 1 60 0v132z" fill="#14283d" fill-opacity=".9"/><rect x="234" y="352" width="96" height="118" rx="10" fill="#7fb0dc"/><g class="fl-tri"><path d="M226 352 282 262 338 352z" fill="#e4577d"/></g><circle cx="404" cy="410" r="60" fill="#c9a15c"/><g class="fl-block"><rect x="360" y="262" width="88" height="88" rx="14" fill="#6fc3b2" transform="rotate(-8 404 306)"/></g><g class="fl-ball"><circle cx="152" cy="196" r="14" fill="#e0c48a"/></g></svg></div>
     <div class="hero-badge"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg> Clean &amp; Safe Environment</div>
   </div>
 </div></section>
 
 <section id="about"><div class="container about">
-  <div class="aboutvisual"><svg class="about-art" viewBox="0 0 480 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><circle cx="352" cy="116" r="84" fill="#c9a15c" fill-opacity=".2"/><rect x="0" y="340" width="480" height="80" fill="#14283d" fill-opacity=".05"/><path d="M96 340V210a70 70 0 0 1 140 0v130z" fill="#14283d"/><path d="M130 340V232a36 36 0 0 1 72 0v108z" fill="#f4ecdd"/><circle cx="316" cy="280" r="60" fill="#e4577d"/><rect x="288" y="168" width="54" height="54" rx="11" fill="#c9a15c" transform="rotate(10 315 195)"/><path d="M352 340a42 42 0 0 1 84 0z" fill="#7fb0dc"/></svg></div>
+  <div class="aboutvisual"><svg class="about-art" viewBox="0 0 480 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"><circle cx="352" cy="116" r="84" fill="#c9a15c" fill-opacity=".2"/><path class="sp" d="M420 60l4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#c9a15c"/><path class="sp" d="M60 90l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#e4577d"/><path class="sp" d="M250 50l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#7fb0dc"/><rect x="0" y="340" width="480" height="80" fill="#14283d" fill-opacity=".05"/><path d="M96 340V210a70 70 0 0 1 140 0v130z" fill="#14283d"/><path d="M130 340V232a36 36 0 0 1 72 0v108z" fill="#f4ecdd"/><circle cx="316" cy="280" r="60" fill="#e4577d"/><g class="fl-block"><rect x="288" y="168" width="54" height="54" rx="11" fill="#c9a15c" transform="rotate(10 315 195)"/></g><path d="M352 340a42 42 0 0 1 84 0z" fill="#7fb0dc"/></svg></div>
   <div class="aboutbox">
     <div class="kicker">Welcome</div>
     <h3>Where every visit becomes a happy memory.</h3>
