@@ -67,9 +67,11 @@ test('business email: the dashboard has the field and saves it with the other se
   assert.match(dashboard, /email:'sEmail'/);
 });
 
-test('business email: shown on the home page (visit box, contact box, footer) only when it is valid - all hidden by default', () => {
-  assert.equal((index.match(/data-mail-wrap hidden/g) || []).length, 2);
-  assert.match(index, /data-mail data-icon="[^"]*" hidden/);
+test('business email: shown once on the home page, in the footer, only when it is valid - hidden by default', () => {
+  assert.equal((index.match(/data-mail-wrap hidden/g) || []).length, 1);
+  assert.equal((index.match(/<a data-mail>/g) || []).length, 1);
+  const footer = index.slice(index.indexOf('<footer'), index.indexOf('</footer>'));
+  assert.match(footer, /data-mail-wrap hidden/);
   assert.match(index, /mailOk = em\.length <= 120 && \/\^\[\^\\s@<>"'\]\+@/);
   assert.match(index, /a\.href = 'mailto:' \+ em;/);
   assert.doesNotMatch(index.split('<script>')[0], /mailto:[a-z]/i); // no address is written into the page itself
