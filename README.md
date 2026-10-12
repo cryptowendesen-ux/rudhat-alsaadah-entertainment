@@ -99,3 +99,9 @@ The admin login has a *Keep me signed in on this device* box. Ticked: the sign-i
 - **Birthday packages: "Book Online"** opens the normal birthday booking form with that package selected.
 - Protection for requests: hidden trap field, 6 per hour and 4 per day per connection, at most 60 requests per day for the whole site, and the same open request is stored once.
 
+## Pages
+`/` home, `/ar` Arabic home, `/privacy` privacy policy, `/terms` terms & conditions (English + Arabic, drafted from what the website already says - have it checked by a UAE lawyer and add your own rules: cancellation / refund policy, age or height limits, whether parents must stay, package validity), `/card` play card, `/admin` dashboard.
+
+## Business email
+Dashboard > Settings > *Business email*. It appears with a `mailto:` link in the visit box, the contact box, the footer, and on the terms and privacy pages (and in the business data Google reads). Leave it empty to hide it everywhere.
+
