@@ -92,6 +92,7 @@ li{margin:4px 0}
 
     <h2>Contact</h2>
     <div class="contact" id="contactEn">WhatsApp / phone: <a id="phoneEn" href="https://wa.me/971585187788">+971 58 518 7788</a></div>
+    <div class="contact" id="mailEn" hidden>Email: <a id="mailLinkEn" dir="ltr"></a></div>
     <a class="back" href="/">← Back to website</a>
   </article>
 
@@ -145,6 +146,7 @@ li{margin:4px 0}
 
     <h2>التواصل</h2>
     <div class="contact" id="contactAr">واتساب / هاتف: <a id="phoneAr" href="https://wa.me/971585187788" dir="ltr">+971 58 518 7788</a></div>
+    <div class="contact" id="mailAr" hidden>البريد الإلكتروني: <a id="mailLinkAr" dir="ltr"></a></div>
     <a class="back" href="/">العودة للموقع ←</a>
   </article>
 </div>
@@ -170,6 +172,14 @@ li{margin:4px 0}
   apply();
   fetch('/api/content').then(function (r) { return r.json(); }).then(function (j) {
     var st = (j && j.settings) || {};
+    var em = String(st.email || '').trim();
+    if (em.length <= 120 && /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']{2,}$/.test(em)) {
+      ['En', 'Ar'].forEach(function (k) {
+        var a = document.getElementById('mailLink' + k);
+        a.href = 'mailto:' + em; a.textContent = em;
+        document.getElementById('mail' + k).hidden = false;
+      });
+    }
     var wa = String(st.whatsapp || '').replace(/\D/g, '');
     if (!wa) return;
     ['phoneEn', 'phoneAr'].forEach(function (id) {
