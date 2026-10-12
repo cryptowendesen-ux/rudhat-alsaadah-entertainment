@@ -336,6 +336,7 @@ const BookingLock = mongoose.model('BookingLock', bookingLockSchema);
 const SETTINGS_DEFAULTS = {
   whatsapp: '971585187788',
   displayPhone: '+971 58 518 7788',
+  email: '',
   weekdayOpen: '09:00',
   weekdayClose: '21:00',
   fridayOpen: '14:00',
@@ -356,6 +357,7 @@ const settingsSchema = new mongoose.Schema(
     key: { type: String, required: true, unique: true },
     whatsapp: String,
     displayPhone: String,
+    email: String,
     weekdayOpen: String,
     weekdayClose: String,
     fridayOpen: String,
@@ -376,7 +378,7 @@ const settingsSchema = new mongoose.Schema(
 const Settings = mongoose.model('Settings', settingsSchema);
 
 // These may be emptied by the admin (e.g. remove the Instagram link); every other field falls back to its default when empty.
-const CLEARABLE_SETTINGS = ['instagram', 'tiktok', 'reviewUrl', 'bannerText', 'bannerTextAr', 'bannerUntil'];
+const CLEARABLE_SETTINGS = ['email', 'instagram', 'tiktok', 'reviewUrl', 'bannerText', 'bannerTextAr', 'bannerUntil'];
 // Settings are read on every page view and booking check, so a short in-memory copy (30 s) keeps the database quiet.
 // It is cleared the moment the owner saves new settings; if the database is down, the last known copy is used.
 let settingsCache = null; // { at, value }
@@ -2112,6 +2114,7 @@ function sendCardPage(req, res) {
 }
 app.get(['/card', '/card/:code'], sendCardPage);
 app.get('/privacy', (req, res) => sendHtmlFile(res, 'privacy.html'));
+app.get('/terms', (req, res) => sendHtmlFile(res, 'terms.html'));
 
 app.get('/api/admin/cards', auth, async (req, res) => {
   try {
@@ -2295,6 +2298,13 @@ app.put('/api/admin/settings', auth, requireOwner, async (req, res) => {
         return res.status(400).json({ error: 'Display phone is required (max 30 characters).' });
       }
       update.displayPhone = dp;
+    }
+    if (b.email !== undefined) {
+      const em = String(b.email).trim();
+      if (em && (em.length > 120 || !/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']{2,}$/.test(em))) {
+        return res.status(400).json({ error: 'Please enter a valid email address.' });
+      }
+      update.email = em;
     }
     for (const k of ['instagram', 'tiktok', 'reviewUrl', 'mapUrl']) {
       if (b[k] !== undefined) {
@@ -2682,6 +2692,7 @@ function buildJsonLd(st) {
       }
     ]
   };
+  if (st.email) ld.email = st.email;
   const sameAs = [st.instagram, st.tiktok].filter(Boolean);
   if (sameAs.length) ld.sameAs = sameAs;
   return (
@@ -2784,6 +2795,7 @@ app.get('/sitemap.xml', (req, res) => {
         '  <url>\n    <loc>' + SITE_URL + '/</loc>\n' + alt + '  </url>\n' +
         '  <url>\n    <loc>' + SITE_URL + '/ar</loc>\n' + alt + '  </url>\n' +
         '  <url>\n    <loc>' + SITE_URL + '/privacy</loc>\n  </url>\n' +
+        '  <url>\n    <loc>' + SITE_URL + '/terms</loc>\n  </url>\n' +
         '</urlset>\n'
     );
 });
@@ -2793,9 +2805,10 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.get(['/admin', '/admin/', '/admin/index.html'], (req, res) => sendHtmlFile(res, 'admin/index.html'));
 app.get('/admin/dashboard.html', (req, res) => sendHtmlFile(res, 'admin/dashboard.html'));
 
-// The clean addresses are /card and /privacy; the raw files redirect there (no duplicate pages for Google).
+// The clean addresses are /card, /privacy and /terms; the raw files redirect there (no duplicate pages for Google).
 app.get('/card.html', (req, res) => res.redirect(301, '/card'));
 app.get('/privacy.html', (req, res) => res.redirect(301, '/privacy'));
+app.get('/terms.html', (req, res) => res.redirect(301, '/terms'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
