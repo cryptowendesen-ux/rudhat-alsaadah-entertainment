@@ -621,6 +621,7 @@ textarea{
     <div class="panelhead"><h2>⚙️ Contact, Hours &amp; Booking Rules</h2></div>
     <div class="sgrid">
       <div><label for="sPhone">DISPLAY PHONE</label><input id="sPhone" placeholder="+971 58 518 7788"></div>
+      <div><label for="sEmail">BUSINESS EMAIL (optional, shown at the bottom of the website)</label><input id="sEmail" type="email" maxlength="120" placeholder="info@yourbusiness.com"></div>
       <div><label for="sWhatsapp">WHATSAPP NUMBER (digits, with country code)</label><input id="sWhatsapp" inputmode="numeric" placeholder="971585187788"></div>
       <div><label for="sWOpen">SAT–THU OPENS</label><input id="sWOpen" type="time"></div>
       <div><label for="sWClose">SAT–THU CLOSES</label><input id="sWClose" type="time"></div>
@@ -1956,7 +1957,7 @@ kEl('scanClose').onclick = closeScan;
    SETTINGS (phone + opening hours)
 ========================================================= */
 const sFields = {
-  displayPhone:'sPhone', whatsapp:'sWhatsapp',
+  displayPhone:'sPhone', email:'sEmail', whatsapp:'sWhatsapp',
   weekdayOpen:'sWOpen', weekdayClose:'sWClose',
   fridayOpen:'sFOpen', fridayClose:'sFClose',
   instagram:'sIg', tiktok:'sTt', reviewUrl:'sReview', mapUrl:'sMap',
