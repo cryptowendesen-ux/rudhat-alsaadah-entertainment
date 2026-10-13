@@ -4,13 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#ff5f87">
+<meta name="theme-color" content="#14283d">
 <title>Page not found | RUDHAT ALSAADAH</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314283d'/%3E%3Cpath d='M7 25V15a5 5 0 0 1 10 0v10z' fill='%23f4ecdd'/%3E%3Ccircle cx='22.5' cy='20' r='5' fill='%23c9a15c'/%3E%3Crect x='5' y='25' width='22' height='1.8' rx='.9' fill='%23e4577d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..800&family=Fraunces:opsz,wght@9..144,500..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#18324a;--muted:#5b6b7e;--bg:#fffaf5;--pink:#ff5f87;--line:#f0e6dd}
+:root{--ink:#14283d;--muted:#5b6b7c;--bg:#fbfaf8;--pink:#d0335d;--yellow:#efd58f;--orange:#c9a15c;--gold:#b38b4d;--gold-2:#e0c48a;--soft:#f3f5f8;--line:#e8e4de;--green:#15803d;--shadow:0 24px 60px rgba(20,40,61,.09);--display:Fraunces,Georgia,"Times New Roman",serif;--body:"Plus Jakarta Sans","Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--ink);font-family:Nunito,Arial,sans-serif;padding:24px}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--ink);font-family:var(--body);padding:24px}
 html[dir=rtl] body{font-family:Cairo,Tahoma,Arial,sans-serif}
 .box{width:min(460px,100%);text-align:center;background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px 24px;box-shadow:0 22px 65px rgba(24,50,74,.1)}
 .emoji{font-size:64px;line-height:1}
@@ -19,11 +22,21 @@ p{margin:0 0 20px;color:var(--muted);font-weight:700;line-height:1.6}
 a.btn{display:inline-block;background:var(--pink);color:#fff;text-decoration:none;font-weight:900;border-radius:999px;padding:13px 26px}
 button.lang{display:block;margin:16px auto 0;border:0;background:none;color:var(--muted);font:inherit;font-weight:800;cursor:pointer;text-decoration:underline}
 [hidden]{display:none!important}
+/* ===== premium theme ===== */
+@keyframes sway{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-10px) rotate(10deg)}}
+.art svg{width:150px;height:auto}
+.art .bl{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.5s ease-in-out infinite}
+.box{border-radius:24px;box-shadow:0 1px 2px rgba(20,40,61,.04),0 14px 34px rgba(20,40,61,.07)}
+h1{font:600 30px/1.15 var(--display);letter-spacing:-.01em}
+a.btn{font-weight:700}
+button.lang{font-weight:600}
+html[dir=rtl] *{letter-spacing:0!important}
+@media(prefers-reduced-motion:reduce){.art .bl{animation:none}}
 </style>
 </head>
 <body>
 <div class="box">
-  <div class="emoji">🎈</div>
+  <div class="art"><svg viewBox="0 0 170 120" aria-hidden="true" focusable="false"><path d="M18 108V68a24 24 0 0 1 48 0v40z" fill="#14283d"/><path d="M30 108V74a12 12 0 0 1 24 0v34z" fill="#f4ecdd"/><circle cx="104" cy="84" r="24" fill="#e4577d"/><g class="bl"><rect x="92" y="38" width="26" height="26" rx="6" fill="#c9a15c" transform="rotate(12 105 51)"/></g><path d="M124 108a22 22 0 0 1 44 0z" fill="#7fb0dc"/></svg></div>
   <div id="en">
     <h1>Oops! Page not found</h1>
     <p>The page you are looking for does not exist or has moved.</p>

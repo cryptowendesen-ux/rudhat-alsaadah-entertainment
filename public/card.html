@@ -4,24 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#ff5f87">
+<meta name="theme-color" content="#14283d">
 <title>My Play Card | RUDHAT ALSAADAH</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%88%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314283d'/%3E%3Cpath d='M7 25V15a5 5 0 0 1 10 0v10z' fill='%23f4ecdd'/%3E%3Ccircle cx='22.5' cy='20' r='5' fill='%23c9a15c'/%3E%3Crect x='5' y='25' width='22' height='1.8' rx='.9' fill='%23e4577d'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Cairo:wght@600;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..800&family=Fraunces:opsz,wght@9..144,500..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#18324a;--muted:#64748b;--bg:#fffaf5;--pink:#ff5f87;--orange:#ff9a5f;--yellow:#ffd95a;--line:#f0e6dd;--green:#16a34a;--shadow:0 22px 65px rgba(24,50,74,.12)}
+:root{--ink:#14283d;--muted:#5b6b7c;--bg:#fbfaf8;--pink:#d0335d;--yellow:#efd58f;--orange:#c9a15c;--gold:#b38b4d;--gold-2:#e0c48a;--soft:#f3f5f8;--line:#e8e4de;--green:#15803d;--shadow:0 24px 60px rgba(20,40,61,.09);--display:Fraunces,Georgia,"Times New Roman",serif;--body:"Plus Jakarta Sans","Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:Nunito,Arial,sans-serif;line-height:1.5;min-height:100%;
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;min-height:100%;
   padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-html[dir=rtl] body{font-family:Cairo,Nunito,Arial,sans-serif}
+html[dir=rtl] body{font-family:Cairo,var(--body)}
 a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer}
 .wrap{width:min(460px,92%);margin:0 auto;padding:16px 0 40px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.brand{display:flex;align-items:center;gap:10px;font:800 15px "Baloo 2",Arial,sans-serif;letter-spacing:.2px}
+.brand{display:flex;align-items:center;gap:10px;font:800 15px var(--display);letter-spacing:.2px}
 .brand i{font-style:normal;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--yellow),var(--pink));font-size:20px}
 .lang{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-weight:800;color:var(--ink)}
 
@@ -32,7 +32,7 @@ button{font:inherit;cursor:pointer}
 .card.off{background:linear-gradient(135deg,#94a3b8,#64748b)}
 .card > *{position:relative;z-index:1}
 .chead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-.holder{font:800 26px/1.15 "Baloo 2",Arial,sans-serif;margin:0;word-break:break-word}
+.holder{font:800 26px/1.15 var(--display);margin:0;word-break:break-word}
 html[dir=rtl] .holder{font-family:Cairo,Arial,sans-serif}
 .pkg{display:inline-block;margin-top:6px;background:rgba(255,255,255,.22);border-radius:999px;padding:3px 12px;font-weight:800;font-size:13px}
 .badge{flex:none;background:#fff;color:var(--green);border-radius:999px;padding:5px 12px;font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
@@ -42,7 +42,7 @@ html[dir=rtl] .holder{font-family:Cairo,Arial,sans-serif}
 .ring .track{stroke:rgba(255,255,255,.28)}
 .ring .bar{stroke:#fff;transition:stroke-dashoffset .9s ease}
 .ringtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.ringtxt b{font:800 38px/1.05 "Baloo 2",Arial,sans-serif}
+.ringtxt b{font:800 38px/1.05 var(--display)}
 html[dir=rtl] .ringtxt b{font-family:Cairo,Arial,sans-serif;font-size:34px}
 .ringtxt span{font-weight:800;font-size:13px;opacity:.92}
 .meta{text-align:center;font-weight:800;font-size:14px;opacity:.95}
@@ -50,13 +50,13 @@ html[dir=rtl] .ringtxt b{font-family:Cairo,Arial,sans-serif;font-size:34px}
 .low{margin-top:12px;background:rgba(255,255,255,.2);border-radius:14px;padding:9px 12px;text-align:center;font-weight:800;font-size:14px}
 
 .panel{background:#fff;border:1px solid var(--line);border-radius:26px;padding:20px;margin-top:16px;box-shadow:0 8px 28px rgba(24,50,74,.05)}
-.panel h2{margin:0 0 12px;font:800 18px "Baloo 2",Arial,sans-serif}
+.panel h2{margin:0 0 12px;font:800 18px var(--display)}
 html[dir=rtl] .panel h2{font-family:Cairo,Arial,sans-serif}
 .qrbox{text-align:center}
 .qr{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px}
 .qr svg{display:block;width:190px;height:190px}
 .qrbox p{margin:10px 0 0;color:var(--muted);font-weight:700;font-size:14px}
-.code{display:inline-block;margin-top:8px;font:800 22px "Baloo 2",monospace;letter-spacing:3px;direction:ltr}
+.code{display:inline-block;margin-top:8px;font:800 22px var(--body);letter-spacing:3px;direction:ltr}
 .hist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .hist li{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fffaf5;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-weight:700;font-size:14px}
 .hist .when{color:var(--muted);font-size:12px;font-weight:700}
@@ -69,22 +69,48 @@ html[dir=rtl] .panel h2{font-family:Cairo,Arial,sans-serif}
 .msg{text-align:center;padding:30px 10px;color:var(--muted);font-weight:800}
 .msg.err{color:#b91c1c}
 .entry{background:#fff;border:1px solid var(--line);border-radius:26px;padding:26px 20px;box-shadow:var(--shadow);text-align:center}
-.entry h1{margin:0 0 6px;font:800 26px "Baloo 2",Arial,sans-serif}
+.entry h1{margin:0 0 6px;font:800 26px var(--display)}
 html[dir=rtl] .entry h1{font-family:Cairo,Arial,sans-serif}
 .entry p{margin:0 0 14px;color:var(--muted);font-weight:700}
-.entry input{width:100%;border:1px solid #dce2ea;border-radius:14px;padding:14px;font:800 22px "Baloo 2",monospace;letter-spacing:4px;text-align:center;text-transform:uppercase;color:var(--ink);outline:none;direction:ltr}
+.entry input{width:100%;border:1px solid #dce2ea;border-radius:14px;padding:14px;font:800 22px var(--body);letter-spacing:4px;text-align:center;text-transform:uppercase;color:var(--ink);outline:none;direction:ltr}
 .entry input:focus{border-color:var(--pink);box-shadow:0 0 0 3px rgba(255,95,135,.15)}
 .entry .btn{background:var(--pink);color:#fff}
 .sk{height:300px;border-radius:30px;background:linear-gradient(90deg,#f6ede4,#fff4ea,#f6ede4);background-size:200% 100%;animation:sh 1.2s infinite linear}
 @keyframes sh{to{background-position:-200% 0}}
 @media(prefers-reduced-motion:reduce){.ring .bar{transition:none}.sk{animation:none}}
 [hidden]{display:none!important}
+/* ===== premium theme ===== */
+@keyframes pSway{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.brand{font:600 15px var(--display);letter-spacing:.02em}
+.brand i{background:var(--ink);font-size:0}
+.brand i svg{width:24px;height:24px}
+.lang{font:600 14px var(--body);border-color:#d6dce4}
+.card{border-radius:28px;background:linear-gradient(155deg,#1b3a58 0%,#0f2236 100%);box-shadow:0 30px 70px rgba(20,40,61,.22)}
+.card:before{width:220px;height:220px;right:-70px;top:-80px;background:none;border:1px solid rgba(224,196,138,.4);opacity:1;animation:pSway 8s ease-in-out infinite}
+.card:after{width:120px;height:120px;left:-36px;bottom:-40px;background:#e4577d;opacity:.3;animation:pSway 7s ease-in-out -3s infinite}
+.holder{font:600 26px/1.15 var(--display)}
+.pkg{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-weight:600}
+.badge{font-weight:700}
+.ring .track{stroke:rgba(255,255,255,.14)}
+.ring .bar{stroke:var(--gold-2)}
+.ringtxt b{font:600 40px/1.05 var(--display)}
+.panel{border-radius:24px;box-shadow:0 1px 2px rgba(20,40,61,.04),0 12px 30px rgba(20,40,61,.06)}
+.panel h2{font:600 19px var(--display)}
+.hist li{background:var(--soft)}
+.entry{border-radius:24px}
+.entry h1{font:600 28px var(--display)}
+.entry input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(20,40,61,.1)}
+.btn{border-radius:999px;font-weight:700}
+.btn .i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk{border-radius:28px;background:linear-gradient(90deg,#eef1f5,#f8f9fb,#eef1f5);background-size:200% 100%}
+html[dir=rtl] *{letter-spacing:0!important}
+@media(prefers-reduced-motion:reduce){.card:before,.card:after{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <a class="brand" href="/"><i>🎈</i><span>RUDHAT ALSAADAH</span></a>
+    <a class="brand" href="/"><i><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M7 25V15a5 5 0 0 1 10 0v10z" fill="#f4ecdd"/><circle cx="22.5" cy="20" r="5" fill="#c9a15c"/><rect x="5" y="25" width="22" height="1.8" rx=".9" fill="#e4577d"/></svg></i><span>RUDHAT ALSAADAH</span></a>
     <button class="lang" id="langBtn" type="button">العربية</button>
   </div>
   <div id="app"><div class="sk"></div></div>
@@ -1489,7 +1515,7 @@ return function(text){var q=new Q(-1,L.M);q.addData(text);q.make();var n=q.getMo
         '<div class="code">' + esc(pretty(c.code)) + '</div></div>' +
       '<div class="panel"><h2>' + esc(t('hist')) + '</h2>' +
         (hist ? '<ul class="hist">' + hist + '</ul>' : '<div class="msg" style="padding:6px">' + esc(t('empty')) + '</div>') + '</div>' +
-      '<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/' + esc(WA) + '?text=' + encodeURIComponent(t('waText') + pretty(c.code) + ')') + '">💬 ' + esc(t('wa')) + '</a>' +
+      '<a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/' + esc(WA) + '?text=' + encodeURIComponent(t('waText') + pretty(c.code) + ')') + '">' + '<svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> ' + esc(t('wa')) + '</a>' +
       '<button class="btn soft" id="refresh" type="button">↻ ' + esc(t('refresh')) + '</button>' +
       '<p class="tip">' + esc(t('tip')) + '</p>';
     document.getElementById('refresh').onclick = load;
