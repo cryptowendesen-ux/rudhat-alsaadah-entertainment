@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="RUDHAT ALSAADAH ENTERTAINMENT — a clean, safe and fun children's entertainment center in Al Majaz 3, Sharjah.">
-<meta name="theme-color" content="#ff6b8b">
+<meta name="theme-color" content="#14283d">
 <title>RUDHAT ALSAADAH | Kids Entertainment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..800&family=Fraunces:opsz,wght@9..144,500..700&family=Plus+Jakarta+Sans:wght@400..800&display=swap" rel="stylesheet">
 <meta name="google-site-verification" content="JPIU2ga-UCC0LGSQ_4f7ocvuILLYjSrs_MXSP5ZUEHg">
 <meta property="og:type" content="website">
 <meta property="og:title" content="RUDHAT ALSAADAH | Kids Entertainment">
@@ -23,7 +23,7 @@
 <meta name="twitter:title" content="RUDHAT ALSAADAH | Kids Entertainment">
 <meta name="twitter:description" content="Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.">
 <meta name="twitter:image" content="https://rudhat-alsaadah-entertainment.onrender.com/og-image.jpg?v=3">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎈</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314283d'/%3E%3Cpath d='M7 25V15a5 5 0 0 1 10 0v10z' fill='%23f4ecdd'/%3E%3Ccircle cx='22.5' cy='20' r='5' fill='%23c9a15c'/%3E%3Crect x='5' y='25' width='22' height='1.8' rx='.9' fill='%23e4577d'/%3E%3C/svg%3E">
 <link rel="canonical" href="https://rudhat-alsaadah-entertainment.onrender.com/">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://rudhat-alsaadah-entertainment.onrender.com/#business","name":"RUDHAT ALSAADAH ENTERTAINMENT","url":"https://rudhat-alsaadah-entertainment.onrender.com/","image":"https://rudhat-alsaadah-entertainment.onrender.com/og-image.jpg?v=3","description":"Children's entertainment and play center in Al Majaz 3, Sharjah, UAE.","telephone":"+971585187788","address":{"@type":"PostalAddress","streetAddress":"Sarab Tower, Al Majaz 3","addressLocality":"Sharjah","addressCountry":"AE"},"hasMap":"https://maps.app.goo.gl/cr9KgWa9pnrv2HNLA","openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday"],"opens":"09:00","closes":"21:00"},{"@type":"OpeningHoursSpecification","dayOfWeek":"Friday","opens":"14:00","closes":"22:00"}]}
@@ -1085,6 +1085,12 @@ html[dir=rtl] .hero::after,html[dir=rtl] #about::after,html[dir=rtl] #faq::after
 
   /* ===== Content (ONE fetch drives prices, hours, phone, FAQ, everything) ===== */
   var galleryData = [];
+  function srcsetFor(u) {
+    var m = '/image/upload/f_auto,q_auto,w_1400,c_limit/';
+    if (!u || u.indexOf(m) < 0) return '';
+    return [480, 900, 1400].map(function (w) { return u.replace('w_1400', 'w_' + w) + ' ' + w + 'w'; }).join(', ');
+  }
+  window.RudhatSrcset = srcsetFor;
   /* line icons (replace the old emoji icons) */
   var ICO = {chat:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',cake:'<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v3M12 8v3M17 8v3"/><path d="M7 4h.01M12 4h.01M17 4h.01"/>',pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',palette:'<circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.7-1.7H16c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/>',music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',shapes:'<path d="M8.3 10a.7.7 0 0 1-.6-1.1L11.4 3a.7.7 0 0 1 1.2 0l3.7 5.9a.7.7 0 0 1-.6 1.1z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>',star:'<path d="M12 3l2.4 5.6 6 .6-4.5 4 1.4 5.9L12 16l-5.3 3.1 1.4-5.9-4.5-4 6-.6z"/>',smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',sock:'<path d="M8 3h6v8l5 4a3 3 0 0 1-2 6H9a3 3 0 0 1-3-3V3z"/><path d="M8 7h6"/>',parking:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',hourglass:'<path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4A2 2 0 0 0 7 17.8V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/>',infinity:'<path d="M12 12c-2-2.7-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.3 6-4zm0 0c2 2.7 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.3-6 4z"/>',ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2M13 17v2M13 11v2"/>',mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>'};
   window.RudhatICO = ICO;
@@ -1120,7 +1126,7 @@ html[dir=rtl] .hero::after,html[dir=rtl] #about::after,html[dir=rtl] #faq::after
     list.innerHTML = galleryData.map(function (g, i) {
       var title = g.title || 'Rudhat Alsaadah';
       return '<div class="gallery-card" data-index="' + i + '" tabindex="0" role="button" aria-label="Open photo: ' + esc(title) + '">' +
-        '<img src="' + esc(safeUrl(g.imageUrl)) + '" alt="' + esc(title) + '" loading="lazy">' +
+        '<img src="' + esc(safeUrl(g.imageUrl)) + '"' + (srcsetFor(safeUrl(g.imageUrl)) ? ' srcset="' + esc(srcsetFor(safeUrl(g.imageUrl))) + '" sizes="(max-width:700px) 86vw, 420px"' : '') + ' alt="' + esc(title) + '" loading="lazy" decoding="async">' +
         '<div class="gallery-label">' + esc(title) + '</div>' +
         (g.description ? '<div class="gallery-sub">' + esc(g.description) + '</div>' : '') + '</div>';
     }).join('');
@@ -1254,6 +1260,8 @@ html[dir=rtl] .hero::after,html[dir=rtl] #about::after,html[dir=rtl] #faq::after
     var img = document.createElement('img');
     img.className = imgClass;
     img.src = url;
+    var ss = srcsetFor(url);
+    if (ss) { img.srcset = ss; img.sizes = imgClass === 'hero-photo' ? '100vw' : '(max-width:900px) 92vw, 560px'; }
     img.alt = item.title || '';
     img.decoding = 'async';
     if (imgClass === 'hero-photo') img.setAttribute('fetchpriority', 'high');
@@ -2389,7 +2397,7 @@ html[dir=rtl] .step{padding:22px 70px 22px 22px}
     var emo = kind === 'birthday' ? 'cake' : (/unlimited|month/i.test(p.title || '') ? 'infinity' : (/hour/i.test(p.title || '') ? 'clock' : 'ticket'));
     var I = window.RudhatICO || {};
     var pop = (kind === 'prices' && p.featured) ? '<span class="pop">Most Popular</span>' : '';
-    return '<div class="pcard-media g' + (i % 4) + '">' + (src ? '<img src="' + esc(src) + '" alt="" loading="lazy">' : '<span class="emo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (I[emo] || '') + '</svg></span>') + pop + '</div>';
+    return '<div class="pcard-media g' + (i % 4) + '">' + (src ? '<img src="' + esc(src) + '"' + (((window.RudhatSrcset || function () { return ''; })(src)) ? ' srcset="' + esc(window.RudhatSrcset(src)) + '" sizes="(max-width:700px) 80vw, 380px"' : '') + ' alt="" loading="lazy" decoding="async">' : '<span class="emo"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (I[emo] || '') + '</svg></span>') + pop + '</div>';
   }
   function icoI(k) { var I = window.RudhatICO || {}; return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + (I[k] || '') + '</svg>'; }
   var L = {
