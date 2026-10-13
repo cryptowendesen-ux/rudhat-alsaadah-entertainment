@@ -32,6 +32,7 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 | Name | Required | Purpose |
 |---|---|---|
 | `JWT_SECRET` | yes | Random string, 32+ characters |
+| `TOTP_ENC_KEY` | no | Second random string, 32+ characters. Encrypts the owner's 2-step secret so `JWT_SECRET` can change later without breaking 2-step. Add it once, sign in once with your 2-step code (the secret moves to the new key), then never change it |
 | `ADMIN_EMAIL` | yes | Admin login email |
 | `ADMIN_PASSWORD` | yes | Admin login password |
 | `MONGODB_URI` | yes | MongoDB Atlas connection string |
@@ -85,6 +86,7 @@ Run the tests before every deploy.
 ## Things to keep in step
 - **Privacy page vs. retention:** `public/privacy.html` says child details on a booking are erased about 90 days after the party. If you change `SENSITIVE_RETENTION_DAYS`, edit the privacy page too.
 - **`JWT_SECRET`:** do not change it on a live site. It signs everyone out and the owner's 2-step code can no longer be read (recovery: set `DISABLE_OWNER_2FA=true` once, sign in, set 2-step up again, remove the line).
+- **Staff sign-in limit:** after 10 wrong passwords for the same staff e-mail within 15 minutes, that e-mail cannot sign in for 15 minutes (on top of the per-IP limit). The owner's e-mail is never limited this way, so nobody can lock the owner out.
 - **Staff permissions:** staff can top up play cards, change their expiry and see booking details (incl. allergy notes). Everything is written to the activity log; the owner can review it. Turn on 2-step for the owner account - it also protects the data backup download.
 
 ## Backup

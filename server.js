@@ -44,6 +44,14 @@ if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
   throw new Error('Set ADMIN_EMAIL and ADMIN_PASSWORD');
 }
 
+// Optional: a separate key for encrypting the owner's 2-step secret, so JWT_SECRET can be changed without
+// breaking 2-step. Not set = the old behaviour (the key is derived from JWT_SECRET).
+const TOTP_ENC_KEY = process.env.TOTP_ENC_KEY || '';
+const TOTP_ENC_KEY_OK = TOTP_ENC_KEY.length >= 32;
+if (TOTP_ENC_KEY && !TOTP_ENC_KEY_OK) {
+  console.warn('SECURITY: TOTP_ENC_KEY is shorter than 32 characters, so it is being ignored.');
+}
+
 if (!MONGODB_URI) {
   throw new Error('Set MONGODB_URI environment variable');
 }
@@ -323,6 +331,27 @@ const ownerAuthSchema = new mongoose.Schema({
   fails: { type: [Number], default: [] } // times (ms) of recent wrong codes
 });
 const OwnerAuth = mongoose.model('OwnerAuth', ownerAuthSchema);
+
+/* ---- Wrong passwords per sign-in e-mail (stored hashed). The IP limit alone does not stop a guesser who uses many IPs.
+   Kept in the database so a restart does not reset it. The owner's e-mail is NOT throttled this way, so nobody can lock the owner out. ---- */
+const loginThrottleSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  fails: { type: [Number], default: [] },
+  at: { type: Date, default: Date.now }
+});
+loginThrottleSchema.index({ at: 1 }, { expireAfterSeconds: 86400 });
+const LoginThrottle = mongoose.model('LoginThrottle', loginThrottleSchema);
+const THROTTLE_MAX = 10;
+const THROTTLE_WINDOW_MS = 15 * 60 * 1000;
+const throttleKey = (email) => crypto.createHash('sha256').update('rudhat-login:' + email).digest('hex');
+const throttleLocked = (doc) =>
+  ((doc && doc.fails) || []).filter((t) => t > Date.now() - THROTTLE_WINDOW_MS).length >= THROTTLE_MAX;
+const throttleFail = (email) =>
+  LoginThrottle.updateOne(
+    { key: throttleKey(email) },
+    { $push: { fails: { $each: [Date.now()], $slice: -20 } }, $set: { at: new Date() } },
+    { upsert: true }
+  ).catch(() => {});
 
 /* ---- Short lock per booking day: stops two server instances taking the same time slot ---- */
 const bookingLockSchema = new mongoose.Schema({
@@ -630,19 +659,34 @@ function totpCheck(secretB32, code, lastStep) {
   }
   return 0;
 }
-// The TOTP secret is stored encrypted (AES-256-GCM) with a key derived from JWT_SECRET
-const totpKey = () => crypto.createHash('sha256').update('rudhat-totp:' + process.env.JWT_SECRET).digest();
+// The TOTP secret is stored encrypted (AES-256-GCM). The key comes from TOTP_ENC_KEY when it is set,
+// otherwise from JWT_SECRET (the original behaviour). A secret saved with the JWT_SECRET key can still be
+// read after TOTP_ENC_KEY is added; the next successful sign-in re-saves it with the new key.
+const totpKeyFrom = (src) => crypto.createHash('sha256').update('rudhat-totp:' + src).digest();
+const totpKey = () => totpKeyFrom(TOTP_ENC_KEY_OK ? TOTP_ENC_KEY : process.env.JWT_SECRET);
+const legacyTotpKey = () => totpKeyFrom(process.env.JWT_SECRET);
 function encSecret(plain) {
   const iv = crypto.randomBytes(12);
   const c = crypto.createCipheriv('aes-256-gcm', totpKey(), iv);
   const enc = Buffer.concat([c.update(plain, 'utf8'), c.final()]);
   return [iv, c.getAuthTag(), enc].map((b) => b.toString('base64')).join('.');
 }
-function decSecret(stored) {
+function decWith(key, stored) {
   const [iv, tag, enc] = String(stored).split('.').map((x) => Buffer.from(x, 'base64'));
-  const d = crypto.createDecipheriv('aes-256-gcm', totpKey(), iv);
+  const d = crypto.createDecipheriv('aes-256-gcm', key, iv);
   d.setAuthTag(tag);
   return Buffer.concat([d.update(enc), d.final()]).toString('utf8');
+}
+function decSecretMeta(stored) {
+  try {
+    return { plain: decWith(totpKey(), stored), legacy: false };
+  } catch (e) {
+    if (!TOTP_ENC_KEY_OK) throw e;
+    return { plain: decWith(legacyTotpKey(), stored), legacy: true };
+  }
+}
+function decSecret(stored) {
+  return decSecretMeta(stored).plain;
 }
 // Five wrong codes block code entry for 15 minutes (the password alone is never enough).
 // Stored in the database so a restart does not reset it and several server instances share it.
@@ -911,6 +955,14 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
   try {
     const email = String((req.body && req.body.email) || '').trim().toLowerCase();
     const password = String((req.body && req.body.password) || '');
+    // Too many wrong passwords for this e-mail (the answer is the same whether or not the account exists)
+    const isOwnerEmail = safeEqual(email, String(process.env.ADMIN_EMAIL || '').trim().toLowerCase());
+    if (email && !isOwnerEmail) {
+      const th = await LoginThrottle.findOne({ key: throttleKey(email) }).lean();
+      if (throttleLocked(th)) {
+        return res.status(429).json({ error: 'Too many failed attempts for this account. Please try again in 15 minutes.' });
+      }
+    }
     const ownerOk =
       safeEqual(email, String(process.env.ADMIN_EMAIL || '').trim().toLowerCase()) &&
       safeEqual(password, process.env.ADMIN_PASSWORD);
@@ -940,8 +992,9 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
         if (!code) return res.json({ needCode: true });
         if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
         let step = 0;
-        try { step = totpCheck(decSecret(oa.secretEnc), code, oa.lastStep || 0); }
-        catch (e) { console.error('2FA decrypt error (did JWT_SECRET change?):', e.message); }
+        let meta = null;
+        try { meta = decSecretMeta(oa.secretEnc); step = totpCheck(meta.plain, code, oa.lastStep || 0); }
+        catch (e) { console.error('2FA decrypt error (did JWT_SECRET or TOTP_ENC_KEY change?):', e.message); }
         if (!step) {
           await totpFail();
           writeAudit({ actor: 'Owner', role: 'owner', action: 'Wrong 2-step code', ip: String(req.ip || '').slice(0, 60), ok: false });
@@ -952,9 +1005,13 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
           await sleep(600);
           return res.status(401).json({ error: 'Invalid code' });
         }
+        if (meta && meta.legacy) { // move the secret to the new key
+          await OwnerAuth.updateOne({ key: 'owner' }, { $set: { secretEnc: encSecret(meta.plain) } }).catch(() => {});
+        }
       }
     }
     if (!role) {
+      if (email && !isOwnerEmail) await throttleFail(email);
       console.warn('Failed admin sign-in from ' + req.ip);
       writeAudit({ actor: email.slice(0, 60), role: '', action: 'Failed sign-in', ip: String(req.ip || '').slice(0, 60), ok: false });
       await sleep(600); // slows down guessing
