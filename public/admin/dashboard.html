@@ -2196,6 +2196,7 @@ async function loadTfa(){
     document.getElementById('tfaStart').style.display = r.enabled ? 'none' : '';
     document.getElementById('tfaOff').style.display = r.enabled ? '' : 'none';
     if(r.enabled) document.getElementById('tfaSetup').style.display = 'none';
+    if(r.required) document.getElementById('tfaOff').style.display = 'none'; /* the server requires it: no off button */
   }catch(e){}
 }
 document.getElementById('tfaStart').onclick = async () => {
@@ -2214,6 +2215,7 @@ document.getElementById('tfaConfirm').onclick = async () => {
     await api('/api/admin/2fa/enable', { method:'POST', body:JSON.stringify({ code:document.getElementById('tfaCode').value.trim() }) });
     document.getElementById('tfaCode').value = '';
     msg.innerHTML = '<span class="msg-ok">Two-step verification is ON. You will be asked for a code at the next sign-in.</span>';
+    if(window.__setup2fa){ setTimeout(() => location.reload(), 1200); return; } /* now the whole dashboard opens */
     loadTfa(); loadAudit();
   }catch(e){ msg.innerHTML = '<span class="msg-err">' + escapeHtml(e.message) + '</span>'; }
 };
@@ -2256,10 +2258,23 @@ document.getElementById('backupBtn').onclick = async () => {
 /* =========================================================
    START
 ========================================================= */
+function showSetup2fa(){
+  window.__setup2fa = true;
+  const panel = document.getElementById('tfaState').closest('section.panel');
+  document.querySelectorAll('main.wrap section.panel').forEach(p => { if(p !== panel) p.style.display = 'none'; });
+  panel.classList.remove('collapsed');
+  const note = document.createElement('div');
+  note.style.cssText = 'background:#fff7ed;border:1px solid #fdba74;color:#7c2d12;border-radius:12px;padding:14px 16px;margin:0 0 14px;font-weight:600';
+  note.textContent = 'Two-step verification is required before you can use the dashboard. Press "Set up", add the key to an authenticator app (Google Authenticator, Microsoft Authenticator...), then enter the 6-digit code.';
+  panel.parentNode.insertBefore(note, panel);
+  loadTfa();
+}
+
 (async function init(){
   let me = { role:'staff', name:'' };
   try{ me = (await api('/api/auth/me')) || me; }catch(e){}
   applyRole(me);
+  if(me.setup2fa){ showSetup2fa(); return; } /* owner must turn on two-step first: nothing else is allowed yet */
   if(isOwner()){
     load(); loadTraffic(); loadStaff(); loadAudit(); loadTfa();
   }else{
@@ -2271,8 +2286,11 @@ document.getElementById('backupBtn').onclick = async () => {
   loadCards();
   loadRequests();
   loadClosed();
-  setInterval(loadBookings, 60000);
-  setInterval(loadRequests, 60000);
+  /* refresh only while the tab is visible (hidden tabs used to poll all night); catch up when it comes back */
+  let lastPoll = Date.now();
+  function poll(){ lastPoll = Date.now(); loadBookings(); loadRequests(); }
+  setInterval(function(){ if(!document.hidden) poll(); }, 60000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden && Date.now() - lastPoll > 60000) poll(); });
 })();
 
 /* ---------- collapsible sections (state remembered) ---------- */
