@@ -52,6 +52,10 @@ Website for a children's entertainment centre in Al Majaz 3, Sharjah, UAE.
 | `DISABLE_OWNER_2FA` | no | Emergency only: set to `true` to skip the owner's 2-step code (e.g. phone lost), sign in, set it up again, then remove it |
 | `TURNSTILE_FAIL_CLOSED` | no | `true` = block bookings if Cloudflare cannot be reached (default: let them through) |
 | `WAIVER_REQUIRED` | no | Set to `false` to make the child name and guardian declaration optional on the booking form (default: required) |
+| `REQUIRE_OWNER_2FA` | no | `true` = the owner cannot use the dashboard until two-step verification is on, and cannot turn it off. `DISABLE_OWNER_2FA=true` (emergency, e.g. lost phone) overrides it. Sessions opened before you switch this on stay open: press "Sign out everywhere" |
+| `STAFF_MAX_TOPUP_HOURS` | no | Most hours staff may add to a play card at once; more (and re-activating a cancelled card) needs the owner (default 70) |
+| `BOOKINGS_DAILY_PER_IP`, `REQUESTS_DAILY_PER_IP` | no | Accepted bookings / package requests per connection per day (defaults 5 / 4) |
+| `TRUST_PROXY_HOPS` | no | Proxies in front of the app (default 1, as on Render) |
 | `PORT` | no | Port to listen on (Render sets it for you; default 3000) |
 | `SENSITIVE_RETENTION_DAYS` | no | Days after the party before a child's name, age and allergy note are erased from a booking (default 90, allowed 7-3650). Keep `public/privacy.html` in step |
 | `ADMIN_REMEMBER_DAYS` | no | How long "Keep me signed in" lasts (default 14, max 90); a normal sign-in lasts 8 hours |
@@ -75,10 +79,11 @@ Push to GitHub; Render builds from the `Dockerfile` (Node 22). Add the environme
 - Free plan: the service sleeps when idle, so the first visit after a pause is slow.
 
 ## Tests
-`npm test` (Node 22, no database or internet needed) runs three groups of tests:
+`npm test` (Node 22, no database or internet needed) runs these groups of tests:
 
 - `test/logic.test.js` – the booking maths in `lib/logic.js`: opening hours incl. after-midnight closing, overlaps, phone numbers, dates.
 - `test/booking-rules.test.js` – the real `checkSlot` / `slotMessage` functions from `server.js` with a fixed clock (Dubai time, 3 h lead time, daily limit, double booking, after-midnight slots).
+- `test/authorization.test.js` – who may call what: a matrix of every `/api/admin` and `/api/auth` route (a new route without `auth` / `requireOwner` fails), the real `auth` / `requireOwner` middleware (401 / 403), the staff limits on play cards, and the card balance under parallel requests. Add every new admin route to the matrix at the top of this file.
 - `test/structure.test.js` – project checks: every `require()` resolves and is declared in `package.json`, all inline scripts parse, no inline `onclick` (CSP), every admin dashboard button handler exists, the Arabic page translates every booking message, and fixed bugs stay fixed.
 
 Run the tests before every deploy.

@@ -270,6 +270,7 @@ const adminSessionSchema = new mongoose.Schema({
   role: { type: String, default: 'staff' }, // 'owner' (full access) or 'staff' (bookings + play cards only)
   staffId: { type: String, default: '' },
   name: { type: String, default: '' },
+  limited: { type: Boolean, default: false }, // owner signed in with the password only while two-step is required: may only set it up
   createdAt: { type: Date, default: Date.now }
 });
 adminSessionSchema.index({ exp: 1 }, { expireAfterSeconds: 0 }); // MongoDB removes expired sessions itself
@@ -557,6 +558,14 @@ function verify(t) {
   }
 }
 
+// REQUIRE_OWNER_2FA=true: the owner cannot use the dashboard until two-step verification is on, and cannot turn it off.
+// DISABLE_OWNER_2FA=true (the emergency switch) always wins, so the owner can never be locked out for good.
+function owner2faRequired() {
+  return process.env.REQUIRE_OWNER_2FA === 'true' && process.env.DISABLE_OWNER_2FA !== 'true';
+}
+// What a "set up two-step first" session may still call
+const LIMITED_OK = /^\/api\/(admin\/2fa(\/(setup|enable))?|auth\/(me|logout))$/;
+
 async function auth(req, res, next) {
   try {
     const t = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
@@ -572,6 +581,10 @@ async function auth(req, res, next) {
     req.adminRole = session.role || 'staff'; // a session without a role gets the lowest access (sign in again to get owner access)
     req.adminName = session.name || '';
     req.adminStaffId = session.staffId || '';
+    req.adminLimited = !!session.limited && owner2faRequired();
+    if (req.adminLimited && !LIMITED_OK.test(String(req.originalUrl || '').split('?')[0])) {
+      return res.status(403).json({ error: 'Two-step verification is required. Set it up first.', setup2fa: true });
+    }
     next();
   } catch (err) {
     console.error('Auth check error:', err);
@@ -759,7 +772,9 @@ const safeEqual = (a, b) =>
 ========================================================= */
 app.disable('x-powered-by');
 // Behind Render's proxy: without this every visitor shares ONE IP for rate limits.
-app.set('trust proxy', 1);
+// Number of proxies in front of the app (Render = 1). Check that the IP in the activity log is the visitor's real one; if every
+// visitor shows the same IP, raise TRUST_PROXY_HOPS.
+app.set('trust proxy', envNum('TRUST_PROXY_HOPS', 1, 0, 5));
 app.use(helmet({ contentSecurityPolicy: false }));
 // Content-Security-Policy: the site loads scripts/styles from itself (inline blocks included),
 // fonts from Google Fonts and photos from Cloudinary. Everything else is blocked.
@@ -985,9 +1000,11 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       }
     }
     // Owner two-step verification (switch off in an emergency with DISABLE_OWNER_2FA=true in Render)
+    let ownerHas2fa = false;
     if (role === 'owner' && process.env.DISABLE_OWNER_2FA !== 'true') {
       const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
       if (oa) {
+        ownerHas2fa = true;
         const code = String((req.body && req.body.code) || '').trim();
         if (!code) return res.json({ needCode: true });
         if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
@@ -1013,7 +1030,7 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
     if (!role) {
       if (email && !isOwnerEmail) await throttleFail(email);
       console.warn('Failed admin sign-in from ' + req.ip);
-      writeAudit({ actor: email.slice(0, 60), role: '', action: 'Failed sign-in', ip: String(req.ip || '').slice(0, 60), ok: false });
+      writeAudit({ actor: email ? email.slice(0, 2) + '***' + (email.includes('@') ? email.slice(email.indexOf('@'), email.indexOf('@') + 40) : '') : '', role: '', action: 'Failed sign-in', ip: String(req.ip || '').slice(0, 60), ok: false });
       await sleep(600); // slows down guessing
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -1030,11 +1047,12 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
       ua: String(req.headers['user-agent'] || '').slice(0, 200),
       role,
       staffId: staff ? staff.id : '',
-      name: staff ? staff.name : 'Owner'
+      name: staff ? staff.name : 'Owner',
+      limited: role === 'owner' && owner2faRequired() && !ownerHas2fa
     }).save();
 
     writeAudit({ actor: staff ? staff.name : 'Owner', role, action: 'Signed in', ip: String(req.ip || '').slice(0, 60) });
-    res.json({ token: token({ email, jti, exp }), role, name: staff ? staff.name : 'Owner' });
+    res.json({ token: token({ email, jti, exp }), role, name: staff ? staff.name : 'Owner', setup2fa: role === 'owner' && owner2faRequired() && !ownerHas2fa });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Sign-in failed. Please try again.' });
@@ -1043,7 +1061,7 @@ app.post('/api/auth/login', loginLimit, async (req, res) => {
 
 // Who am I? (the dashboard hides what the person is not allowed to use)
 app.get('/api/auth/me', auth, (req, res) => {
-  res.json({ role: req.adminRole, name: req.adminName || (req.adminRole === 'owner' ? 'Owner' : '') });
+  res.json({ role: req.adminRole, name: req.adminName || (req.adminRole === 'owner' ? 'Owner' : ''), setup2fa: !!req.adminLimited });
 });
 
 // Sign out this device (the token stops working immediately)
@@ -1365,7 +1383,7 @@ const requestLimit = rateLimit({
 });
 const requestDailyLimit = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
-  max: 4,
+  max: envNum('REQUESTS_DAILY_PER_IP', 4, 1, 100),
   skipFailedRequests: true,
   message: { error: 'Too many requests from this connection today. Please use WhatsApp.' }
 });
@@ -1410,7 +1428,7 @@ async function notifyPackageRequest(r) {
   }
 }
 
-app.post('/api/package-requests', requestLimit, requestDailyLimit, async (req, res) => {
+app.post('/api/package-requests', requestLimit, requestDailyLimit, verifyTurnstile, async (req, res) => {
   const b = req.body || {};
   if (String(b.website || '').trim()) return res.status(201).json({ ok: true, reference: 'OK' }); // trap field: looks accepted, stores nothing
   const name = clip(b.name, 100).trim();
@@ -1490,7 +1508,7 @@ const bookingLimit = rateLimit({
 // Extra brake while the Turnstile check is off: only requests that were accepted count, so real customers are not punished.
 const bookingDailyLimit = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
-  max: 5,
+  max: envNum('BOOKINGS_DAILY_PER_IP', 5, 1, 100),
   skipFailedRequests: true,
   message: { error: 'Too many booking requests from this connection today. Please use WhatsApp.' }
 });
@@ -2090,6 +2108,8 @@ app.delete('/api/admin/bookings/:id', auth, requireOwner, async (req, res) => {
    Public: the customer opens /card/CODE (QR code) and sees the balance.
    Admin: create, deduct time, top up, cancel, extend, delete.
 ========================================================= */
+// Staff may add only a normal package of hours to a card; larger amounts and re-activating a cancelled card need the owner.
+const STAFF_MAX_TOPUP_HOURS = envNum('STAFF_MAX_TOPUP_HOURS', 70, 1, 1000);
 const CARD_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I (easy to read and type)
 const CARD_CODE_RE = /^[A-HJ-NP-Z2-9]{8}$/;
 function genCardCode() {
@@ -2273,6 +2293,9 @@ app.post('/api/admin/cards/:id/topup', auth, async (req, res) => {
     if (!(hours > 0) || hours > 1000 || minutes < 1) {
       return res.status(400).json({ error: 'Hours must be a number between 0.5 and 1000.' });
     }
+    if (req.adminRole !== 'owner' && hours > STAFF_MAX_TOPUP_HOURS) {
+      return res.status(403).json({ error: 'Adding more than ' + STAFF_MAX_TOPUP_HOURS + ' hours needs the owner.' });
+    }
     const note = String((req.body || {}).note || 'Hours added').trim().slice(0, 200);
     const c = await PlayCard.findOne({ id: req.params.id }).lean();
     if (!c) return res.status(404).json({ error: 'Card not found' });
@@ -2296,6 +2319,10 @@ app.patch('/api/admin/cards/:id', auth, async (req, res) => {
     const update = {};
     if (b.status !== undefined) {
       if (!['active', 'cancelled'].includes(b.status)) return res.status(400).json({ error: 'Invalid status' });
+      if (b.status === 'active' && req.adminRole !== 'owner') {
+        const cur = await PlayCard.findOne({ id: req.params.id }).select('status').lean();
+        if (cur && cur.status === 'cancelled') return res.status(403).json({ error: 'Only the owner can re-activate a cancelled card.' });
+      }
       update.status = b.status;
     }
     if (b.expiresAt !== undefined) {
@@ -2545,7 +2572,7 @@ app.post('/api/track', trackLimit, async (req, res) => {
   try {
     const ev = String((req.body && req.body.e) || '');
     // Ignore calls that come from another website (browsers always send Origin on cross-site POSTs).
-    let sameSite = true;
+    let sameSite = !!req.headers.origin; // scripts without an Origin (curl, bots) are not counted
     if (req.headers.origin) {
       try { sameSite = new URL(req.headers.origin).host === req.headers.host; } catch { sameSite = false; }
     }
@@ -2592,7 +2619,7 @@ app.get('/api/admin/stats', auth, requireOwner, async (req, res) => {
 app.get('/api/admin/2fa', auth, requireOwner, async (req, res) => {
   try {
     const oa = await OwnerAuth.findOne({ key: 'owner' }).lean();
-    res.json({ enabled: !!(oa && oa.enabled), emergencyOff: process.env.DISABLE_OWNER_2FA === 'true' });
+    res.json({ enabled: !!(oa && oa.enabled), emergencyOff: process.env.DISABLE_OWNER_2FA === 'true', required: owner2faRequired() });
   } catch (err) {
     console.error('2FA status error:', err);
     res.status(500).json({ error: 'Could not read the two-step status.' });
@@ -2621,6 +2648,9 @@ app.post('/api/admin/2fa/enable', auth, requireOwner, async (req, res) => {
     const step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, 0);
     if (!step) return res.status(400).json({ error: 'That code is not correct. Check the app and try again.' });
     await OwnerAuth.updateOne({ key: 'owner' }, { $set: { enabled: true, lastStep: step } });
+    // This device just proved it has the app. Every other owner session was opened without a code: close them.
+    await AdminSession.deleteMany({ role: 'owner', jti: { $ne: req.adminJti } });
+    await AdminSession.updateOne({ jti: req.adminJti }, { $set: { limited: false } });
     res.json({ enabled: true });
   } catch (err) {
     console.error('2FA enable error:', err);
@@ -2630,6 +2660,7 @@ app.post('/api/admin/2fa/enable', auth, requireOwner, async (req, res) => {
 
 app.post('/api/admin/2fa/disable', auth, requireOwner, async (req, res) => {
   try {
+    if (owner2faRequired()) return res.status(403).json({ error: 'Two-step verification is required by the server settings and cannot be turned off here.' });
     const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
     if (!oa) return res.status(400).json({ error: 'Two-step verification is not on.' });
     if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
@@ -2876,6 +2907,8 @@ app.get('*', (req, res) => {
   sendHtmlFile(res, '404.html', { status: 404, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'no-cache' } });
 });
 
+app.all('*', (req, res) => res.status(404).type('text/plain').send('Not found'));
+
 // Always answer with JSON on /api (e.g. a malformed request body), never an HTML error page.
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);
@@ -2897,6 +2930,24 @@ async function purgeOldChildData() {
     { $set: { allergies: '', childName: '' }, $unset: { childAge: 1 } }
   );
   if (r.modifiedCount) console.log('Erased child details from ' + r.modifiedCount + ' old booking(s).');
+  // Play cards: the child's name goes too once the card has been expired or cancelled for the same period
+  const cutDate = new Date(Date.now() - SENSITIVE_RETENTION_DAYS * 86400000);
+  const c = await PlayCard.updateMany(
+    { childName: { $ne: '' }, $or: [{ expiresAt: { $ne: '', $lt: cutoff } }, { status: 'cancelled', updatedAt: { $lt: cutDate } }] },
+    { $set: { childName: '' } }
+  );
+  if (c.modifiedCount) console.log('Erased the child name from ' + c.modifiedCount + ' old play card(s).');
+}
+
+// The owner password alone protects customer data and the backup download: remind the owner to switch 2-step on.
+async function warnIfNo2fa() {
+  if (!dbUp()) return;
+  if (process.env.DISABLE_OWNER_2FA === 'true') {
+    console.warn('WARNING: DISABLE_OWNER_2FA=true - the owner sign-in has NO second step. Remove this variable once you have signed in.');
+    return;
+  }
+  const oa = await OwnerAuth.findOne({ key: 'owner', enabled: true }).lean();
+  if (!oa) console.warn('WARNING: Owner two-step verification is OFF. ' + (owner2faRequired() ? 'The owner must set it up at the next sign-in (REQUIRE_OWNER_2FA=true).' : 'Turn it on in the dashboard (Security), or set REQUIRE_OWNER_2FA=true - the password alone protects all customer data.'));
 }
 
 const server = app.listen(PORT, () => {
@@ -2904,6 +2955,7 @@ const server = app.listen(PORT, () => {
   console.log('Email notifications: ' + mailStatus());
   console.log('Booking security check (Turnstile): ' + (turnstileOn ? 'ON' : 'OFF'));
   if (!turnstileOn) console.warn('WARNING: Turnstile is OFF - bots can fill your calendar with fake pending bookings. Set TURNSTILE_SITE_KEY and TURNSTILE_SECRET.');
+  setTimeout(() => warnIfNo2fa().catch(() => {}), 45 * 1000).unref();
   setTimeout(() => purgeOldChildData().catch((e) => console.error('Purge error:', e.message)), 60 * 1000).unref();
   setInterval(() => purgeOldChildData().catch((e) => console.error('Purge error:', e.message)), 6 * 60 * 60 * 1000).unref();
   setInterval(() => retryFailedEmails().catch((e) => console.error('Email retry error:', e.message)), 5 * 60 * 1000).unref();
