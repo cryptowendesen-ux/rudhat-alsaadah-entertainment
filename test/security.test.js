@@ -93,18 +93,20 @@ test('the stored key is a hash: the e-mail itself is never saved, and it is stab
 });
 
 /* The real sign-in handler, with a fake database */
-function loginHarness() {
+function loginHarness(opts = {}) {
   const store = new Map();
   const staffRow = { id: 's1', name: 'Lina', email: 'lina@example.com', passHash: 'h', active: true };
   const helpers = slice('const THROTTLE_MAX', 'const throttleFail');
   const code =
     helpers +
     '\nconst throttleFail = (email) => LoginThrottle.updateOne({ key: throttleKey(email) }, { $push: { fails: { $each: [Date.now()] } } }, { upsert: true });\n' +
+    slice('function owner2faRequired', 'const LIMITED_OK') +
     slice("app.post('/api/auth/login'", '// Who am I?');
   let handler = null;
+  const sessions = [];
   const ctx = {
     crypto, Date, Math, String, console: { warn() {}, error() {} },
-    process: { env: { ADMIN_EMAIL: 'owner@example.com', ADMIN_PASSWORD: 'owner-pass', DISABLE_OWNER_2FA: 'true' } },
+    process: { env: { ADMIN_EMAIL: 'owner@example.com', ADMIN_PASSWORD: 'owner-pass', DISABLE_OWNER_2FA: 'true', ...(opts.env || {}) } },
     app: { post: (p, l, h) => { handler = h; } },
     loginLimit: (q, r, n) => n(),
     safeEqual: (a, b) => String(a) === String(b),
@@ -112,7 +114,9 @@ function loginHarness() {
     DUMMY_HASH_P: Promise.resolve('dummy'),
     verifyPassword: async (pw, hash) => hash === 'h' && pw === 'staff-pass',
     Staff: { findOne: (q) => ({ lean: async () => (q.email === staffRow.email ? staffRow : null) }) },
-    OwnerAuth: { findOne: () => ({ lean: async () => null }) },
+    OwnerAuth: { findOne: () => ({ lean: async () => opts.ownerAuth || null }) },
+    totpCheck: () => 7, decSecretMeta: () => ({ plain: 'x', legacy: false }), totpIsLocked: () => false, totpFail: async () => {},
+    claimTotpStep: async () => true, encSecret: (x) => x,
     LoginThrottle: {
       findOne: (q) => ({ lean: async () => store.get(q.key) || null }),
       updateOne: async (q, u) => {
@@ -121,19 +125,19 @@ function loginHarness() {
         return { ok: 1 };
       }
     },
-    AdminSession: class { constructor(d) { Object.assign(this, d); } async save() { return this; } },
+    AdminSession: class { constructor(d) { Object.assign(this, d); } async save() { sessions.push(this); return this; } },
     writeAudit: () => {},
     token: () => 'tok',
     mongoose: {}
   };
   vm.runInNewContext(code, ctx);
-  const login = async (email, password) => {
+  const login = async (email, password, code) => {
     const out = { status: 200, body: null };
     const res = { status: (c) => { out.status = c; return res; }, json: (b) => { out.body = b; return res; } };
-    await handler({ body: { email, password }, ip: '1.2.3.4', headers: {} }, res);
+    await handler({ body: { email, password, code }, ip: '1.2.3.4', headers: {} }, res);
     return out;
   };
-  return { login, store };
+  return { login, store, sessions };
 }
 
 test('real sign-in: 10 wrong staff passwords lock that e-mail, even for the right password, and it is the same for unknown e-mails', async () => {
@@ -171,4 +175,40 @@ test('the limit is checked before any password work (cheap) and failures are rec
   assert.equal((h.match(/throttleFail\(email\)/g) || []).length, 1);
   assert.ok(h.indexOf('throttleFail(email)') > h.indexOf('if (!role) {'));
   assert.ok(/LoginThrottle[\s\S]{0,40}expireAfterSeconds|expireAfterSeconds: 86400/.test(server), 'old records expire by themselves');
+});
+
+/* REQUIRE_OWNER_2FA: the owner's password alone only opens a "set up two-step first" session */
+test('REQUIRE_OWNER_2FA: owner with no two-step yet gets a limited session and is told to set it up', async () => {
+  const { login, sessions } = loginHarness({ env: { REQUIRE_OWNER_2FA: 'true', DISABLE_OWNER_2FA: 'false' } });
+  const ok = await login('owner@example.com', 'owner-pass');
+  assert.equal(ok.status, 200);
+  assert.equal(ok.body.setup2fa, true);
+  assert.equal(sessions.at(-1).limited, true);
+});
+
+test('REQUIRE_OWNER_2FA: with two-step already on and a correct code the session is a normal one; without a code it asks for one', async () => {
+  const { login, sessions } = loginHarness({ env: { REQUIRE_OWNER_2FA: 'true', DISABLE_OWNER_2FA: 'false' }, ownerAuth: { enabled: true, secretEnc: 'x', lastStep: 0 } });
+  assert.equal((await login('owner@example.com', 'owner-pass')).body.needCode, true);
+  const ok = await login('owner@example.com', 'owner-pass', '123456');
+  assert.equal(ok.status, 200);
+  assert.equal(ok.body.setup2fa, false);
+  assert.equal(sessions.at(-1).limited, false);
+});
+
+test('REQUIRE_OWNER_2FA: the emergency switch DISABLE_OWNER_2FA still gives the owner a normal session; staff are never limited', async () => {
+  const emergency = loginHarness({ env: { REQUIRE_OWNER_2FA: 'true', DISABLE_OWNER_2FA: 'true' } });
+  const o = await emergency.login('owner@example.com', 'owner-pass');
+  assert.equal(o.body.setup2fa, false);
+  assert.equal(emergency.sessions.at(-1).limited, false);
+  const normal = loginHarness({ env: { REQUIRE_OWNER_2FA: 'true', DISABLE_OWNER_2FA: 'false' } });
+  const st = await normal.login('lina@example.com', 'staff-pass');
+  assert.equal(st.status, 200);
+  assert.equal(normal.sessions.at(-1).limited, false);
+});
+
+test('without REQUIRE_OWNER_2FA nothing changes: the owner gets a normal session', async () => {
+  const { login, sessions } = loginHarness({ env: { DISABLE_OWNER_2FA: 'false' } });
+  const ok = await login('owner@example.com', 'owner-pass');
+  assert.equal(ok.body.setup2fa, false);
+  assert.equal(sessions.at(-1).limited, false);
 });
