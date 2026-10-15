@@ -2218,6 +2218,9 @@ app.post('/api/admin/cards', auth, async (req, res) => {
     if (!(hours > 0) || hours > 1000 || totalMinutes < 1) {
       return res.status(400).json({ error: 'Hours must be a number between 0.5 and 1000.' });
     }
+    if (req.adminRole !== 'owner' && hours > STAFF_MAX_TOPUP_HOURS) {
+      return res.status(403).json({ error: 'Creating a card with more than ' + STAFF_MAX_TOPUP_HOURS + ' hours needs the owner.' });
+    }
     const expiresAt = String(b.expiresAt || '').trim();
     if (expiresAt && (!DATE_RE.test(expiresAt) || !isRealDate(expiresAt))) {
       return res.status(400).json({ error: 'Expiry must be a valid date.' });
@@ -2300,6 +2303,10 @@ app.post('/api/admin/cards/:id/topup', auth, async (req, res) => {
     const c = await PlayCard.findOne({ id: req.params.id }).lean();
     if (!c) return res.status(404).json({ error: 'Card not found' });
     if (c.status === 'cancelled') return res.status(409).json({ error: 'This card is cancelled.' });
+    // Repeated small top-ups must not get around the cap: staff may take one card to at most twice the cap in total.
+    if (req.adminRole !== 'owner' && (c.totalMinutes || 0) + minutes > STAFF_MAX_TOPUP_HOURS * 2 * 60) {
+      return res.status(403).json({ error: 'This card would hold more than ' + STAFF_MAX_TOPUP_HOURS * 2 + ' hours in total; that needs the owner.' });
+    }
     const updated = await PlayCard.findOneAndUpdate(
       { id: c.id, status: 'active' },
       { $inc: { totalMinutes: minutes }, $push: { ledger: { at: new Date(), minutes, note } } },
@@ -2666,6 +2673,7 @@ app.post('/api/admin/2fa/disable', auth, requireOwner, async (req, res) => {
     if (totpIsLocked(oa)) return res.status(429).json({ error: 'Too many wrong codes. Please wait 15 minutes.' });
     const step = totpCheck(decSecret(oa.secretEnc), req.body && req.body.code, oa.lastStep || 0);
     if (!step) { await totpFail(); return res.status(400).json({ error: 'That code is not correct.' }); }
+    if (!(await claimTotpStep(step))) return res.status(400).json({ error: 'That code was just used. Wait for the next one.' });
     await OwnerAuth.deleteOne({ key: 'owner' });
     res.json({ enabled: false });
   } catch (err) {
@@ -2898,7 +2906,9 @@ app.get('/card.html', (req, res) => res.redirect(301, '/card'));
 app.get('/privacy.html', (req, res) => res.redirect(301, '/privacy'));
 app.get('/terms.html', (req, res) => res.redirect(301, '/terms'));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, file) => { if (/\.(png|jpe?g|webp)$/i.test(file)) res.setHeader('Cache-Control', 'public, max-age=604800'); }
+}));
 
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
